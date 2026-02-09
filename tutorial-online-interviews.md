@@ -51,7 +51,7 @@ Additional resources: If helpful to review Git and Github before starting, see e
 2. Click on **Create a resource**. 
 3. Select **Web App**.
    - Create a new **Resource Group** (e.g., `interviews`).
-   - Give the instance a name (will be part of the URL shared to the participants).
+   - Give the instance a name (will be part of the URL shared with the participants).
    - Select **Python 3.13** as the runtime stack.
    - Choose a region (e.g., `UK South`).
    - Keep **Zone redundancy disabled**.
@@ -169,7 +169,7 @@ If participants have completed interviews, transcripts are stored as `.txt` file
 ## VI. Scaling up the app's compute resources for larger studies
 
 1. Go to your **app's main page** on Azure.
-2. Select a larger instance from the **Production settings** (key parameters are the virtual CPUs and memory settings). *To test the app or use it with a few users, Basic B2 is typically sufficient.*
+2. Click on **Scale up or Scale out (App Service plan)** in the left dropdown menu to increase the compute resources in case many interview participants are expected to use the platform simultaneously. *To test the app or use it with a few participants, Basic B2 or B3 instances are typically sufficient.*
 
 ## VII. Adding basic login details for respondents and integrating interviews into surveys such as Qualtrics
 
