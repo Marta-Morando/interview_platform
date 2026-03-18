@@ -289,16 +289,26 @@ def get_survey_return_url(*, completion=False):
     """Return the best available same-tab survey URL."""
 
     return_mode = get_survey_return_mode()
-    if not return_mode:
-        return None
-
-    if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        return get_request_referrer_url()
+    explicit_return_url = get_query_param(
+        getattr(config, "RETURN_URL_PARAM", "return_url")
+    )
+    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
 
     if completion:
-        return build_completion_redirect_url()
+        completion_url = build_completion_redirect_url()
+        if completion_url:
+            return completion_url
 
-    return get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
+    if explicit_return_url:
+        return explicit_return_url
+
+    if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
+        return get_request_referrer_url() or default_return_url
+
+    if return_mode:
+        return default_return_url
+
+    return default_return_url
 
 
 def validate_login_credentials(username, password):
