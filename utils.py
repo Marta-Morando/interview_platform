@@ -51,6 +51,9 @@ def apply_readable_app_styles():
         }
 
         [data-testid="stChatMessage"] {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.55rem;
             background: #171a21 !important;
             border: 1px solid #2a2f3a;
             border-radius: 16px;
@@ -59,17 +62,33 @@ def apply_readable_app_styles():
             overflow: visible;
         }
 
+        [data-testid="stChatMessageAvatarUser"],
+        [data-testid="stChatMessageAvatarAssistant"] {
+            flex: 0 0 auto;
+            margin-top: 0.08rem;
+        }
+
         [data-testid="stChatMessageContent"],
         [data-testid="stChatMessageContent"] p,
         [data-testid="stChatMessageContent"] div {
             color: #f3f4f6 !important;
             font-size: 1.03rem;
             line-height: 1.72;
-            padding-top: 0.35rem;
+            padding-top: 0 !important;
+            margin-top: 0 !important;
             overflow-wrap: anywhere;
             word-break: break-word;
             white-space: pre-wrap;
             max-width: 100%;
+        }
+
+        [data-testid="stChatMessageContent"] {
+            flex: 1 1 auto;
+        }
+
+        [data-testid="stChatMessageContent"] p:first-child,
+        [data-testid="stChatMessageContent"] div:first-child {
+            margin-top: 0 !important;
         }
 
         [data-testid="stMarkdownContainer"],
@@ -91,13 +110,21 @@ def apply_readable_app_styles():
             box-shadow: none !important;
         }
 
+        [data-testid="stChatInput"] > div,
+        [data-testid="stChatInput"] > div > div,
+        [data-testid="stChatInput"] > div > div > div {
+            background: #171a21 !important;
+        }
+
         [data-testid="stChatInput"] textarea,
         [data-testid="stTextInput"] input {
             background: #171a21 !important;
+            border: none !important;
             color: #f3f4f6 !important;
             caret-color: #f3f4f6 !important;
             font-size: 1rem !important;
             line-height: 1.55 !important;
+            box-shadow: none !important;
         }
 
         .stButton button {
