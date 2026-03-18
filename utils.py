@@ -196,6 +196,49 @@ def get_query_param(name):
     return value or None
 
 
+def get_request_header(name):
+    """Return a request header from Streamlit context, if available."""
+
+    if not name:
+        return None
+
+    try:
+        headers = st.context.headers
+    except Exception:
+        return None
+
+    candidates = [name, name.lower(), name.title()]
+    for candidate in candidates:
+        try:
+            value = headers.get(candidate)
+        except Exception:
+            value = None
+        if value:
+            return str(value).strip()
+
+    try:
+        for key, value in headers.items():
+            if str(key).lower() == name.lower() and value:
+                return str(value).strip()
+    except Exception:
+        return None
+
+    return None
+
+
+def get_request_referrer_url():
+    """Return the browser referrer URL for the current session, if usable."""
+
+    referrer = get_request_header("referer")
+    if not referrer or referrer.startswith("${"):
+        return None
+
+    if "interview-platform.streamlit.app" in referrer:
+        return None
+
+    return referrer
+
+
 def get_survey_return_mode():
     """Return the configured survey-return mode, if any."""
 
@@ -220,48 +263,42 @@ def get_survey_return_mode():
 def has_survey_return_target():
     """Return whether the app can send the respondent back to a survey."""
 
-    return get_survey_return_mode() is not None
+    return bool(get_survey_return_url())
 
 
 def render_survey_return_control(label="Back to survey", *, completion=False):
     """Render a survey-return control that works in the main page context."""
 
-    return_mode = get_survey_return_mode()
-    if not return_mode:
+    href = get_survey_return_url(completion=completion)
+    if not href:
         return False
-
-    if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        href = "#"
-        onclick = (
-            "if (window.history.length > 1) { "
-            "window.history.back(); "
-            "} else if (document.referrer) { "
-            "window.location.href = document.referrer; "
-            "} return false;"
-        )
-    else:
-        href = (
-            build_completion_redirect_url()
-            if completion
-            else get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
-        )
-        if not href:
-            return False
-        onclick = None
 
     escaped_href = html.escape(href, quote=True)
     escaped_label = html.escape(label)
-    onclick_attr = (
-        f' onclick="{html.escape(onclick, quote=True)}"' if onclick else ""
-    )
     st.markdown(
         (
             f'<a class="survey-return-button" href="{escaped_href}"'
-            f'{onclick_attr}>{escaped_label}</a>'
+            f'>{escaped_label}</a>'
         ),
         unsafe_allow_html=True,
     )
     return True
+
+
+def get_survey_return_url(*, completion=False):
+    """Return the best available same-tab survey URL."""
+
+    return_mode = get_survey_return_mode()
+    if not return_mode:
+        return None
+
+    if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
+        return get_request_referrer_url()
+
+    if completion:
+        return build_completion_redirect_url()
+
+    return get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
 
 
 def validate_login_credentials(username, password):

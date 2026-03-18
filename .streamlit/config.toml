@@ -2,4 +2,6 @@
 gatherUsageStats = false
 
 [client]
-toolbarMode = "viewer"
+toolbarMode = "minimal"
+showErrorDetails = "none"
+showErrorLinks = false

@@ -50,7 +50,15 @@ def get_wav_duration(audio_bytes):
 #
 
 # Set page title and icon
-st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
+st.set_page_config(
+    page_title="Interview",
+    page_icon=config.AVATAR_INTERVIEWER,
+    menu_items={
+        "Get help": None,
+        "Report a bug": None,
+        "About": None,
+    },
+)
 dropbox_storage.show_dropbox_warning_if_needed()
 apply_readable_app_styles()
 
