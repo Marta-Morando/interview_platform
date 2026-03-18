@@ -1,4 +1,5 @@
 from copy import deepcopy
+import html
 import hmac
 import json
 import os
@@ -112,6 +113,24 @@ def apply_readable_app_styles():
         .stButton button[kind="secondary"],
         [data-testid="stBaseButton-secondary"] {
             color: #d6dae1 !important;
+        }
+
+        .survey-return-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 2rem;
+            padding: 0.12rem 0.85rem;
+            border-radius: 999px;
+            border: 1px solid #2f3642;
+            background: #171a21;
+            color: #dce1e8 !important;
+            text-decoration: none !important;
+            font-size: 0.9rem;
+            line-height: 1.2;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 0.35rem;
         }
         </style>
         """,
@@ -301,6 +320,31 @@ def build_completion_redirect_url():
         )
 
     return urlunparse(parsed_url._replace(query=urlencode(query_params)))
+
+
+def get_in_progress_return_url():
+    """Return the survey URL provided at launch, if present."""
+
+    return get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
+
+
+def render_return_to_survey_button(label="Back to survey"):
+    """Render an in-progress return link when the survey URL is known."""
+
+    return_url = get_in_progress_return_url()
+    if not return_url:
+        return False
+
+    escaped_url = html.escape(return_url, quote=True)
+    escaped_label = html.escape(label)
+    st.markdown(
+        (
+            f'<a class="survey-return-button" href="{escaped_url}" target="_self">'
+            f"{escaped_label}</a>"
+        ),
+        unsafe_allow_html=True,
+    )
+    return True
 
 
 def render_completion_redirect():

@@ -26,6 +26,7 @@ from utils import (
     check_password,
     initialize_survey_username,
     is_valid_username,
+    render_return_to_survey_button,
     save_backup,
     load_backup,
     save_transcript_and_metadata,
@@ -278,8 +279,9 @@ if st.session_state.interview_active:
             label=config.VOICE_INPUT_INSTRUCTIONS,
             key=st.session_state.voice_input_key,
         )
-        quit_spacer, quit_col = st.columns([6.5, 1.2])
-        with quit_col:
+        action_spacer, action_col = st.columns([6.5, 1.2])
+        with action_col:
+            render_return_to_survey_button()
             quit_clicked = st.button(
                 "Quit",
                 key="quit_interview_button",
