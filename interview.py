@@ -15,9 +15,11 @@ from openai import OpenAI
 
 import config
 from utils import (
+    apply_app_styles,
     check_password,
     initialize_survey_username,
     is_valid_username,
+    render_return_link,
     stream_response,
     save_backup,
     load_backup,
@@ -34,6 +36,7 @@ from utils import (
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 dropbox_storage.show_dropbox_warning_if_needed()
+apply_app_styles()
 
 # Check if login screen is enabled
 if config.LOGINS:
@@ -133,21 +136,6 @@ if "transcription_done" not in st.session_state:
 # Key for voice input element
 if "voice_input_key" not in st.session_state:
     st.session_state.voice_input_key = random.uniform(0, 1)
-
-# Button to cancel interview
-col1, col2 = st.columns([0.75, 0.25])
-with col2:
-    if st.session_state.interview_active and st.button(
-        "Quit interview", help="Logging back in will restore the chat."
-    ):
-        st.session_state.interview_active = False
-        quit_message = "You have quit the interview for now."
-        # Run before quit message, to not store that but only display it to the user
-        save_backup(
-            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
-        )
-        st.session_state.messages.append({"role": "assistant", "content": quit_message})
-        st.rerun()
 
 # Initialise API kwargs
 if isinstance(config.ADDITIONAL_API_KWARGS, dict):
@@ -464,4 +452,26 @@ if st.session_state.interview_active:
 
         # Refresh to show a new voice_input element
         st.session_state.voice_input_key = random.uniform(0, 1)
+        st.rerun()
+
+st.divider()
+footer_left, footer_spacer, footer_right = st.columns([1.4, 3.2, 0.9])
+with footer_left:
+    render_return_link(
+        "Back to survey",
+        getattr(config, "RETURN_IN_PROGRESS_STATUS_VALUE", "in_progress"),
+    )
+with footer_right:
+    if st.session_state.interview_active and st.button(
+        "Quit",
+        key="quit_interview_button",
+        type="secondary",
+        help="You can return later and continue from the saved transcript.",
+    ):
+        st.session_state.interview_active = False
+        quit_message = "You have quit the interview for now."
+        save_backup(
+            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
+        )
+        st.session_state.messages.append({"role": "assistant", "content": quit_message})
         st.rerun()
