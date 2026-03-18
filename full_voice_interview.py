@@ -22,6 +22,7 @@ from scipy.io import wavfile
 
 import config
 from utils import (
+    apply_readable_app_styles,
     check_password,
     initialize_survey_username,
     is_valid_username,
@@ -49,6 +50,7 @@ def get_wav_duration(audio_bytes):
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 dropbox_storage.show_dropbox_warning_if_needed()
+apply_readable_app_styles()
 
 # Do not show Streamlit audio player when playing back interviewer audio
 st.markdown(
@@ -163,21 +165,6 @@ if "last_transcription" not in st.session_state:
 if "voice_input_key" not in st.session_state:
     st.session_state.voice_input_key = random.uniform(0, 1)
 
-# Button to cancel interview
-col1, col2 = st.columns([0.75, 0.25])
-with col2:
-    if st.session_state.interview_active and st.button(
-        "Quit interview", help="Logging back in will restore the chat."
-    ):
-        st.session_state.interview_active = False
-        quit_message = "You have quit the interview for now."
-        # Run before quit message, to not store that but only display it to the user
-        save_backup(
-            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
-        )
-        st.session_state.messages.append({"role": "assistant", "content": quit_message})
-        st.rerun()
-
 # API client
 if config.API == "openai":
     client = OpenAI(api_key=st.secrets["KEY_OPENAI"])
@@ -233,8 +220,7 @@ if not st.session_state.messages and st.session_state.interview_active:
 
             message_placeholder.empty()
             message_placeholder.markdown("Interviewer speaking ...")
-            with col1:
-                st.audio(audio_bytes, format="audio/wav", autoplay=True)
+            st.audio(audio_bytes, format="audio/wav", autoplay=True)
 
             time.sleep(interviewer_message_duration + 0.5)
             message_placeholder.empty()
@@ -285,12 +271,30 @@ if not st.session_state.interview_active and is_interview_completed(
 if st.session_state.interview_active:
 
     response_container = st.container()
+    quit_clicked = False
     with response_container:
         voice_input_element = st.empty()
         audio_response = voice_input_element.audio_input(
             label=config.VOICE_INPUT_INSTRUCTIONS,
             key=st.session_state.voice_input_key,
         )
+        quit_spacer, quit_col = st.columns([6.5, 1.2])
+        with quit_col:
+            quit_clicked = st.button(
+                "Quit",
+                key="quit_interview_button",
+                type="secondary",
+                help="Logging back in will restore the chat.",
+            )
+
+    if quit_clicked:
+        st.session_state.interview_active = False
+        quit_message = "You have quit the interview for now."
+        save_backup(
+            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
+        )
+        st.session_state.messages.append({"role": "assistant", "content": quit_message})
+        st.rerun()
 
     # Only if we have new audio
     if audio_response:
@@ -404,12 +408,11 @@ if st.session_state.interview_active:
                             # Play closing message
                             message_placeholder.empty()
                             message_placeholder.markdown("Interviewer speaking ...")
-                            with col1:
-                                st.audio(
-                                    closing_audio_bytes,
-                                    format="audio/wav",
-                                    autoplay=True,
-                                )
+                            st.audio(
+                                closing_audio_bytes,
+                                format="audio/wav",
+                                autoplay=True,
+                            )
 
                             # Wait for audio duration + small buffer
                             time.sleep(closing_message_duration + 0.5)
@@ -452,8 +455,7 @@ if st.session_state.interview_active:
 
                     message_placeholder.empty()
                     message_placeholder.markdown("Interviewer speaking ...")
-                    with col1:
-                        st.audio(audio_bytes, format="audio/wav", autoplay=True)
+                    st.audio(audio_bytes, format="audio/wav", autoplay=True)
                     time.sleep(interviewer_message_duration + 0.5)
                     message_placeholder.empty()
                     message_placeholder.markdown(interviewer_message_transcript)

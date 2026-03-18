@@ -14,6 +14,58 @@ import config
 import dropbox_storage
 
 
+def apply_readable_app_styles():
+    """Apply minimal, high-contrast readability styles."""
+
+    st.markdown(
+        """
+        <style>
+        .stApp, .stApp p, .stApp li, .stApp label, .stApp span, .stApp div {
+            color: #1f2933;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        }
+
+        .block-container {
+            max-width: 900px;
+            padding-top: 1.1rem;
+            padding-bottom: 1.6rem;
+        }
+
+        [data-testid="stChatMessageContent"],
+        [data-testid="stChatMessageContent"] p,
+        [data-testid="stChatMessageContent"] div {
+            color: #1f2933 !important;
+            font-size: 1.03rem;
+            line-height: 1.68;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        [data-testid="stMarkdownContainer"],
+        [data-testid="stMarkdownContainer"] p,
+        [data-testid="stMarkdownContainer"] div,
+        [data-testid="stMarkdownContainer"] span {
+            color: #1f2933;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        [data-testid="stChatInput"] textarea,
+        [data-testid="stTextInput"] input {
+            color: #1f2933 !important;
+            font-size: 1rem !important;
+            line-height: 1.55 !important;
+        }
+
+        .stButton button {
+            border-radius: 999px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 # Simple password screen for respondents (note: only very basic authentication!)
 # Based on https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
 # To add advanced respondent authentication to the interview application, see

@@ -15,6 +15,7 @@ from openai import OpenAI
 
 import config
 from utils import (
+    apply_readable_app_styles,
     check_password,
     initialize_survey_username,
     is_valid_username,
@@ -34,6 +35,7 @@ from utils import (
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 dropbox_storage.show_dropbox_warning_if_needed()
+apply_readable_app_styles()
 
 # Check if login screen is enabled
 if config.LOGINS:
@@ -133,21 +135,6 @@ if "transcription_done" not in st.session_state:
 # Key for voice input element
 if "voice_input_key" not in st.session_state:
     st.session_state.voice_input_key = random.uniform(0, 1)
-
-# Button to cancel interview
-col1, col2 = st.columns([0.75, 0.25])
-with col2:
-    if st.session_state.interview_active and st.button(
-        "Quit interview", help="Logging back in will restore the chat."
-    ):
-        st.session_state.interview_active = False
-        quit_message = "You have quit the interview for now."
-        # Run before quit message, to not store that but only display it to the user
-        save_backup(
-            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
-        )
-        st.session_state.messages.append({"role": "assistant", "content": quit_message})
-        st.rerun()
 
 # Initialise API kwargs
 if isinstance(config.ADDITIONAL_API_KWARGS, dict):
@@ -261,6 +248,7 @@ if not st.session_state.interview_active and is_interview_completed(
 if st.session_state.interview_active:
     # Container for the chat and voice input elements used by the respondent
     response_container = st.container()
+    quit_clicked = False
 
     with response_container:
         # Divider between chat and inputs
@@ -284,6 +272,24 @@ if st.session_state.interview_active:
             )
         else:
             voice_response = None
+
+        quit_spacer, quit_col = st.columns([6.5, 1.2])
+        with quit_col:
+            quit_clicked = st.button(
+                "Quit",
+                key="quit_interview_button",
+                type="secondary",
+                help="Logging back in will restore the chat.",
+            )
+
+    if quit_clicked:
+        st.session_state.interview_active = False
+        quit_message = "You have quit the interview for now."
+        save_backup(
+            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
+        )
+        st.session_state.messages.append({"role": "assistant", "content": quit_message})
+        st.rerun()
 
     # If respondent uses written input
     if text_response:
