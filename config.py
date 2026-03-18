@@ -184,6 +184,9 @@ URL_PASSWORD_PARAM = "password"
 # If the interview URL includes a return URL, the app can offer a link back to the
 # survey and optionally redirect there automatically once the interview is completed.
 RETURN_URL_PARAM = "return_url"
+RETURN_METHOD_PARAM = "return_method"
+RETURN_METHOD_HISTORY = "history"
+RETURN_METHOD_URL = "url"
 RETURN_RESPONSE_ID_SOURCE_PARAM = "respondent_id"
 RETURN_USERNAME_PARAM = "interview_username"
 RETURN_RESPONSE_ID_PARAM = "response_id"

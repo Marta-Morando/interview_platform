@@ -1,5 +1,4 @@
 from copy import deepcopy
-import html
 import hmac
 import json
 import os
@@ -115,23 +114,6 @@ def apply_readable_app_styles():
             color: #d6dae1 !important;
         }
 
-        .survey-return-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 2rem;
-            padding: 0.12rem 0.85rem;
-            border-radius: 999px;
-            border: 1px solid #2f3642;
-            background: #171a21;
-            color: #dce1e8 !important;
-            text-decoration: none !important;
-            font-size: 0.9rem;
-            line-height: 1.2;
-            width: 100%;
-            box-sizing: border-box;
-            margin-bottom: 0.35rem;
-        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -186,6 +168,33 @@ def get_query_param(name):
 
     value = str(value).strip()
     return value or None
+
+
+def get_survey_return_mode():
+    """Return the configured survey-return mode, if any."""
+
+    return_method_param = getattr(config, "RETURN_METHOD_PARAM", "return_method")
+    requested_mode = (get_query_param(return_method_param) or "").strip().lower()
+
+    history_mode = getattr(config, "RETURN_METHOD_HISTORY", "history")
+    url_mode = getattr(config, "RETURN_METHOD_URL", "url")
+
+    if requested_mode == history_mode:
+        return history_mode
+
+    if requested_mode == url_mode:
+        return url_mode
+
+    if get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url")):
+        return url_mode
+
+    return None
+
+
+def has_survey_return_target():
+    """Return whether the app can send the respondent back to a survey."""
+
+    return get_survey_return_mode() is not None
 
 
 def validate_login_credentials(username, password):
@@ -294,6 +303,11 @@ def apply_url_login_if_available():
 def build_completion_redirect_url():
     """Build a survey return URL with interview linkage parameters appended."""
 
+    if get_survey_return_mode() == getattr(
+        config, "RETURN_METHOD_HISTORY", "history"
+    ):
+        return None
+
     base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
     if not base_url:
         return None
@@ -322,27 +336,42 @@ def build_completion_redirect_url():
     return urlunparse(parsed_url._replace(query=urlencode(query_params)))
 
 
-def get_in_progress_return_url():
-    """Return the survey URL provided at launch, if present."""
+def send_respondent_back_to_survey():
+    """Navigate back to the survey using the configured return method."""
 
-    return get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
+    if get_survey_return_mode() == getattr(
+        config, "RETURN_METHOD_HISTORY", "history"
+    ):
+        components.html(
+            """
+            <script>
+            (function() {
+                const targets = [window.parent, window.top, window];
+                for (const target of targets) {
+                    try {
+                        target.history.back();
+                        return;
+                    } catch (error) {
+                    }
+                }
+            })();
+            </script>
+            """,
+            height=0,
+        )
+        return True
 
-
-def render_return_to_survey_button(label="Back to survey"):
-    """Render an in-progress return link when the survey URL is known."""
-
-    return_url = get_in_progress_return_url()
-    if not return_url:
+    redirect_url = build_completion_redirect_url()
+    if not redirect_url:
         return False
 
-    escaped_url = html.escape(return_url, quote=True)
-    escaped_label = html.escape(label)
-    st.markdown(
-        (
-            f'<a class="survey-return-button" href="{escaped_url}" target="_self">'
-            f"{escaped_label}</a>"
-        ),
-        unsafe_allow_html=True,
+    components.html(
+        f"""
+        <script>
+        window.top.location.replace({json.dumps(redirect_url)});
+        </script>
+        """,
+        height=0,
     )
     return True
 
@@ -350,11 +379,22 @@ def render_return_to_survey_button(label="Back to survey"):
 def render_completion_redirect():
     """Render a return-to-survey link and optionally auto-redirect there."""
 
+    if get_survey_return_mode() == getattr(
+        config, "RETURN_METHOD_HISTORY", "history"
+    ):
+        if st.button(
+            "Back to survey",
+            key="completion_return_to_survey_button",
+            type="secondary",
+        ):
+            send_respondent_back_to_survey()
+        return
+
     redirect_url = build_completion_redirect_url()
     if not redirect_url:
         return
 
-    st.link_button("Return to survey", redirect_url)
+    st.link_button("Back to survey", redirect_url)
 
     if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
         delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)

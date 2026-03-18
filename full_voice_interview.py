@@ -24,14 +24,15 @@ import config
 from utils import (
     apply_readable_app_styles,
     check_password,
+    has_survey_return_target,
     initialize_survey_username,
     is_valid_username,
-    render_return_to_survey_button,
-    save_backup,
     load_backup,
-    save_transcript_and_metadata,
     is_interview_completed,
     render_completion_redirect,
+    save_backup,
+    save_transcript_and_metadata,
+    send_respondent_back_to_survey,
 )
 
 
@@ -272,6 +273,7 @@ if not st.session_state.interview_active and is_interview_completed(
 if st.session_state.interview_active:
 
     response_container = st.container()
+    return_clicked = False
     quit_clicked = False
     with response_container:
         voice_input_element = st.empty()
@@ -279,15 +281,28 @@ if st.session_state.interview_active:
             label=config.VOICE_INPUT_INSTRUCTIONS,
             key=st.session_state.voice_input_key,
         )
-        action_spacer, action_col = st.columns([6.5, 1.2])
+        action_spacer, action_col = st.columns([5.6, 2.1])
         with action_col:
-            render_return_to_survey_button()
+            if has_survey_return_target():
+                return_clicked = st.button(
+                    "Back to survey",
+                    key="return_to_survey_button",
+                    type="secondary",
+                    help="Return to the survey without ending the interview.",
+                )
             quit_clicked = st.button(
                 "Quit",
                 key="quit_interview_button",
                 type="secondary",
                 help="Logging back in will restore the chat.",
             )
+
+    if return_clicked:
+        save_backup(
+            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
+        )
+        send_respondent_back_to_survey()
+        st.stop()
 
     if quit_clicked:
         st.session_state.interview_active = False
