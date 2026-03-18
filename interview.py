@@ -226,7 +226,6 @@ if not st.session_state.messages and st.session_state.interview_active:
     save_backup(
         backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
     )
-    st.rerun()
 
 # Otherwise, display the previous conversation
 else:
@@ -260,15 +259,6 @@ if st.session_state.interview_active:
     response_container = st.container()
     survey_return_available = has_survey_return_target()
 
-    if survey_return_available:
-        try:
-            save_backup(
-                backups_directory=config.BACKUPS_DIRECTORY,
-                admin_alias=config.ADMIN_ALIAS,
-            )
-        except Exception:
-            pass
-
     with response_container:
         # Divider between chat and inputs
         st.divider()
@@ -295,7 +285,13 @@ if st.session_state.interview_active:
         if survey_return_available:
             action_spacer, action_col = st.columns([5.6, 2.1])
             with action_col:
-                render_survey_return_control("Back to survey")
+                render_survey_return_control(
+                    "Back to survey",
+                    on_prepare_return=lambda: save_backup(
+                        backups_directory=config.BACKUPS_DIRECTORY,
+                        admin_alias=config.ADMIN_ALIAS,
+                    ),
+                )
 
     # If respondent uses written input
     if text_response:
