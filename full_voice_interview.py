@@ -281,7 +281,6 @@ if not st.session_state.interview_active and is_interview_completed(
 if st.session_state.interview_active:
 
     response_container = st.container()
-    quit_clicked = False
     survey_return_available = has_survey_return_target()
 
     if survey_return_available:
@@ -299,25 +298,10 @@ if st.session_state.interview_active:
             label=config.VOICE_INPUT_INSTRUCTIONS,
             key=st.session_state.voice_input_key,
         )
-        action_spacer, action_col = st.columns([5.6, 2.1])
-        with action_col:
-            if survey_return_available:
+        if survey_return_available:
+            action_spacer, action_col = st.columns([5.6, 2.1])
+            with action_col:
                 render_survey_return_control("Back to survey")
-            quit_clicked = st.button(
-                "Quit",
-                key="quit_interview_button",
-                type="secondary",
-                help="Logging back in will restore the chat.",
-            )
-
-    if quit_clicked:
-        st.session_state.interview_active = False
-        quit_message = "You have quit the interview for now."
-        save_backup(
-            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
-        )
-        st.session_state.messages.append({"role": "assistant", "content": quit_message})
-        st.rerun()
 
     # Only if we have new audio
     if audio_response:
