@@ -359,6 +359,7 @@ if st.session_state.interview_active:
 
             # If user accepts, then proceed with the language model call
             if accept_clicked:
+                st.session_state.pop("survey_return_confirmed", None)
 
                 # Add the user’s message to the conversation
                 st.session_state.messages.append(

@@ -280,9 +280,21 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     if not href:
         return False
 
+    confirm_key = "survey_return_confirmed" if not completion else None
+    if not completion and not st.session_state.get(confirm_key, False):
+        if st.button(
+            label,
+            key="survey_return_initial_button",
+            type="secondary",
+        ):
+            st.session_state[confirm_key] = True
+            st.rerun()
+        return True
+
     reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
+    confirm_label = getattr(config, "SURVEY_RETURN_CONFIRM_LABEL", label).strip() or label
     escaped_href = html.escape(href, quote=True)
-    escaped_label = html.escape(label)
+    escaped_label = html.escape(confirm_label if not completion else label)
     escaped_reminder = html.escape(reminder_text)
     reminder_html = (
         f'<p class="survey-return-reminder">{escaped_reminder}</p>'

@@ -299,6 +299,7 @@ if st.session_state.interview_active:
 
     # If respondent uses written input
     if text_response:
+        st.session_state.pop("survey_return_confirmed", None)
         message_respondent = text_response
 
         # Increase statistic for number of text answers given by respondent
@@ -366,6 +367,7 @@ if st.session_state.interview_active:
 
             # If user accepts, then proceed with the chat API call
             if accept_clicked:
+                st.session_state.pop("survey_return_confirmed", None)
                 message_respondent = st.session_state.response_transcription
 
                 # Increase statistic for number of voice answers given by respondent
