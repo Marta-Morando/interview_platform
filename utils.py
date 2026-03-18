@@ -1,4 +1,5 @@
 from copy import deepcopy
+import html
 import hmac
 import json
 import os
@@ -114,6 +115,31 @@ def apply_readable_app_styles():
             color: #d6dae1 !important;
         }
 
+        .survey-return-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 2rem;
+            padding: 0.1rem 0.8rem;
+            margin-bottom: 0.35rem;
+            border: 1px solid #2f3642;
+            border-radius: 999px;
+            background: #171a21;
+            color: #d6dae1 !important;
+            text-decoration: none !important;
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+
+        .survey-return-button:hover,
+        .survey-return-button:focus,
+        .survey-return-button:active {
+            color: #eef2f7 !important;
+            border-color: #434c5c;
+        }
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -195,6 +221,47 @@ def has_survey_return_target():
     """Return whether the app can send the respondent back to a survey."""
 
     return get_survey_return_mode() is not None
+
+
+def render_survey_return_control(label="Back to survey", *, completion=False):
+    """Render a survey-return control that works in the main page context."""
+
+    return_mode = get_survey_return_mode()
+    if not return_mode:
+        return False
+
+    if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
+        href = "#"
+        onclick = (
+            "if (window.history.length > 1) { "
+            "window.history.back(); "
+            "} else if (document.referrer) { "
+            "window.location.href = document.referrer; "
+            "} return false;"
+        )
+    else:
+        href = (
+            build_completion_redirect_url()
+            if completion
+            else get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
+        )
+        if not href:
+            return False
+        onclick = None
+
+    escaped_href = html.escape(href, quote=True)
+    escaped_label = html.escape(label)
+    onclick_attr = (
+        f' onclick="{html.escape(onclick, quote=True)}"' if onclick else ""
+    )
+    st.markdown(
+        (
+            f'<a class="survey-return-button" href="{escaped_href}"'
+            f'{onclick_attr}>{escaped_label}</a>'
+        ),
+        unsafe_allow_html=True,
+    )
+    return True
 
 
 def validate_login_credentials(username, password):
@@ -382,12 +449,7 @@ def render_completion_redirect():
     if get_survey_return_mode() == getattr(
         config, "RETURN_METHOD_HISTORY", "history"
     ):
-        if st.button(
-            "Back to survey",
-            key="completion_return_to_survey_button",
-            type="secondary",
-        ):
-            send_respondent_back_to_survey()
+        render_survey_return_control("Back to survey", completion=True)
         return
 
     redirect_url = build_completion_redirect_url()

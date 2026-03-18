@@ -30,9 +30,9 @@ from utils import (
     load_backup,
     is_interview_completed,
     render_completion_redirect,
+    render_survey_return_control,
     save_backup,
     save_transcript_and_metadata,
-    send_respondent_back_to_survey,
 )
 
 
@@ -273,8 +273,18 @@ if not st.session_state.interview_active and is_interview_completed(
 if st.session_state.interview_active:
 
     response_container = st.container()
-    return_clicked = False
     quit_clicked = False
+    survey_return_available = has_survey_return_target()
+
+    if survey_return_available:
+        try:
+            save_backup(
+                backups_directory=config.BACKUPS_DIRECTORY,
+                admin_alias=config.ADMIN_ALIAS,
+            )
+        except Exception:
+            pass
+
     with response_container:
         voice_input_element = st.empty()
         audio_response = voice_input_element.audio_input(
@@ -283,26 +293,14 @@ if st.session_state.interview_active:
         )
         action_spacer, action_col = st.columns([5.6, 2.1])
         with action_col:
-            if has_survey_return_target():
-                return_clicked = st.button(
-                    "Back to survey",
-                    key="return_to_survey_button",
-                    type="secondary",
-                    help="Return to the survey without ending the interview.",
-                )
+            if survey_return_available:
+                render_survey_return_control("Back to survey")
             quit_clicked = st.button(
                 "Quit",
                 key="quit_interview_button",
                 type="secondary",
                 help="Logging back in will restore the chat.",
             )
-
-    if return_clicked:
-        save_backup(
-            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
-        )
-        send_respondent_back_to_survey()
-        st.stop()
 
     if quit_clicked:
         st.session_state.interview_active = False
