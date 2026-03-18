@@ -16,6 +16,17 @@ import dropbox_storage
 # Based on https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
 # To add advanced respondent authentication to the interview application, see
 # https://docs.streamlit.io/develop/concepts/connections/authentication)
+def is_valid_username(username):
+    """Allow simple file-safe usernames for surveys and direct links."""
+
+    username = (username or "").strip()
+    if not username:
+        return False
+
+    allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
+    return all(char in allowed for char in username)
+
+
 def get_query_param(name):
     """Return a single query-parameter value as a stripped string."""
 
@@ -54,8 +65,12 @@ def validate_login_credentials(username, password):
             config.RANDOM_IDS_PW_ALPHA + username_int * config.RANDOM_IDS_PW_BETA
         )
     else:
-        if not username.isalnum():
-            return False, "Username must be alphanumeric.", username
+        if not is_valid_username(username):
+            return (
+                False,
+                "Username must contain only letters, numbers, underscores, or hyphens.",
+                username,
+            )
 
         password_correct = username in st.secrets.passwords and hmac.compare_digest(
             password,
@@ -66,6 +81,23 @@ def validate_login_credentials(username, password):
         return True, None, username
 
     return False, "User or password incorrect.", username
+
+
+def get_direct_launch_username():
+    """Return a username from URL parameters for direct-launch survey handoffs."""
+
+    query_names = [
+        getattr(config, "URL_USERNAME_PARAM", "username"),
+        "respondent_id",
+        "rid",
+    ]
+
+    for query_name in query_names:
+        username = get_query_param(query_name)
+        if username:
+            return username
+
+    return None
 
 
 def apply_url_login_if_available():

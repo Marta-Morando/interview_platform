@@ -16,6 +16,8 @@ from openai import OpenAI
 import config
 from utils import (
     check_password,
+    get_direct_launch_username,
+    is_valid_username,
     stream_response,
     save_backup,
     load_backup,
@@ -45,6 +47,17 @@ if config.LOGINS:
 else:
     # Until username confirmed, show the input and stop
     if "username" not in st.session_state:
+        username_from_url = get_direct_launch_username()
+        if username_from_url:
+            if not is_valid_username(username_from_url):
+                st.warning(
+                    "Username in the survey link must contain only letters, numbers, underscores, or hyphens."
+                )
+                st.stop()
+
+            st.session_state.username = username_from_url.strip()
+            st.rerun()
+
         username_input = st.text_input(
             "Please enter a username to start the interview:",
             key="username_input",
@@ -52,8 +65,10 @@ else:
         if not username_input:
             # User hasn't typed anything yet, just render the page
             st.stop()
-        if not username_input.strip().isalnum():
-            st.warning("Username must be alphanumeric.")
+        if not is_valid_username(username_input):
+            st.warning(
+                "Username must contain only letters, numbers, underscores, or hyphens."
+            )
             st.stop()
 
         # Save non-empty username and rerun
