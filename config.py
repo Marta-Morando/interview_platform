@@ -95,7 +95,7 @@ SYSTEM_PROMPT = f"""{INTERVIEW_OUTLINE}
 
 # Text and voice settings
 INPUT_MODE = "text"  # set as "text" or "voice" or "text_and_voice"
-TEXT_INPUT_INSTRUCTIONS = "To use text input, please type here."
+TEXT_INPUT_INSTRUCTIONS = "Please type here"
 
 
 VOICE_INPUT_INSTRUCTIONS = "To use voice input, please click 🎤 to start recording. Wait for the icon to change, then begin speaking. Click ⏹️ to stop recording. Voice input may not be supported on some browsers and devices."

@@ -85,8 +85,9 @@ def apply_readable_app_styles():
         [data-testid="stChatInput"] {
             background: #171a21 !important;
             border: 1px solid #2a2f3a;
-            border-radius: 14px;
-            padding-top: 0.2rem;
+            border-radius: 10px;
+            padding-top: 0.05rem;
+            box-shadow: none !important;
         }
 
         [data-testid="stChatInput"] textarea,
@@ -106,6 +107,11 @@ def apply_readable_app_styles():
             min-height: 2rem;
             padding: 0.1rem 0.8rem;
             font-size: 0.9rem;
+        }
+
+        .stButton button[kind="secondary"],
+        [data-testid="stBaseButton-secondary"] {
+            color: #d6dae1 !important;
         }
         </style>
         """,
