@@ -22,16 +22,20 @@ def apply_readable_app_styles():
         <style>
         [data-testid="stAppViewContainer"],
         .stApp {
-            background: #f8fafc !important;
+            background: #0f1115 !important;
         }
 
-        [data-testid="stHeader"] {
-            background: rgba(248, 250, 252, 0.96) !important;
+        header,
+        [data-testid="stHeader"],
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"],
+        [data-testid="stStatusWidget"] {
+            display: none !important;
         }
 
         .block-container {
             max-width: 900px;
-            padding-top: 1.6rem;
+            padding-top: 2.4rem;
             padding-bottom: 1.8rem;
         }
 
@@ -41,25 +45,26 @@ def apply_readable_app_styles():
         .stApp label,
         .stApp span,
         .stApp div {
-            color: #667085;
+            color: #f3f4f6;
             font-family: "Trebuchet MS", "Segoe UI", sans-serif;
         }
 
         [data-testid="stChatMessage"] {
-            background: #ffffff !important;
-            border: 1px solid #d9e0e7;
+            background: #171a21 !important;
+            border: 1px solid #2a2f3a;
             border-radius: 16px;
-            padding: 0.25rem 0.45rem 0.4rem;
+            padding: 0.5rem 0.65rem 0.55rem;
+            margin-top: 0.35rem;
             overflow: visible;
         }
 
         [data-testid="stChatMessageContent"],
         [data-testid="stChatMessageContent"] p,
         [data-testid="stChatMessageContent"] div {
-            color: #667085 !important;
+            color: #f3f4f6 !important;
             font-size: 1.03rem;
-            line-height: 1.68;
-            padding-top: 0.18rem;
+            line-height: 1.72;
+            padding-top: 0.35rem;
             overflow-wrap: anywhere;
             word-break: break-word;
             white-space: pre-wrap;
@@ -70,7 +75,7 @@ def apply_readable_app_styles():
         [data-testid="stMarkdownContainer"] p,
         [data-testid="stMarkdownContainer"] div,
         [data-testid="stMarkdownContainer"] span {
-            color: #667085 !important;
+            color: #f3f4f6 !important;
             overflow-wrap: anywhere;
             word-break: break-word;
             white-space: pre-wrap;
@@ -78,25 +83,25 @@ def apply_readable_app_styles():
         }
 
         [data-testid="stChatInput"] {
-            background: #ffffff !important;
-            border: 1px solid #d9e0e7;
+            background: #171a21 !important;
+            border: 1px solid #2a2f3a;
             border-radius: 14px;
-            padding-top: 0.15rem;
+            padding-top: 0.2rem;
         }
 
         [data-testid="stChatInput"] textarea,
         [data-testid="stTextInput"] input {
-            background: #ffffff !important;
-            color: #667085 !important;
-            caret-color: #667085 !important;
+            background: #171a21 !important;
+            color: #f3f4f6 !important;
+            caret-color: #f3f4f6 !important;
             font-size: 1rem !important;
             line-height: 1.55 !important;
         }
 
         .stButton button {
-            background: #ffffff !important;
-            color: #667085 !important;
-            border: 1px solid #d0d7de !important;
+            background: #171a21 !important;
+            color: #f3f4f6 !important;
+            border: 1px solid #2f3642 !important;
             border-radius: 999px;
             min-height: 2rem;
             padding: 0.1rem 0.8rem;
