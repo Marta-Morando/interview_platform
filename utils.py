@@ -300,9 +300,7 @@ def has_survey_return_target():
     return bool(get_survey_return_url())
 
 
-def render_survey_return_control(
-    label="Back to survey", *, completion=False, on_prepare_return=None
-):
+def render_survey_return_control(label="Back to survey", *, completion=False):
     """Render a survey-return control that works in the main page context."""
 
     href = get_survey_return_url(completion=completion)
@@ -316,8 +314,6 @@ def render_survey_return_control(
             key="survey_return_initial_button",
             type="secondary",
         ):
-            if on_prepare_return:
-                on_prepare_return()
             st.session_state[confirm_key] = True
             st.rerun()
         return True

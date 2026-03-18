@@ -285,13 +285,7 @@ if st.session_state.interview_active:
         if survey_return_available:
             action_spacer, action_col = st.columns([5.6, 2.1])
             with action_col:
-                render_survey_return_control(
-                    "Back to survey",
-                    on_prepare_return=lambda: save_backup(
-                        backups_directory=config.BACKUPS_DIRECTORY,
-                        admin_alias=config.ADMIN_ALIAS,
-                    ),
-                )
+                render_survey_return_control("Back to survey")
 
     # If respondent uses written input
     if text_response:
