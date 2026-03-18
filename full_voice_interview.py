@@ -23,7 +23,7 @@ from scipy.io import wavfile
 import config
 from utils import (
     check_password,
-    get_direct_launch_username,
+    initialize_survey_username,
     is_valid_username,
     save_backup,
     load_backup,
@@ -74,15 +74,7 @@ if config.LOGINS:
 else:
     # Until username confirmed, show the input and stop
     if "username" not in st.session_state:
-        username_from_url = get_direct_launch_username()
-        if username_from_url:
-            if not is_valid_username(username_from_url):
-                st.warning(
-                    "Username in the survey link must contain only letters, numbers, underscores, or hyphens."
-                )
-                st.stop()
-
-            st.session_state.username = username_from_url.strip()
+        if initialize_survey_username():
             st.rerun()
 
         username_input = st.text_input(

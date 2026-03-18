@@ -166,6 +166,8 @@ LOGINS = False
 # The following settings control this functionality. The displayed password will be:
 # password = RANDOM_IDS_PW_ALPHA + int(username) * RANDOM_IDS_PW_BETA
 # Full details are discussed in the file "tutorial-online-interviews.md" in the repo.
+REQUIRE_USERNAME_INPUT = False  # When LOGINS = False, set to False to skip the username text input entirely.
+# The app will use the respondent_id URL parameter, or generate a random ID if absent.
 RANDOM_IDS = False  # set to True if random IDs are used for usernames and passwords
 # instead of those credentials specified in .streamlit/secrets.toml
 RANDOM_IDS_PW_ALPHA = 123  # replace with an integer of your choice
@@ -182,7 +184,7 @@ URL_PASSWORD_PARAM = "password"
 # If the interview URL includes a return URL, the app can offer a link back to the
 # survey and optionally redirect there automatically once the interview is completed.
 RETURN_URL_PARAM = "return_url"
-RETURN_RESPONSE_ID_SOURCE_PARAM = "response_id"
+RETURN_RESPONSE_ID_SOURCE_PARAM = "respondent_id"
 RETURN_USERNAME_PARAM = "interview_username"
 RETURN_RESPONSE_ID_PARAM = "response_id"
 RETURN_STATUS_PARAM = "interview_status"

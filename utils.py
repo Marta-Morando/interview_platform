@@ -2,7 +2,9 @@ from copy import deepcopy
 import hmac
 import json
 import os
+import re
 import time
+import uuid
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import streamlit as st
@@ -25,6 +27,20 @@ def is_valid_username(username):
 
     allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
     return all(char in allowed for char in username)
+
+
+def sanitize_username(username):
+    """Return a file-safe username or None when nothing usable is available."""
+
+    username = (username or "").strip()
+    if not username or username.startswith("${"):
+        return None
+
+    if is_valid_username(username):
+        return username
+
+    sanitized = re.sub(r"[^A-Za-z0-9_-]", "_", username).strip("_")
+    return sanitized or None
 
 
 def get_query_param(name):
@@ -94,10 +110,31 @@ def get_direct_launch_username():
 
     for query_name in query_names:
         username = get_query_param(query_name)
-        if username:
+        if username and not username.startswith("${"):
             return username
 
     return None
+
+
+def initialize_survey_username():
+    """Populate session username from the survey link or an anonymous fallback."""
+
+    existing_username = sanitize_username(st.session_state.get("username"))
+    if existing_username:
+        st.session_state.username = existing_username
+        return existing_username
+
+    survey_username = sanitize_username(get_direct_launch_username())
+    if survey_username:
+        st.session_state.username = survey_username
+        return survey_username
+
+    if getattr(config, "REQUIRE_USERNAME_INPUT", True):
+        return None
+
+    anonymous_username = f"anon_{uuid.uuid4().hex[:8]}"
+    st.session_state.username = anonymous_username
+    return anonymous_username
 
 
 def apply_url_login_if_available():
@@ -110,7 +147,7 @@ def apply_url_login_if_available():
     ):
         return False
 
-    username = get_query_param(getattr(config, "URL_USERNAME_PARAM", "username"))
+    username = get_direct_launch_username()
     password = get_query_param(getattr(config, "URL_PASSWORD_PARAM", "password"))
 
     if not username or not password:
@@ -222,8 +259,13 @@ def check_password():
 
     def login_form():
         """Render the login form to collect username and password."""
+        survey_username = sanitize_username(get_direct_launch_username())
+        if survey_username:
+            st.session_state.username = survey_username
+
         with st.form("Credentials"):
-            st.text_input("Username", key="username")
+            if not survey_username:
+                st.text_input("Username", key="username")
             st.text_input("Password", type="password", key="password")
             st.form_submit_button("Log in", on_click=password_entered)
 
@@ -629,7 +671,7 @@ def save_backup(backups_directory, admin_alias):
         data["num_text_and_voice_answers"] = st.session_state.num_text_and_voice_answers
 
         # --- Also save a running transcript after every message ---
-        transcript_text = ""
+        transcript_text = f"Respondent ID: {st.session_state.username}\n\n"
         for message in st.session_state.messages:
             if message["role"] == "assistant" and any(
                 code in message["content"]
@@ -704,7 +746,7 @@ def save_transcript_and_metadata(
     if st.session_state.username != admin_alias:
 
         # --- Build transcript text ---
-        transcript_text = ""
+        transcript_text = f"Respondent ID: {st.session_state.username}\n\n"
         user_messages = 0
         assistant_messages = 0
         for message in st.session_state.messages:
@@ -757,6 +799,9 @@ def save_transcript_and_metadata(
         external_response_id = get_query_param(
             getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
         )
+        # Discard unresolved Qualtrics piped-text literals (e.g. ${e://Field/ResponseID})
+        if external_response_id and external_response_id.startswith("${"):
+            external_response_id = None
         survey_return_url_supplied = bool(
             get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
         )
@@ -773,7 +818,9 @@ def save_transcript_and_metadata(
             else ""
         )
 
-        meta_text = f"""Start time (UTC): {time.strftime('%d/%m/%Y %H:%M:%S', time.gmtime(st.session_state.start_time))}
+        meta_text = f"""Respondent ID: {st.session_state.username}
+
+Start time (UTC): {time.strftime('%d/%m/%Y %H:%M:%S', time.gmtime(st.session_state.start_time))}
 End time (UTC): {time.strftime('%d/%m/%Y %H:%M:%S', time.gmtime(current_time))}
 Interview duration (multiple logins are separated by '+'): {times_display} minutes
 Text answers given by respondent: {st.session_state.num_text_and_voice_answers[0]}
