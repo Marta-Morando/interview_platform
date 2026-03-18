@@ -1,5 +1,4 @@
 from copy import deepcopy
-import html
 import hmac
 import json
 import os
@@ -13,64 +12,6 @@ import streamlit.components.v1 as components
 
 import config
 import dropbox_storage
-
-
-def apply_app_styles():
-    """Apply a lightweight visual refresh shared across interview apps."""
-
-    st.markdown(
-        """
-        <style>
-        .stApp {
-            background:
-                radial-gradient(circle at top, rgba(217, 236, 255, 0.7), transparent 38%),
-                linear-gradient(180deg, #f7fbff 0%, #eef4f9 100%);
-        }
-
-        .block-container {
-            max-width: 880px;
-            padding-top: 1.25rem;
-            padding-bottom: 2rem;
-        }
-
-        [data-testid="stChatMessage"] {
-            background: rgba(255, 255, 255, 0.84);
-            border: 1px solid rgba(112, 144, 176, 0.18);
-            border-radius: 18px;
-            box-shadow: 0 10px 28px rgba(39, 76, 119, 0.08);
-            padding: 0.3rem 0.4rem;
-        }
-
-        [data-testid="stChatInput"] {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(112, 144, 176, 0.2);
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(39, 76, 119, 0.08);
-        }
-
-        .survey-footer-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 2.4rem;
-            padding: 0.45rem 0.95rem;
-            border-radius: 999px;
-            border: 1px solid #a8bfd6;
-            background: rgba(255, 255, 255, 0.92);
-            color: #1f3b57;
-            font-weight: 600;
-            text-decoration: none;
-            box-shadow: 0 8px 24px rgba(39, 76, 119, 0.08);
-        }
-
-        .survey-footer-link:hover {
-            border-color: #7ea4c8;
-            color: #14314c;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 # Simple password screen for respondents (note: only very basic authentication!)
@@ -226,8 +167,8 @@ def apply_url_login_if_available():
     return False
 
 
-def build_return_url(status_value=None):
-    """Build a survey return URL with optional linkage parameters appended."""
+def build_completion_redirect_url():
+    """Build a survey return URL with interview linkage parameters appended."""
 
     base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
     if not base_url:
@@ -249,36 +190,12 @@ def build_return_url(status_value=None):
         query_params.setdefault(response_id_param, response_id)
 
     status_param = getattr(config, "RETURN_STATUS_PARAM", "interview_status")
-    if status_param and status_value:
-        query_params[status_param] = status_value
+    if status_param:
+        query_params[status_param] = getattr(
+            config, "RETURN_STATUS_VALUE", "completed"
+        )
 
     return urlunparse(parsed_url._replace(query=urlencode(query_params)))
-
-
-def build_completion_redirect_url():
-    """Build a completed-interview survey return URL."""
-
-    return build_return_url(getattr(config, "RETURN_STATUS_VALUE", "completed"))
-
-
-def render_return_link(label="Return to survey", status_value=None):
-    """Render a survey return link that escapes the iframe."""
-
-    redirect_url = build_return_url(status_value)
-    if not redirect_url:
-        return False
-
-    escaped_url = html.escape(redirect_url, quote=True)
-    escaped_label = html.escape(label)
-    st.markdown(
-        f"""
-        <a class="survey-footer-link" href="{escaped_url}" target="_top">
-            {escaped_label}
-        </a>
-        """,
-        unsafe_allow_html=True,
-    )
-    return True
 
 
 def render_completion_redirect():
@@ -288,10 +205,7 @@ def render_completion_redirect():
     if not redirect_url:
         return
 
-    render_return_link(
-        "Return to survey",
-        getattr(config, "RETURN_STATUS_VALUE", "completed"),
-    )
+    st.link_button("Return to survey", redirect_url)
 
     if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
         delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)
