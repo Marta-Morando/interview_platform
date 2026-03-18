@@ -140,6 +140,13 @@ def apply_readable_app_styles():
             border-color: #434c5c;
         }
 
+        .survey-return-reminder {
+            margin: 0 0 0.45rem;
+            color: #c9d0db !important;
+            font-size: 0.88rem;
+            line-height: 1.4;
+        }
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -273,11 +280,18 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     if not href:
         return False
 
+    reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
     escaped_href = html.escape(href, quote=True)
     escaped_label = html.escape(label)
+    escaped_reminder = html.escape(reminder_text)
+    reminder_html = (
+        f'<p class="survey-return-reminder">{escaped_reminder}</p>'
+        if reminder_text and not completion
+        else ""
+    )
     st.markdown(
         (
-            f'<a class="survey-return-button" href="{escaped_href}"'
+            f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
             f'>{escaped_label}</a>'
         ),
         unsafe_allow_html=True,

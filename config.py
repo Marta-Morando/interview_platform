@@ -188,6 +188,9 @@ RETURN_METHOD_PARAM = "return_method"
 RETURN_METHOD_HISTORY = "history"
 RETURN_METHOD_URL = "url"
 DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_6fEmPg7zvkxl65w"
+SURVEY_RETURN_REMINDER = (
+    "Before returning to the survey, please answer as many of the interview questions as you can."
+)
 RETURN_RESPONSE_ID_SOURCE_PARAM = "respondent_id"
 RETURN_USERNAME_PARAM = "interview_username"
 RETURN_RESPONSE_ID_PARAM = "response_id"
