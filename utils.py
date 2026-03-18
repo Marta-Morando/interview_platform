@@ -20,45 +20,87 @@ def apply_readable_app_styles():
     st.markdown(
         """
         <style>
-        .stApp, .stApp p, .stApp li, .stApp label, .stApp span, .stApp div {
-            color: #1f2933;
-            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        [data-testid="stAppViewContainer"],
+        .stApp {
+            background: #f8fafc !important;
+        }
+
+        [data-testid="stHeader"] {
+            background: rgba(248, 250, 252, 0.96) !important;
         }
 
         .block-container {
             max-width: 900px;
-            padding-top: 1.1rem;
-            padding-bottom: 1.6rem;
+            padding-top: 1.6rem;
+            padding-bottom: 1.8rem;
+        }
+
+        .stApp,
+        .stApp p,
+        .stApp li,
+        .stApp label,
+        .stApp span,
+        .stApp div {
+            color: #667085;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        }
+
+        [data-testid="stChatMessage"] {
+            background: #ffffff !important;
+            border: 1px solid #d9e0e7;
+            border-radius: 16px;
+            padding: 0.25rem 0.45rem 0.4rem;
+            overflow: visible;
         }
 
         [data-testid="stChatMessageContent"],
         [data-testid="stChatMessageContent"] p,
         [data-testid="stChatMessageContent"] div {
-            color: #1f2933 !important;
+            color: #667085 !important;
             font-size: 1.03rem;
             line-height: 1.68;
+            padding-top: 0.18rem;
             overflow-wrap: anywhere;
             word-break: break-word;
+            white-space: pre-wrap;
+            max-width: 100%;
         }
 
         [data-testid="stMarkdownContainer"],
         [data-testid="stMarkdownContainer"] p,
         [data-testid="stMarkdownContainer"] div,
         [data-testid="stMarkdownContainer"] span {
-            color: #1f2933;
+            color: #667085 !important;
             overflow-wrap: anywhere;
             word-break: break-word;
+            white-space: pre-wrap;
+            max-width: 100%;
+        }
+
+        [data-testid="stChatInput"] {
+            background: #ffffff !important;
+            border: 1px solid #d9e0e7;
+            border-radius: 14px;
+            padding-top: 0.15rem;
         }
 
         [data-testid="stChatInput"] textarea,
         [data-testid="stTextInput"] input {
-            color: #1f2933 !important;
+            background: #ffffff !important;
+            color: #667085 !important;
+            caret-color: #667085 !important;
             font-size: 1rem !important;
             line-height: 1.55 !important;
         }
 
         .stButton button {
+            background: #ffffff !important;
+            color: #667085 !important;
+            border: 1px solid #d0d7de !important;
             border-radius: 999px;
+            min-height: 2rem;
+            padding: 0.1rem 0.8rem;
+            font-size: 0.9rem;
         }
         </style>
         """,
