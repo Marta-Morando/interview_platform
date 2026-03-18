@@ -3,155 +3,16 @@ import hmac
 import json
 import os
 import time
-from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 import config
-import dropbox_storage
 
 
 # Simple password screen for respondents (note: only very basic authentication!)
 # Based on https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
 # To add advanced respondent authentication to the interview application, see
 # https://docs.streamlit.io/develop/concepts/connections/authentication)
-def get_query_param(name):
-    """Return a single query-parameter value as a stripped string."""
-
-    if not name:
-        return None
-
-    try:
-        value = st.query_params.get(name, None)
-    except Exception:
-        value = st.experimental_get_query_params().get(name, None)
-
-    if isinstance(value, list):
-        value = value[0] if value else None
-
-    if value is None:
-        return None
-
-    value = str(value).strip()
-    return value or None
-
-
-def validate_login_credentials(username, password):
-    """Validate respondent credentials for either random IDs or secrets-based logins."""
-
-    username = (username or "").strip()
-    password = (password or "").strip()
-
-    if config.RANDOM_IDS:
-        try:
-            username_int = int(username)
-            password_int = int(password)
-        except ValueError:
-            return False, "Username and password must be integers.", username
-
-        password_correct = password_int == (
-            config.RANDOM_IDS_PW_ALPHA + username_int * config.RANDOM_IDS_PW_BETA
-        )
-    else:
-        if not username.isalnum():
-            return False, "Username must be alphanumeric.", username
-
-        password_correct = username in st.secrets.passwords and hmac.compare_digest(
-            password,
-            st.secrets.passwords[username],
-        )
-
-    if password_correct:
-        return True, None, username
-
-    return False, "User or password incorrect.", username
-
-
-def apply_url_login_if_available():
-    """Authenticate from query parameters when enabled in config.py."""
-
-    if (
-        not config.LOGINS
-        or not getattr(config, "ALLOW_URL_LOGIN", False)
-        or st.session_state.get("password_correct", False)
-    ):
-        return False
-
-    username = get_query_param(getattr(config, "URL_USERNAME_PARAM", "username"))
-    password = get_query_param(getattr(config, "URL_PASSWORD_PARAM", "password"))
-
-    if not username or not password:
-        return False
-
-    password_correct, login_error, username = validate_login_credentials(
-        username, password
-    )
-    st.session_state.username = username
-    st.session_state.password_correct = password_correct
-
-    if password_correct:
-        st.session_state.pop("login_error", None)
-        return True
-
-    st.session_state["login_error"] = login_error
-    return False
-
-
-def build_completion_redirect_url():
-    """Build a survey return URL with interview linkage parameters appended."""
-
-    base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
-    if not base_url:
-        return None
-
-    parsed_url = urlparse(base_url)
-    query_params = dict(parse_qsl(parsed_url.query, keep_blank_values=True))
-
-    username = st.session_state.get("username", "").strip()
-    username_param = getattr(config, "RETURN_USERNAME_PARAM", "interview_username")
-    if username and username_param:
-        query_params.setdefault(username_param, username)
-
-    response_id = get_query_param(
-        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
-    )
-    response_id_param = getattr(config, "RETURN_RESPONSE_ID_PARAM", "response_id")
-    if response_id and response_id_param:
-        query_params.setdefault(response_id_param, response_id)
-
-    status_param = getattr(config, "RETURN_STATUS_PARAM", "interview_status")
-    if status_param:
-        query_params[status_param] = getattr(
-            config, "RETURN_STATUS_VALUE", "completed"
-        )
-
-    return urlunparse(parsed_url._replace(query=urlencode(query_params)))
-
-
-def render_completion_redirect():
-    """Render a return-to-survey link and optionally auto-redirect there."""
-
-    redirect_url = build_completion_redirect_url()
-    if not redirect_url:
-        return
-
-    st.link_button("Return to survey", redirect_url)
-
-    if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
-        delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)
-        components.html(
-            f"""
-            <script>
-            setTimeout(function() {{
-                window.top.location.replace({json.dumps(redirect_url)});
-            }}, {delay_ms});
-            </script>
-            """,
-            height=0,
-        )
-
-
 def check_password():
     """Check credentials entered via Streamlit widgets.
 
@@ -211,26 +72,54 @@ def check_password():
         # Store username without whitespaces
         st.session_state.username = (st.session_state.get("username") or "").strip()
 
-        password_correct, login_error, username = validate_login_credentials(
-            st.session_state.get("username"),
-            st.session_state.get("password"),
-        )
-        st.session_state.username = username
-        st.session_state.password_correct = password_correct
+        # If RANDOM_IDS is True, check if username and password are integers
+        if config.RANDOM_IDS:
+            try:
+                int(st.session_state.username)
+                int(st.session_state.password)
+            except ValueError:
+                st.session_state.login_error = "Username and password must be integers."
+                st.session_state.password_correct = False
+                st.session_state.pop("password", None)
+                return
 
-        if password_correct:
+        # If RANDOM_IDS is False, check if username is alphanumeric
+        else:
+            if not st.session_state.username.isalnum():
+                st.session_state.login_error = "Username must be alphanumeric."
+                st.session_state.password_correct = False
+                st.session_state.pop("password", None)
+                return
+
+        # Check password in case that usernames are shared via random ID in survey,
+        # or when usernames are shared separately and stored in the secrets file
+        if (
+            config.RANDOM_IDS
+            and int(st.session_state.password)
+            == config.RANDOM_IDS_PW_ALPHA
+            + int(st.session_state.username) * config.RANDOM_IDS_PW_BETA
+            or not config.RANDOM_IDS
+            and (
+                st.session_state.username in st.secrets.passwords
+                and hmac.compare_digest(
+                    st.session_state.password,
+                    st.secrets.passwords[st.session_state.username],
+                )
+            )
+        ):
+            st.session_state.password_correct = True
+            # Clear any previous error on successful login
             st.session_state.pop("login_error", None)
         else:
-            st.session_state["login_error"] = login_error
+            st.session_state.password_correct = False
+            # Only set a generic error if we don't already have a more specific one
+            st.session_state.setdefault("login_error", "User or password incorrect.")
 
         # Don't store password in session state
         st.session_state.pop("password", None)
 
     # If already logged in
     if st.session_state.get("password_correct", False):
-        return True, st.session_state.username
-    # Otherwise, try URL-based login first if enabled
-    if apply_url_login_if_available():
         return True, st.session_state.username
     # Otherwise show login form
     login_form()
@@ -456,14 +345,11 @@ def stream_response(client, client_kwargs, message_placeholder, minimum_characte
 # Functions to load and save backups, transcripts, and metadata:
 
 
-# Dropbox path prefix for all interview data
-DROPBOX_BASE_PATH = "/projects/consulting/survey/ai_interview/interview_data"
-
-
 def load_backup(backups_directory):
-    """Load backup data for the current user, from Dropbox if enabled or from disk.
+    """Load backup data for the current user from disk, if available.
 
-    The backup is expected to be a JSON file named <username>.json. The structure is:
+    The backup is expected to be a JSON file named <username>.json in the given
+    directory. The structure is assumed to be:
 
     .. code-block:: json
 
@@ -480,43 +366,43 @@ def load_backup(backups_directory):
     Parameters
     ----------
     backups_directory : str | os.PathLike
-        Directory where backup JSON files are stored (used for local storage).
+        Directory where backup JSON files are stored.
 
     Returns
     -------
     tuple
-        A 4-tuple (messages, start_time, times, num_text_and_voice_answers).
+        A 4-tuple (messages, start_time, times, num_text_and_voice_answers) where:
+
+        messages : list[dict]
+            List of message dictionaries as used in the chat history. If no assistant
+            messages are found, this is an empty list and represents a fresh start.
+        start_time : float
+            Epoch timestamp (in seconds) of when the interview started.
+        times : list[float]
+            List of durations (in minutes) spent in previous logins.
+        num_text_and_voice_answers : list[int]
+            A list [num_text, num_voice] counting the number of text and voice
+            answers given by the respondent.
+
+    Notes
+    -----
+    - If at least one message from the assistant is present, only messages up to and
+      including the last assistant message are returned.
+    - On any exception (file missing, JSON error, etc.), a new interview state is
+      returned with start_time = time.time(), empty messages and times, and
+      [0, 0] as the answer counts.
     """
 
     # Try to load backup data if it exists
     try:
-
-        # --- DROPBOX STORAGE ---
-        if dropbox_storage.is_dropbox_enabled():
-            dropbox_path = f"{DROPBOX_BASE_PATH}/backups/{st.session_state.username}.json"
-            data = dropbox_storage.download_json(dropbox_path)
-            if data is None and not dropbox_storage.is_dropbox_enabled():
-                with open(
-                    os.path.join(
-                        backups_directory,
-                        f"{st.session_state.username}.json",
-                    ),
-                    "r",
-                ) as f:
-                    data = json.load(f)
-            elif data is None:
-                raise FileNotFoundError("No backup found in Dropbox")
-
-        # --- LOCAL STORAGE (original behaviour) ---
-        else:
-            with open(
-                os.path.join(
-                    backups_directory,
-                    f"{st.session_state.username}.json",
-                ),
-                "r",
-            ) as f:
-                data = json.load(f)
+        with open(
+            os.path.join(
+                backups_directory,
+                f"{st.session_state.username}.json",
+            ),
+            "r",
+        ) as f:
+            data = json.load(f)
 
         # Number of user answers given by text vs voice input
         num_text_and_voice_answers = data["num_text_and_voice_answers"]
@@ -559,20 +445,35 @@ def load_backup(backups_directory):
 
 
 def save_backup(backups_directory, admin_alias):
-    """Save the most recent interview data as a JSON backup.
+    """Save the most recent interview data to disk as a JSON backup.
 
-    Saves to Dropbox if enabled, otherwise saves to local disk.
+    The file is written as <username>.json into the specified directory and
+    contains:
+
+    - messages: full message history (copied from st.session_state.messages)
+    - start_time: initial interview start time
+    - times: list of durations (in minutes) across logins
+    - num_text_and_voice_answers: counts of text vs voice answers
+
+    Data for users whose username equals admin_alias is not written.
 
     Parameters
     ----------
     backups_directory : str | os.PathLike
-        Directory where the backup JSON file should be written (local storage).
-    admin_alias : str
-        Username for which backups should be suppressed.
+        Directory where the backup JSON file should be written.
+    admin_alias : str, optional
+        Username for which backups should be suppressed (e.g. admin/test accounts).
+        Default is "testaccount".
 
     Returns
     -------
     None
+        The function is called for its side effects.
+
+    Side effects
+    ------------
+    - Reads from st.session_state (messages, times, username, etc.).
+    - Writes <username>.json into backups_directory.
     """
 
     # Don't store data for admin alias
@@ -596,42 +497,7 @@ def save_backup(backups_directory, admin_alias):
         # Add number of answers through text and voice inputs
         data["num_text_and_voice_answers"] = st.session_state.num_text_and_voice_answers
 
-        # --- Also save a running transcript after every message ---
-        transcript_text = ""
-        for message in st.session_state.messages:
-            if message["role"] == "assistant" and any(
-                code in message["content"]
-                for code in config.CLOSING_MESSAGES.keys()
-            ):
-                continue
-            elif message["role"] == "assistant":
-                transcript_text += f"Interviewer: {message['content']}\n\n"
-            elif message["role"] == "user":
-                transcript_text += f"Respondent: {message['content']}\n\n"
-
-        # --- DROPBOX STORAGE ---
-        if dropbox_storage.is_dropbox_enabled():
-            dropbox_path = f"{DROPBOX_BASE_PATH}/backups/{st.session_state.username}.json"
-            transcript_path = (
-                f"{DROPBOX_BASE_PATH}/transcripts/{st.session_state.username}.txt"
-            )
-            backup_saved = dropbox_storage.upload_json(data, dropbox_path)
-            transcript_saved = dropbox_storage.upload_text(
-                transcript_text, transcript_path
-            )
-            if backup_saved and transcript_saved:
-                return
-
-        # --- LOCAL STORAGE (original behaviour) ---
-        # Save running transcript locally
-        transcripts_dir = config.TRANSCRIPTS_DIRECTORY
-        os.makedirs(transcripts_dir, exist_ok=True)
-        with open(
-            os.path.join(transcripts_dir, f"{st.session_state.username}.txt"),
-            "w",
-        ) as tf:
-            tf.write(transcript_text)
-
+        # Save all as JSON
         with open(
             os.path.join(
                 backups_directory,
@@ -648,100 +514,112 @@ def save_transcript_and_metadata(
     api_kwargs,
     admin_alias,
 ):
-    """Write the interview transcript and metadata.
+    """Write the interview transcript and metadata to disk for the current user.
 
-    Saves to Dropbox if enabled, otherwise saves to local disk.
+    Two files are written (unless the username equals admin_alias):
+
+    1. Transcript file: <username>.txt in transcripts_directory
+       - Contains alternating "Interviewer:" and "Respondent:" lines.
+       - Skips system messages and any assistant messages that contain closing codes
+         defined in config.CLOSING_MESSAGES.
+
+    2. Metadata file: <username>.txt in metadata_directory
+       - Contains start and end times (UTC), durations per login and in total,
+         counts of text and voice respondent messages, counts of all respondent and
+         interviewer messages, API call argument, and system prompt.
 
     Parameters
     ----------
     transcripts_directory : str | os.PathLike
-        Directory where the transcript `.txt` file will be written (local storage).
+        Directory where the transcript `.txt` file will be written.
     metadata_directory : str | os.PathLike
-        Directory where the metadata `.txt` file will be written (local storage).
+        Directory where the metadata `.txt` file will be written.
     api_kwargs : dict
         Keyword arguments used in API call.
-    admin_alias : str
+    admin_alias : str, optional
         Username for which no transcript or metadata should be stored.
+        Default is "testaccount".
 
     Returns
     -------
     None
+        The function is called for its side effects.
+
+    Side effects
+    ------------
+    - Reads from st.session_state (messages, times, counters, start time, etc.).
+    - Writes two text files into the specified directories.
     """
 
     # Don't store data for admin alias
     if st.session_state.username != admin_alias:
+        with open(
+            os.path.join(
+                transcripts_directory,
+                f"{st.session_state.username}.txt",
+            ),
+            "w",
+        ) as f:
+            user_messages = 0
+            assistant_messages = 0
+            for message in st.session_state.messages:
+                if message["role"] == "assistant" and any(
+                    code in message["content"]
+                    for code in config.CLOSING_MESSAGES.keys()
+                ):
+                    # Skip messages with codes
+                    continue
+                elif message["role"] == "assistant":
+                    assistant_messages += 1
+                    f.write(f"Interviewer: {message['content']}\n\n")
+                elif message["role"] == "user":
+                    user_messages += 1
+                    f.write(f"Respondent: {message['content']}\n\n")
 
-        # --- Build transcript text ---
-        transcript_text = ""
-        user_messages = 0
-        assistant_messages = 0
-        for message in st.session_state.messages:
-            if message["role"] == "assistant" and any(
-                code in message["content"]
-                for code in config.CLOSING_MESSAGES.keys()
-            ):
-                # Skip messages with codes
-                continue
-            elif message["role"] == "assistant":
-                assistant_messages += 1
-                transcript_text += f"Interviewer: {message['content']}\n\n"
-            elif message["role"] == "user":
-                user_messages += 1
-                transcript_text += f"Respondent: {message['content']}\n\n"
+            # Store file with start time, duration of interview, number of text vs voice
+            # answers, and total messages from respondent and interviewer
+            current_time = time.time()
+            times = st.session_state.times_previous_attempts + [
+                (current_time - st.session_state.start_time_current_login) / 60
+            ]
 
-        # --- Build metadata text ---
-        current_time = time.time()
-        times = st.session_state.times_previous_attempts + [
-            (current_time - st.session_state.start_time_current_login) / 60
-        ]
+            times_str = [f"{d:.2f}" for d in times]
+            total_time = sum(times)
 
-        times_str = [f"{d:.2f}" for d in times]
-        total_time = sum(times)
+            if len(times) > 1:
+                # e.g. "3.50 + 2.25 = 5.75 minutes"
+                times_display = " + ".join(times_str) + f" = {total_time:.2f}"
+            else:
+                # e.g. "3.50 minutes"
+                times_display = times_str[0]
 
-        if len(times) > 1:
-            times_display = " + ".join(times_str) + f" = {total_time:.2f}"
-        else:
-            times_display = times_str[0]
-
-        api_kwargs_text = json.dumps(
-            {
-                k: (
-                    {sk: sv for sk, sv in v.items() if sk != "system_instruction"}
-                    if k == "config" and isinstance(v, dict) and len(v) > 1
-                    else v
-                )
-                for k, v in api_kwargs.items()
-                if k != "system"
-                and not (
-                    k == "config"
-                    and isinstance(v, dict)
-                    and len(v) == 1
-                    and "system_instruction" in v
-                )
-            },
-            indent=2,
-        )
-
-        external_response_id = get_query_param(
-            getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
-        )
-        survey_return_url_supplied = bool(
-            get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
-        )
-        external_context_lines = []
-        if external_response_id:
-            external_context_lines.append(
-                f"External survey response ID: {external_response_id}"
+            # Next, document API kwargs w/o messages and system prompt (as these are
+            # stored separately)
+            # For the Google API, system_instruction is stored in a config dictionary
+            # For the Anthropic API, the system prompt is stored as the parameter system
+            # For the OpenAI/Azure, the system prompt is part of the messages and thus
+            # excluded automatically since messages are not parts of api_kwargs and only
+            # added before each API call through add_messages_to_api_kwargs()
+            api_kwargs_text = json.dumps(
+                {
+                    k: (
+                        {sk: sv for sk, sv in v.items() if sk != "system_instruction"}
+                        if k == "config" and isinstance(v, dict) and len(v) > 1
+                        else v
+                    )
+                    for k, v in api_kwargs.items()
+                    if k != "system"
+                    and not (
+                        k == "config"
+                        and isinstance(v, dict)
+                        and len(v) == 1
+                        and "system_instruction" in v
+                    )
+                },
+                indent=2,
             )
-        if survey_return_url_supplied:
-            external_context_lines.append("Survey return URL supplied: yes")
-        external_context_text = (
-            "\n".join(external_context_lines) + "\n\n---\n\n"
-            if external_context_lines
-            else ""
-        )
 
-        meta_text = f"""Start time (UTC): {time.strftime('%d/%m/%Y %H:%M:%S', time.gmtime(st.session_state.start_time))}
+            meta_text = f"""Start time (UTC): {time.strftime('%d/%m/%Y %H:%M:%S', time.gmtime(st.session_state.start_time))}
 End time (UTC): {time.strftime('%d/%m/%Y %H:%M:%S', time.gmtime(current_time))}
 Interview duration (multiple logins are separated by '+'): {times_display} minutes
 Text answers given by respondent: {st.session_state.num_text_and_voice_answers[0]}
@@ -751,7 +629,7 @@ Total interviewer messages: {assistant_messages}
 
 ---
 
-{external_context_text}API call parameters at the time of concluding the interview (excluding messages and system prompt):
+API call parameters at the time of concluding the interview (excluding messages and system prompt):
 
 {api_kwargs_text}
 
@@ -762,103 +640,28 @@ System prompt at the time of concluding the interview:
 {config.SYSTEM_PROMPT}
 """
 
-        # --- DROPBOX STORAGE ---
-        if dropbox_storage.is_dropbox_enabled():
-            transcript_path = (
-                f"{DROPBOX_BASE_PATH}/transcripts/{st.session_state.username}.txt"
-            )
-            metadata_path = (
-                f"{DROPBOX_BASE_PATH}/metadata/{st.session_state.username}.txt"
-            )
-            transcript_saved = dropbox_storage.upload_text(
-                transcript_text, transcript_path
-            )
-            metadata_saved = dropbox_storage.upload_text(meta_text, metadata_path)
-            if transcript_saved and metadata_saved:
-                return
-
-        # --- LOCAL STORAGE (original behaviour) ---
-        with open(
-            os.path.join(
-                transcripts_directory,
-                f"{st.session_state.username}.txt",
-            ),
-            "w",
-        ) as f:
-            f.write(transcript_text)
-
-        with open(
-            os.path.join(
-                metadata_directory,
-                f"{st.session_state.username}.txt",
-            ),
-            "w",
-        ) as d:
-            d.write(meta_text)
-
-
-def backup_contains_closing_code(messages):
-    """Return True when any assistant message contains a configured closing code."""
-
-    return any(
-        message.get("role") == "assistant"
-        and any(
-            code in message.get("content", "") for code in config.CLOSING_MESSAGES.keys()
-        )
-        for message in messages
-    )
-
-
-def is_interview_completed(metadata_directory, backups_directory):
-    """Check whether the interview has finished for the current user."""
-
-    username = st.session_state.username
-
-    if dropbox_storage.is_dropbox_enabled():
-        metadata_path = f"{DROPBOX_BASE_PATH}/metadata/{username}.txt"
-        if dropbox_storage.file_exists(metadata_path):
-            return True
-
-        backup_path = f"{DROPBOX_BASE_PATH}/backups/{username}.json"
-        backup_data = dropbox_storage.download_json(backup_path) or {}
-        return backup_contains_closing_code(backup_data.get("messages", []))
-
-    metadata_path = os.path.join(metadata_directory, f"{username}.txt")
-    if os.path.exists(metadata_path):
-        return True
-
-    backup_path = os.path.join(backups_directory, f"{username}.json")
-    try:
-        with open(backup_path, "r") as f:
-            backup_data = json.load(f)
-    except Exception:
-        return False
-
-    return backup_contains_closing_code(backup_data.get("messages", []))
+            with open(
+                os.path.join(metadata_directory, f"{st.session_state.username}.txt"),
+                "w",
+            ) as d:
+                d.write(meta_text)
 
 
 def is_transcript_saved(transcripts_directory):
-    """Check whether a transcript for the current user already exists.
-
-    Checks Dropbox if enabled, otherwise checks local disk.
+    """Check whether a transcript file for the current user already exists.
 
     Parameters
     ----------
     transcripts_directory : str | os.PathLike
-        Directory where transcript `.txt` files are stored (local storage).
+        Directory where transcript `.txt` files are stored.
 
     Returns
     -------
     bool
-        True if the transcript exists, False otherwise.
+        True if <username>.txt exists in transcripts_directory for the
+        current st.session_state.username, otherwise False.
     """
 
-    # --- DROPBOX STORAGE ---
-    if dropbox_storage.is_dropbox_enabled():
-        dropbox_path = f"{DROPBOX_BASE_PATH}/transcripts/{st.session_state.username}.txt"
-        return dropbox_storage.file_exists(dropbox_path)
+    path = os.path.join(transcripts_directory, f"{st.session_state.username}.txt")
 
-    # --- LOCAL STORAGE (original behaviour) ---
-    else:
-        path = os.path.join(transcripts_directory, f"{st.session_state.username}.txt")
-        return os.path.exists(path)
+    return os.path.exists(path)

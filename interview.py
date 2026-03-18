@@ -8,6 +8,7 @@ import os
 import random
 import time
 from copy import deepcopy
+import dropbox_storage
 
 import streamlit as st
 from openai import OpenAI
@@ -19,7 +20,8 @@ from utils import (
     save_backup,
     load_backup,
     save_transcript_and_metadata,
-    is_transcript_saved,
+    is_interview_completed,
+    render_completion_redirect,
 )
 
 
@@ -29,6 +31,7 @@ from utils import (
 
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
+dropbox_storage.show_dropbox_warning_if_needed()
 
 # Check if login screen is enabled
 if config.LOGINS:
@@ -57,16 +60,20 @@ else:
         st.session_state.username = username_input.strip()
         st.rerun()
 
-# Directories
-if not os.path.exists(config.TRANSCRIPTS_DIRECTORY):
-    os.makedirs(config.TRANSCRIPTS_DIRECTORY)
-if not os.path.exists(config.METADATA_DIRECTORY):
-    os.makedirs(config.METADATA_DIRECTORY)
-if not os.path.exists(config.BACKUPS_DIRECTORY):
-    os.makedirs(config.BACKUPS_DIRECTORY)
+# Directories (only create local folders when Dropbox is not enabled)
+if not dropbox_storage.is_dropbox_enabled():
+    if not os.path.exists(config.TRANSCRIPTS_DIRECTORY):
+        os.makedirs(config.TRANSCRIPTS_DIRECTORY)
+    if not os.path.exists(config.METADATA_DIRECTORY):
+        os.makedirs(config.METADATA_DIRECTORY)
+    if not os.path.exists(config.BACKUPS_DIRECTORY):
+        os.makedirs(config.BACKUPS_DIRECTORY)
+
 
 # Check if interview has been completed and, if so, only display closing message
-interview_previously_completed = is_transcript_saved(config.TRANSCRIPTS_DIRECTORY)
+interview_previously_completed = is_interview_completed(
+    config.METADATA_DIRECTORY, config.BACKUPS_DIRECTORY
+)
 if "messages" not in st.session_state and interview_previously_completed:
     st.session_state.messages = []
     st.session_state.interview_active = False
@@ -93,6 +100,7 @@ if "messages" not in st.session_state and interview_previously_completed:
 
     st.session_state.interview_active = False
     st.markdown(closing_message)
+    render_completion_redirect()
     st.stop()
 
 # If interview has not yet been completed, initialise session states
@@ -234,6 +242,11 @@ else:
             if not any(code in message["content"] for code in config.CLOSING_MESSAGES):
                 with st.chat_message(message["role"], avatar=avatar):
                     st.markdown(message["content"])
+
+if not st.session_state.interview_active and is_interview_completed(
+    config.METADATA_DIRECTORY, config.BACKUPS_DIRECTORY
+):
+    render_completion_redirect()
 
 
 #
