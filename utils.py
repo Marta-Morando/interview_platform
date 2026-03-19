@@ -331,20 +331,16 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     confirm_label = getattr(config, "SURVEY_RETURN_CONFIRM_LABEL", label).strip() or label
 
     if get_survey_return_mode() == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        history_js = (
-            "const targets=[window.parent,window.top,window];"
-            "for(const target of targets){"
-            "try{target.history.back();return false;}catch(error){}}"
-            "return false;"
-        )
-        escaped_history_label = html.escape(confirm_label if not completion else label)
-        st.markdown(
-            (
-                f'{reminder_html}<a class="survey-return-button" href="#" '
-                f'onclick="{history_js}">{escaped_history_label}</a>'
-            ),
-            unsafe_allow_html=True,
-        )
+        if reminder_html:
+            st.markdown(reminder_html, unsafe_allow_html=True)
+        if st.button(
+            confirm_label if not completion else label,
+            key="survey_return_confirm_button"
+            if not completion
+            else "completion_return_to_survey_button",
+            type="secondary",
+        ):
+            send_respondent_back_to_survey()
         return True
 
     href = get_survey_return_url(completion=completion)
