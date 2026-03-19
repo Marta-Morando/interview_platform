@@ -273,6 +273,29 @@ def get_request_referrer_url():
     return referrer
 
 
+def get_cached_request_referrer_url():
+    """Return the initial non-app referrer URL, caching it across reruns."""
+
+    session_key = "survey_return_referrer_url"
+    referrer = get_request_referrer_url()
+    if referrer:
+        st.session_state[session_key] = referrer
+        return referrer
+
+    cached_referrer = st.session_state.get(session_key)
+    if not cached_referrer:
+        return None
+
+    cached_referrer = str(cached_referrer).strip()
+    if not cached_referrer or cached_referrer.startswith("${"):
+        return None
+
+    if "interview-platform.streamlit.app" in cached_referrer:
+        return None
+
+    return cached_referrer
+
+
 def get_survey_return_mode():
     """Return the configured survey-return mode, if any."""
 
@@ -356,7 +379,7 @@ def get_survey_return_url(*, completion=False):
         return explicit_return_url
 
     if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        return get_request_referrer_url() or default_return_url
+        return get_cached_request_referrer_url() or default_return_url
 
     if return_mode:
         return default_return_url
