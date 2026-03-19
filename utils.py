@@ -300,29 +300,63 @@ def get_survey_return_mode():
 def has_survey_return_target():
     """Return whether the app can send the respondent back to a survey."""
 
+    if get_survey_return_mode() == getattr(config, "RETURN_METHOD_HISTORY", "history"):
+        return True
+
     return bool(get_survey_return_url())
 
 
 def render_survey_return_control(label="Back to survey", *, completion=False):
     """Render a survey-return control that works in the main page context."""
 
-    href = get_survey_return_url(completion=completion)
-    if not href:
-        return False
-
     reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
-    escaped_href = html.escape(href, quote=True)
-    escaped_label = html.escape(label)
     escaped_reminder = html.escape(reminder_text)
     reminder_html = (
         f'<p class="survey-return-reminder">{escaped_reminder}</p>'
         if reminder_text and not completion
         else ""
     )
+
+    confirm_key = "survey_return_confirmed" if not completion else None
+    if not completion and not st.session_state.get(confirm_key, False):
+        if st.button(
+            label,
+            key="survey_return_initial_button",
+            type="secondary",
+        ):
+            st.session_state[confirm_key] = True
+            st.rerun()
+        return True
+
+    confirm_label = getattr(config, "SURVEY_RETURN_CONFIRM_LABEL", label).strip() or label
+
+    if get_survey_return_mode() == getattr(config, "RETURN_METHOD_HISTORY", "history"):
+        history_js = (
+            "const targets=[window.parent,window.top,window];"
+            "for(const target of targets){"
+            "try{target.history.back();return false;}catch(error){}}"
+            "return false;"
+        )
+        escaped_history_label = html.escape(confirm_label if not completion else label)
+        st.markdown(
+            (
+                f'{reminder_html}<a class="survey-return-button" href="#" '
+                f'onclick="{history_js}">{escaped_history_label}</a>'
+            ),
+            unsafe_allow_html=True,
+        )
+        return True
+
+    href = get_survey_return_url(completion=completion)
+    if not href:
+        return False
+
+    escaped_href = html.escape(href, quote=True)
+    escaped_confirm_label = html.escape(confirm_label if not completion else label)
     st.markdown(
         (
             f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\" target=\"_self\""
-            f'>{escaped_label}</a>'
+            f'>{escaped_confirm_label}</a>'
         ),
         unsafe_allow_html=True,
     )
