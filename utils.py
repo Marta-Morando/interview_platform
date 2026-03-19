@@ -379,14 +379,20 @@ def get_survey_return_url(*, completion=False):
         return explicit_return_url
 
     if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        return get_cached_request_referrer_url() or default_return_url
-
-    if return_mode:
+        referrer = get_cached_request_referrer_url()
+        if referrer:
+            return referrer
+        # Referrer unavailable — fall through to Q_R URL below
+    elif return_mode:
         return default_return_url
 
-    # Build a Qualtrics Q_R resume URL for reliable mid-survey return
+    # Build a Qualtrics Q_R resume URL for reliable mid-survey return.
+    # Tries the dedicated qrid param first, then respondent_id (which the live
+    # survey populates with the Qualtrics ResponseID).
     qrid_param = getattr(config, "QUALTRICS_RESPONSE_ID_PARAM", "qrid")
-    qrid = get_query_param(qrid_param)
+    qrid = get_query_param(qrid_param) or get_query_param(
+        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "respondent_id")
+    )
     if default_return_url and qrid and not qrid.startswith("${"):
         parsed = urlparse(default_return_url)
         params = dict(parse_qsl(parsed.query, keep_blank_values=True))
