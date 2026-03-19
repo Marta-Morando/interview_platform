@@ -189,7 +189,7 @@ RETURN_METHOD_HISTORY = "history"
 RETURN_METHOD_URL = "url"
 DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_6fEmPg7zvkxl65w"
 SURVEY_RETURN_REMINDER = (
-    "These interview responses are an important part of our study. Please share as much as you can before continuing back to the survey."
+    "Before returning to the survey, please answer as many of the interview questions as you can."
 )
 SURVEY_RETURN_CONFIRM_LABEL = "Click again to go back"
 RETURN_RESPONSE_ID_SOURCE_PARAM = "respondent_id"
