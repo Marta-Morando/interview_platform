@@ -278,18 +278,21 @@ def get_survey_return_mode():
 
     return_method_param = getattr(config, "RETURN_METHOD_PARAM", "return_method")
     requested_mode = (get_query_param(return_method_param) or "").strip().lower()
+    explicit_return_url = get_query_param(
+        getattr(config, "RETURN_URL_PARAM", "return_url")
+    )
 
     history_mode = getattr(config, "RETURN_METHOD_HISTORY", "history")
     url_mode = getattr(config, "RETURN_METHOD_URL", "url")
 
-    if requested_mode == history_mode:
-        return history_mode
+    if explicit_return_url and not explicit_return_url.startswith("${"):
+        return url_mode
 
     if requested_mode == url_mode:
         return url_mode
 
-    if get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url")):
-        return url_mode
+    if requested_mode == history_mode:
+        return history_mode
 
     return None
 
@@ -307,21 +310,9 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     if not href:
         return False
 
-    confirm_key = "survey_return_confirmed" if not completion else None
-    if not completion and not st.session_state.get(confirm_key, False):
-        if st.button(
-            label,
-            key="survey_return_initial_button",
-            type="secondary",
-        ):
-            st.session_state[confirm_key] = True
-            st.rerun()
-        return True
-
     reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
-    confirm_label = getattr(config, "SURVEY_RETURN_CONFIRM_LABEL", label).strip() or label
     escaped_href = html.escape(href, quote=True)
-    escaped_label = html.escape(confirm_label if not completion else label)
+    escaped_label = html.escape(label)
     escaped_reminder = html.escape(reminder_text)
     reminder_html = (
         f'<p class="survey-return-reminder">{escaped_reminder}</p>'
@@ -330,7 +321,7 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     )
     st.markdown(
         (
-            f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
+            f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\" target=\"_self\""
             f'>{escaped_label}</a>'
         ),
         unsafe_allow_html=True,
@@ -339,7 +330,7 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
 
 
 def get_survey_return_url(*, completion=False):
-    """Return the best available same-tab survey URL."""
+    """Return the best available survey return URL."""
 
     return_mode = get_survey_return_mode()
     explicit_return_url = get_query_param(
@@ -352,7 +343,7 @@ def get_survey_return_url(*, completion=False):
         if completion_url:
             return completion_url
 
-    if explicit_return_url:
+    if explicit_return_url and not explicit_return_url.startswith("${"):
         return explicit_return_url
 
     if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
@@ -470,13 +461,8 @@ def apply_url_login_if_available():
 def build_completion_redirect_url():
     """Build a survey return URL with interview linkage parameters appended."""
 
-    if get_survey_return_mode() == getattr(
-        config, "RETURN_METHOD_HISTORY", "history"
-    ):
-        return None
-
     base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
-    if not base_url:
+    if not base_url or base_url.startswith("${"):
         return None
 
     parsed_url = urlparse(base_url)
@@ -506,6 +492,18 @@ def build_completion_redirect_url():
 def send_respondent_back_to_survey():
     """Navigate back to the survey using the configured return method."""
 
+    redirect_url = build_completion_redirect_url()
+    if redirect_url:
+        components.html(
+            f"""
+            <script>
+            window.top.location.replace({json.dumps(redirect_url)});
+            </script>
+            """,
+            height=0,
+        )
+        return True
+
     if get_survey_return_mode() == getattr(
         config, "RETURN_METHOD_HISTORY", "history"
     ):
@@ -528,43 +526,26 @@ def send_respondent_back_to_survey():
         )
         return True
 
-    redirect_url = build_completion_redirect_url()
-    if not redirect_url:
-        return False
-
-    components.html(
-        f"""
-        <script>
-        window.top.location.replace({json.dumps(redirect_url)});
-        </script>
-        """,
-        height=0,
-    )
-    return True
+    return False
 
 
 def render_completion_redirect():
     """Render a return-to-survey link and optionally auto-redirect there."""
 
-    if get_survey_return_mode() == getattr(
-        config, "RETURN_METHOD_HISTORY", "history"
-    ):
-        render_survey_return_control("Back to survey", completion=True)
-        return
-
-    redirect_url = build_completion_redirect_url()
+    redirect_url = get_survey_return_url(completion=True)
     if not redirect_url:
         return
 
-    st.link_button("Back to survey", redirect_url)
+    render_survey_return_control("Back to survey", completion=True)
 
-    if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
+    completion_redirect_url = build_completion_redirect_url()
+    if completion_redirect_url and getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
         delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)
         components.html(
             f"""
             <script>
             setTimeout(function() {{
-                window.top.location.replace({json.dumps(redirect_url)});
+                window.top.location.replace({json.dumps(completion_redirect_url)});
             }}, {delay_ms});
             </script>
             """,
