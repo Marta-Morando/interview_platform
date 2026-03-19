@@ -199,6 +199,7 @@ RETURN_STATUS_PARAM = "interview_status"
 RETURN_STATUS_VALUE = "completed"
 AUTO_REDIRECT_TO_RETURN_URL = False
 AUTO_REDIRECT_DELAY_MS = 2500
+QUALTRICS_RESPONSE_ID_PARAM = "qrid"  # URL param carrying Qualtrics ResponseID
 
 
 # Admin alias (no transcript or metadata saved for this username -- set in

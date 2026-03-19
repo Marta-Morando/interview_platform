@@ -354,7 +354,7 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     st.markdown(
         (
             f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
-            f'>{escaped_label}</a>'
+            f' target="_top">{escaped_label}</a>'
         ),
         unsafe_allow_html=True,
     )
@@ -383,6 +383,16 @@ def get_survey_return_url(*, completion=False):
 
     if return_mode:
         return default_return_url
+
+    # Build a Qualtrics Q_R resume URL for reliable mid-survey return
+    qrid_param = getattr(config, "QUALTRICS_RESPONSE_ID_PARAM", "qrid")
+    qrid = get_query_param(qrid_param)
+    if default_return_url and qrid and not qrid.startswith("${"):
+        parsed = urlparse(default_return_url)
+        params = dict(parse_qsl(parsed.query, keep_blank_values=True))
+        params["Q_R"] = qrid
+        params["Q_R_DEL"] = "1"
+        return urlunparse(parsed._replace(query=urlencode(params)))
 
     return default_return_url
 
