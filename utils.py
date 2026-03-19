@@ -264,13 +264,21 @@ def get_request_referrer_url():
     """Return the browser referrer URL for the current session, if usable."""
 
     referrer = get_request_header("referer")
-    if not referrer or referrer.startswith("${"):
+    if referrer:
+        referrer = str(referrer).strip()
+        if referrer and not referrer.startswith("${"):
+            if "interview-platform.streamlit.app" not in referrer:
+                st.session_state["survey_return_referrer_url"] = referrer
+                return referrer
+
+    stored_referrer = st.session_state.get("survey_return_referrer_url")
+    if not stored_referrer or stored_referrer.startswith("${"):
         return None
 
-    if "interview-platform.streamlit.app" in referrer:
+    if "interview-platform.streamlit.app" in stored_referrer:
         return None
 
-    return referrer
+    return str(stored_referrer).strip()
 
 
 def get_survey_return_mode():
@@ -300,16 +308,18 @@ def get_survey_return_mode():
 def has_survey_return_target():
     """Return whether the app can send the respondent back to a survey."""
 
-    if get_survey_return_mode() == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        return True
-
     return bool(get_survey_return_url())
 
 
 def render_survey_return_control(label="Back to survey", *, completion=False):
     """Render a survey-return control that works in the main page context."""
 
+    href = get_survey_return_url(completion=completion)
+    if not href:
+        return False
+
     reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
+    escaped_href = html.escape(href, quote=True)
     escaped_reminder = html.escape(reminder_text)
     reminder_html = (
         f'<p class="survey-return-reminder">{escaped_reminder}</p>'
@@ -330,24 +340,6 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
 
     confirm_label = getattr(config, "SURVEY_RETURN_CONFIRM_LABEL", label).strip() or label
 
-    if get_survey_return_mode() == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        if reminder_html:
-            st.markdown(reminder_html, unsafe_allow_html=True)
-        if st.button(
-            confirm_label if not completion else label,
-            key="survey_return_confirm_button"
-            if not completion
-            else "completion_return_to_survey_button",
-            type="secondary",
-        ):
-            send_respondent_back_to_survey()
-        return True
-
-    href = get_survey_return_url(completion=completion)
-    if not href:
-        return False
-
-    escaped_href = html.escape(href, quote=True)
     escaped_confirm_label = html.escape(confirm_label if not completion else label)
     st.markdown(
         (
