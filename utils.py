@@ -308,86 +308,18 @@ def get_survey_return_mode():
 def has_survey_return_target():
     """Return whether the app can send the respondent back to a survey."""
 
-    if get_survey_return_mode() == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        return True
-
     return bool(get_survey_return_url())
-
-
-def render_history_back_control(label, reminder_text=""):
-    """Render a client-side button that returns with browser history."""
-
-    escaped_label = html.escape(label)
-    escaped_reminder = html.escape((reminder_text or "").strip())
-    reminder_html = (
-        f'<p class="survey-return-reminder">{escaped_reminder}</p>'
-        if escaped_reminder
-        else ""
-    )
-    height = 96 if escaped_reminder else 56
-    components.html(
-        f"""
-        <div style="margin:0;padding:0;">
-          <style>
-            body {{
-              margin: 0;
-              padding: 0;
-              background: transparent;
-              color: #f3f4f6;
-              font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-            }}
-            .survey-return-button {{
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              width: 100%;
-              box-sizing: border-box;
-              min-height: 2rem;
-              padding: 0.1rem 0.8rem;
-              margin-bottom: 0.35rem;
-              border: 1px solid #2f3642;
-              border-radius: 999px;
-              background: #171a21;
-              color: #d6dae1;
-              font-size: 0.9rem;
-              line-height: 1.2;
-              cursor: pointer;
-            }}
-            .survey-return-reminder {{
-              margin: 0 0 0.45rem;
-              color: #c9d0db;
-              font-size: 0.88rem;
-              line-height: 1.4;
-            }}
-          </style>
-          {reminder_html}
-          <button id="survey-return-button" type="button" class="survey-return-button">{escaped_label}</button>
-        </div>
-        <script>
-          (function() {{
-            const button = document.getElementById("survey-return-button");
-            if (!button) return;
-            button.addEventListener("click", function() {{
-              const targets = [window.parent, window.top, window];
-              for (const target of targets) {{
-                try {{
-                  target.history.back();
-                  return;
-                }} catch (error) {{
-                }}
-              }}
-            }});
-          }})();
-        </script>
-        """,
-        height=height,
-    )
 
 
 def render_survey_return_control(label="Back to survey", *, completion=False):
     """Render a survey-return control that works in the main page context."""
 
+    href = get_survey_return_url(completion=completion)
+    if not href:
+        return False
+
     reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
+    escaped_href = html.escape(href, quote=True)
     escaped_reminder = html.escape(reminder_text)
     reminder_html = (
         f'<p class="survey-return-reminder">{escaped_reminder}</p>'
@@ -408,18 +340,6 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
 
     confirm_label = getattr(config, "SURVEY_RETURN_CONFIRM_LABEL", label).strip() or label
 
-    if get_survey_return_mode() == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        render_history_back_control(
-            confirm_label if not completion else label,
-            reminder_text if not completion else "",
-        )
-        return True
-
-    href = get_survey_return_url(completion=completion)
-    if not href:
-        return False
-
-    escaped_href = html.escape(href, quote=True)
     escaped_confirm_label = html.escape(confirm_label if not completion else label)
     st.markdown(
         (
