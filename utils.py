@@ -350,9 +350,9 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     )
     st.markdown(
         (
-            f"{reminder_html}<form action=\"{escaped_href}\" method=\"get\""
-            f' target="_top"><button class="survey-return-button"'
-            f' type="submit">{escaped_label}</button></form>'
+            f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
+            f' target="_top" onclick="try {{ window.top.location.assign(this.href); return false; }}'
+            f' catch (e) {{ return true; }}">{escaped_label}</a>'
         ),
         unsafe_allow_html=True,
     )
@@ -629,13 +629,13 @@ def render_completion_redirect():
     if not redirect_url:
         return
 
-    # Render as a plain same-tab anchor. This keeps the return path as close as
-    # possible to a direct user navigation in the top-level browsing context.
+    # Render as a visible anchor and also attempt explicit top-level navigation
+    # on click so desktop browsers treat it as a direct user-initiated redirect.
     escaped_url = html.escape(redirect_url, quote=True)
     st.markdown(
-        f'<form action="{escaped_url}" method="get" target="_top">'
-        f'<button class="survey-return-button" type="submit">Back to survey</button>'
-        f"</form>",
+        f'<a class="survey-return-button" href="{escaped_url}"'
+        f' target="_top" onclick="try {{ window.top.location.assign(this.href); return false; }}'
+        f' catch (e) {{ return true; }}">Back to survey</a>',
         unsafe_allow_html=True,
     )
 
