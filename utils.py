@@ -354,7 +354,7 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     st.markdown(
         (
             f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
-            f' target="_self">{escaped_label}</a>'
+            f' target="_top">{escaped_label}</a>'
         ),
         unsafe_allow_html=True,
     )
@@ -399,6 +399,7 @@ def build_qualtrics_resume_url(*, completion=False):
     parsed = urlparse(default_return_url)
     query_params = dict(parse_qsl(parsed.query, keep_blank_values=True))
     query_params["Q_R"] = qrid
+    query_params["Q_R_DEL"] = "1"
 
     if completion:
         username = st.session_state.get("username", "").strip()
@@ -462,9 +463,11 @@ def should_prefer_qualtrics_resume_url(explicit_return_url):
 def get_survey_return_url(*, completion=False):
     """Return the best available same-tab survey URL."""
 
+    return_mode = get_survey_return_mode()
     explicit_return_url = get_query_param(
         getattr(config, "RETURN_URL_PARAM", "return_url")
     )
+    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
 
     if completion:
         completion_url = build_completion_redirect_url()
@@ -473,6 +476,17 @@ def get_survey_return_url(*, completion=False):
 
     if explicit_return_url:
         return explicit_return_url
+
+    if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
+        referrer = get_cached_request_referrer_url()
+        if referrer:
+            return referrer
+    elif return_mode:
+        return default_return_url
+
+    resume_url = build_qualtrics_resume_url(completion=completion)
+    if resume_url:
+        return resume_url
 
     return build_default_survey_return_url(completion=completion)
 
@@ -581,13 +595,39 @@ def apply_url_login_if_available():
 
 
 def build_completion_redirect_url():
-    """Build the survey return URL used after interview completion."""
+    """Build a survey return URL with completion metadata appended."""
+
+    if get_survey_return_mode() == getattr(
+        config, "RETURN_METHOD_HISTORY", "history"
+    ):
+        return None
 
     base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
     if not base_url:
-        return build_default_survey_return_url(completion=True)
+        return None
 
-    return base_url
+    parsed_url = urlparse(base_url)
+    query_params = dict(parse_qsl(parsed_url.query, keep_blank_values=True))
+
+    username = st.session_state.get("username", "").strip()
+    username_param = getattr(config, "RETURN_USERNAME_PARAM", "interview_username")
+    if username and username_param:
+        query_params.setdefault(username_param, username)
+
+    response_id = get_query_param(
+        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
+    )
+    response_id_param = getattr(config, "RETURN_RESPONSE_ID_PARAM", "response_id")
+    if response_id and response_id_param:
+        query_params.setdefault(response_id_param, response_id)
+
+    status_param = getattr(config, "RETURN_STATUS_PARAM", "interview_status")
+    if status_param:
+        query_params[status_param] = getattr(
+            config, "RETURN_STATUS_VALUE", "completed"
+        )
+
+    return urlunparse(parsed_url._replace(query=urlencode(query_params)))
 
 
 def send_respondent_back_to_survey():
@@ -622,7 +662,7 @@ def render_completion_redirect():
     escaped_url = html.escape(redirect_url, quote=True)
     st.markdown(
         f'<a class="survey-return-button" href="{escaped_url}"'
-        f' target="_self">Back to survey</a>',
+        f' target="_top">Back to survey</a>',
         unsafe_allow_html=True,
     )
 
