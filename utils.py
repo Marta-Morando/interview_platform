@@ -353,9 +353,8 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     )
     st.markdown(
         (
-            f"{reminder_html}<form action=\"{escaped_href}\" method=\"get\""
-            f' target="_top"><button class="survey-return-button"'
-            f' type="submit">{escaped_label}</button></form>'
+            f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
+            f' target="_self">{escaped_label}</a>'
         ),
         unsafe_allow_html=True,
     )
@@ -590,14 +589,12 @@ def render_completion_redirect():
     if not redirect_url:
         return
 
-    # Render via st.markdown with target="_top" so the link navigates the top-level
-    # frame. Use a plain form submit rather than only an anchor so browsers treat
-    # it as a direct user navigation even when Streamlit is embedded.
+    # Render as a plain same-tab anchor. This keeps the return path as close as
+    # possible to the older, simpler behavior that was previously working.
     escaped_url = html.escape(redirect_url, quote=True)
     st.markdown(
-        f'<form action="{escaped_url}" method="get" target="_top">'
-        f'<button class="survey-return-button" type="submit">Back to survey</button>'
-        f"</form>",
+        f'<a class="survey-return-button" href="{escaped_url}"'
+        f' target="_self">Back to survey</a>',
         unsafe_allow_html=True,
     )
 
