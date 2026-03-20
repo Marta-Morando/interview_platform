@@ -389,15 +389,21 @@ def get_survey_return_url(*, completion=False):
     # Build a Qualtrics Q_R resume URL for reliable mid-survey return.
     # Tries the dedicated qrid param first, then respondent_id (which the live
     # survey populates with the Qualtrics ResponseID).
+    # Cache in session state so the value survives Streamlit reruns that may
+    # clear query params.
+    cache_key = "_cached_qrid"
     qrid_param = getattr(config, "QUALTRICS_RESPONSE_ID_PARAM", "qrid")
     qrid = get_query_param(qrid_param) or get_query_param(
         getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "respondent_id")
     )
+    if qrid and not qrid.startswith("${"):
+        st.session_state[cache_key] = qrid
+    elif cache_key in st.session_state:
+        qrid = st.session_state[cache_key]
     if default_return_url and qrid and not qrid.startswith("${"):
         parsed = urlparse(default_return_url)
         params = dict(parse_qsl(parsed.query, keep_blank_values=True))
         params["Q_R"] = qrid
-        params["Q_R_DEL"] = "1"
         return urlunparse(parsed._replace(query=urlencode(params)))
 
     return default_return_url
