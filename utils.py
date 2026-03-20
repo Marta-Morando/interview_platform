@@ -361,6 +361,64 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     return True
 
 
+def get_cached_qualtrics_response_id():
+    """Return the current or cached Qualtrics ResponseID for resume links."""
+
+    cache_key = "_cached_qrid"
+    qrid_param = getattr(config, "QUALTRICS_RESPONSE_ID_PARAM", "qrid")
+    qrid = get_query_param(qrid_param) or get_query_param(
+        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "respondent_id")
+    )
+
+    if qrid and not qrid.startswith("${"):
+        st.session_state[cache_key] = qrid
+        return qrid
+
+    cached_qrid = st.session_state.get(cache_key)
+    if not cached_qrid:
+        return None
+
+    cached_qrid = str(cached_qrid).strip()
+    if not cached_qrid or cached_qrid.startswith("${"):
+        return None
+
+    return cached_qrid
+
+
+def build_qualtrics_resume_url(*, completion=False):
+    """Build a Qualtrics resume URL from the ResponseID when available."""
+
+    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
+    if not default_return_url:
+        return None
+
+    qrid = get_cached_qualtrics_response_id()
+    if not qrid:
+        return default_return_url
+
+    parsed = urlparse(default_return_url)
+    query_params = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    query_params["Q_R"] = qrid
+
+    if completion:
+        username = st.session_state.get("username", "").strip()
+        username_param = getattr(config, "RETURN_USERNAME_PARAM", "interview_username")
+        if username and username_param:
+            query_params.setdefault(username_param, username)
+
+        response_id_param = getattr(config, "RETURN_RESPONSE_ID_PARAM", "response_id")
+        if response_id_param:
+            query_params.setdefault(response_id_param, qrid)
+
+        status_param = getattr(config, "RETURN_STATUS_PARAM", "interview_status")
+        if status_param:
+            query_params[status_param] = getattr(
+                config, "RETURN_STATUS_VALUE", "completed"
+            )
+
+    return urlunparse(parsed._replace(query=urlencode(query_params)))
+
+
 def get_survey_return_url(*, completion=False):
     """Return the best available same-tab survey URL."""
 
@@ -386,27 +444,7 @@ def get_survey_return_url(*, completion=False):
     elif return_mode:
         return default_return_url
 
-    # Build a Qualtrics Q_R resume URL for reliable mid-survey return.
-    # Tries the dedicated qrid param first, then respondent_id (which the live
-    # survey populates with the Qualtrics ResponseID).
-    # Cache in session state so the value survives Streamlit reruns that may
-    # clear query params.
-    cache_key = "_cached_qrid"
-    qrid_param = getattr(config, "QUALTRICS_RESPONSE_ID_PARAM", "qrid")
-    qrid = get_query_param(qrid_param) or get_query_param(
-        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "respondent_id")
-    )
-    if qrid and not qrid.startswith("${"):
-        st.session_state[cache_key] = qrid
-    elif cache_key in st.session_state:
-        qrid = st.session_state[cache_key]
-    if default_return_url and qrid and not qrid.startswith("${"):
-        parsed = urlparse(default_return_url)
-        params = dict(parse_qsl(parsed.query, keep_blank_values=True))
-        params["Q_R"] = qrid
-        return urlunparse(parsed._replace(query=urlencode(params)))
-
-    return default_return_url
+    return build_qualtrics_resume_url()
 
 
 def validate_login_credentials(username, password):
@@ -522,7 +560,7 @@ def build_completion_redirect_url():
 
     base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
     if not base_url:
-        return None
+        return build_qualtrics_resume_url(completion=True)
 
     parsed_url = urlparse(base_url)
     query_params = dict(parse_qsl(parsed_url.query, keep_blank_values=True))
@@ -534,7 +572,7 @@ def build_completion_redirect_url():
 
     response_id = get_query_param(
         getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
-    )
+    ) or get_cached_qualtrics_response_id()
     response_id_param = getattr(config, "RETURN_RESPONSE_ID_PARAM", "response_id")
     if response_id and response_id_param:
         query_params.setdefault(response_id_param, response_id)
