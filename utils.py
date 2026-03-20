@@ -351,8 +351,8 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     st.markdown(
         (
             f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
-            f' target="_top" onclick="try {{ window.top.location.assign(this.href); return false; }}'
-            f' catch (e) {{ return true; }}">{escaped_label}</a>'
+            f' target="_top" onclick="try {{ window.top.location.assign(this.href); }}'
+            f' catch (e) {{}} return true;">{escaped_label}</a>'
         ),
         unsafe_allow_html=True,
     )
@@ -634,8 +634,8 @@ def render_completion_redirect():
     escaped_url = html.escape(redirect_url, quote=True)
     st.markdown(
         f'<a class="survey-return-button" href="{escaped_url}"'
-        f' target="_top" onclick="try {{ window.top.location.assign(this.href); return false; }}'
-        f' catch (e) {{ return true; }}">Back to survey</a>',
+        f' target="_top" onclick="try {{ window.top.location.assign(this.href); }}'
+        f' catch (e) {{}} return true;">Back to survey</a>',
         unsafe_allow_html=True,
     )
 
