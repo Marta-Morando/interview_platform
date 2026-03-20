@@ -481,14 +481,10 @@ def get_survey_return_url(*, completion=False):
         referrer = get_cached_request_referrer_url()
         if referrer:
             return referrer
-    elif return_mode:
-        return default_return_url
 
-    resume_url = build_qualtrics_resume_url(completion=completion)
-    if resume_url:
-        return resume_url
-
-    return build_default_survey_return_url(completion=completion)
+    return build_default_survey_return_url(completion=completion) or build_qualtrics_resume_url(
+        completion=completion
+    )
 
 
 def validate_login_credentials(username, password):
@@ -605,29 +601,7 @@ def build_completion_redirect_url():
     base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
     if not base_url:
         return None
-
-    parsed_url = urlparse(base_url)
-    query_params = dict(parse_qsl(parsed_url.query, keep_blank_values=True))
-
-    username = st.session_state.get("username", "").strip()
-    username_param = getattr(config, "RETURN_USERNAME_PARAM", "interview_username")
-    if username and username_param:
-        query_params.setdefault(username_param, username)
-
-    response_id = get_query_param(
-        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
-    )
-    response_id_param = getattr(config, "RETURN_RESPONSE_ID_PARAM", "response_id")
-    if response_id and response_id_param:
-        query_params.setdefault(response_id_param, response_id)
-
-    status_param = getattr(config, "RETURN_STATUS_PARAM", "interview_status")
-    if status_param:
-        query_params[status_param] = getattr(
-            config, "RETURN_STATUS_VALUE", "completed"
-        )
-
-    return urlunparse(parsed_url._replace(query=urlencode(query_params)))
+    return base_url
 
 
 def send_respondent_back_to_survey():
