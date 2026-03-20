@@ -351,22 +351,6 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
         if reminder_text and not completion
         else ""
     )
-    if get_survey_return_mode() == getattr(
-        config, "RETURN_METHOD_HISTORY", "history"
-    ):
-        if reminder_html:
-            st.markdown(reminder_html, unsafe_allow_html=True)
-        button_label = confirm_label if not completion else label
-        if st.button(
-            button_label,
-            key="survey_return_history_button_completion"
-            if completion
-            else "survey_return_history_button",
-            type="secondary",
-        ):
-            send_respondent_back_to_survey(completion=completion)
-        return True
-
     st.markdown(
         (
             f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
@@ -442,31 +426,7 @@ def build_default_survey_return_url(*, completion=False):
     if not default_return_url:
         return None
 
-    if not completion:
-        return default_return_url
-
-    parsed_url = urlparse(default_return_url)
-    query_params = dict(parse_qsl(parsed_url.query, keep_blank_values=True))
-
-    username = st.session_state.get("username", "").strip()
-    username_param = getattr(config, "RETURN_USERNAME_PARAM", "interview_username")
-    if username and username_param:
-        query_params.setdefault(username_param, username)
-
-    response_id = get_query_param(
-        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
-    ) or get_cached_qualtrics_response_id()
-    response_id_param = getattr(config, "RETURN_RESPONSE_ID_PARAM", "response_id")
-    if response_id and response_id_param:
-        query_params.setdefault(response_id_param, response_id)
-
-    status_param = getattr(config, "RETURN_STATUS_PARAM", "interview_status")
-    if status_param:
-        query_params[status_param] = getattr(
-            config, "RETURN_STATUS_VALUE", "completed"
-        )
-
-    return urlunparse(parsed_url._replace(query=urlencode(query_params)))
+    return default_return_url
 
 
 def should_prefer_qualtrics_resume_url(explicit_return_url):
@@ -502,32 +462,19 @@ def should_prefer_qualtrics_resume_url(explicit_return_url):
 def get_survey_return_url(*, completion=False):
     """Return the best available same-tab survey URL."""
 
-    return_mode = get_survey_return_mode()
     explicit_return_url = get_query_param(
         getattr(config, "RETURN_URL_PARAM", "return_url")
     )
-    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
 
     if completion:
         completion_url = build_completion_redirect_url()
         if completion_url:
             return completion_url
 
-    if should_prefer_qualtrics_resume_url(explicit_return_url):
-        return build_qualtrics_resume_url(completion=completion)
-
     if explicit_return_url:
         return explicit_return_url
 
-    if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        referrer = get_cached_request_referrer_url()
-        if referrer:
-            return referrer
-        # Referrer unavailable — fall through to Q_R URL below
-    elif return_mode:
-        return default_return_url
-
-    return build_qualtrics_resume_url()
+    return build_default_survey_return_url(completion=completion)
 
 
 def validate_login_credentials(username, password):
@@ -634,131 +581,21 @@ def apply_url_login_if_available():
 
 
 def build_completion_redirect_url():
-    """Build a survey return URL with interview linkage parameters appended."""
-
-    if get_survey_return_mode() == getattr(
-        config, "RETURN_METHOD_HISTORY", "history"
-    ):
-        return None
+    """Build the survey return URL used after interview completion."""
 
     base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
-    if should_prefer_qualtrics_resume_url(base_url):
-        return build_qualtrics_resume_url(completion=True)
-
     if not base_url:
-        return build_qualtrics_resume_url(completion=True)
+        return build_default_survey_return_url(completion=True)
 
-    parsed_url = urlparse(base_url)
-    query_params = dict(parse_qsl(parsed_url.query, keep_blank_values=True))
-
-    username = st.session_state.get("username", "").strip()
-    username_param = getattr(config, "RETURN_USERNAME_PARAM", "interview_username")
-    if username and username_param:
-        query_params.setdefault(username_param, username)
-
-    response_id = get_query_param(
-        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
-    ) or get_cached_qualtrics_response_id()
-    response_id_param = getattr(config, "RETURN_RESPONSE_ID_PARAM", "response_id")
-    if response_id and response_id_param:
-        query_params.setdefault(response_id_param, response_id)
-
-    status_param = getattr(config, "RETURN_STATUS_PARAM", "interview_status")
-    if status_param:
-        query_params[status_param] = getattr(
-            config, "RETURN_STATUS_VALUE", "completed"
-        )
-
-    return urlunparse(parsed_url._replace(query=urlencode(query_params)))
+    return base_url
 
 
-def send_respondent_back_to_survey(*, completion=False, delay_ms=0):
-    """Navigate back to the survey using the configured return method."""
+def send_respondent_back_to_survey():
+    """Navigate back to the survey using the configured return URL."""
 
-    if get_survey_return_mode() == getattr(
-        config, "RETURN_METHOD_HISTORY", "history"
-    ):
-        fallback_url = (
-            build_default_survey_return_url(completion=completion)
-            or build_qualtrics_resume_url(completion=completion)
-            or ""
-        )
-        completion_state_json = json.dumps({"aiSurveyReturnCompleted": True})
-        history_script = """
-            <script>
-            (function() {
-                function markCompletion(target) {
-                    if (!__COMPLETION_FLAG__) {
-                        return;
-                    }
-                    try {
-                        let state = {};
-                        if (target.name) {
-                            try {
-                                state = JSON.parse(target.name);
-                            } catch (error) {
-                                state = {};
-                            }
-                        }
-                        state.aiSurveyReturnCompleted = true;
-                        target.name = JSON.stringify(state);
-                    } catch (error) {
-                        try {
-                            target.name = __COMPLETION_STATE__;
-                        } catch (error2) {
-                        }
-                    }
-                }
-
-                function goBack() {
-                    const targets = [window.parent, window.top, window];
-                    for (const target of targets) {
-                        try {
-                            markCompletion(target);
-                            target.history.back();
-                            return;
-                        } catch (error) {
-                        }
-                    }
-                    if (__FALLBACK_LITERAL__) {
-                        window.top.location.assign(__FALLBACK_LITERAL__);
-                    }
-                }
-
-                const fallbackUrl = __FALLBACK_LITERAL__;
-                const fallbackTimer = window.setTimeout(function() {
-                    if (fallbackUrl) {
-                        try {
-                            window.top.location.assign(fallbackUrl);
-                            return;
-                        } catch (error) {
-                        }
-                        window.location.assign(fallbackUrl);
-                    }
-                }, __FALLBACK_DELAY__);
-
-                try {
-                    window.addEventListener('pagehide', function() {
-                        window.clearTimeout(fallbackTimer);
-                    }, { once: true });
-                } catch (error) {
-                }
-
-                window.setTimeout(goBack, __GO_BACK_DELAY__);
-            })();
-            </script>
-        """
-        history_script = (
-            history_script.replace("__COMPLETION_FLAG__", str(completion).lower())
-            .replace("__COMPLETION_STATE__", json.dumps(completion_state_json))
-            .replace("__FALLBACK_LITERAL__", json.dumps(fallback_url))
-            .replace("__FALLBACK_DELAY__", str(max(int(delay_ms), 0) + 900))
-            .replace("__GO_BACK_DELAY__", str(max(int(delay_ms), 0)))
-        )
-        components.html(history_script, height=0)
-        return True
-
-    redirect_url = build_completion_redirect_url()
+    redirect_url = build_completion_redirect_url() or get_survey_return_url(
+        completion=True
+    )
     if not redirect_url:
         return False
 
@@ -775,21 +612,6 @@ def send_respondent_back_to_survey(*, completion=False, delay_ms=0):
 
 def render_completion_redirect():
     """Render a return-to-survey link and optionally auto-redirect there."""
-
-    if get_survey_return_mode() == getattr(
-        config, "RETURN_METHOD_HISTORY", "history"
-    ):
-        if st.button(
-            "Back to survey",
-            key="completion_return_history_button",
-            type="secondary",
-        ):
-            send_respondent_back_to_survey(completion=True)
-
-        if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
-            delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)
-            send_respondent_back_to_survey(completion=True, delay_ms=delay_ms)
-        return
 
     redirect_url = build_completion_redirect_url() or get_survey_return_url(completion=True)
     if not redirect_url:
