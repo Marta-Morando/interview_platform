@@ -419,6 +419,36 @@ def build_qualtrics_resume_url(*, completion=False):
     return urlunparse(parsed._replace(query=urlencode(query_params)))
 
 
+def should_prefer_qualtrics_resume_url(explicit_return_url):
+    """Return whether a supplied return_url should be replaced with a Q_R link."""
+
+    if not explicit_return_url:
+        return False
+
+    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
+    if not default_return_url:
+        return False
+
+    if not get_cached_qualtrics_response_id():
+        return False
+
+    try:
+        explicit = urlparse(explicit_return_url)
+        default = urlparse(default_return_url)
+    except Exception:
+        return False
+
+    return (
+        explicit.scheme.lower(),
+        explicit.netloc.lower(),
+        explicit.path.rstrip("/"),
+    ) == (
+        default.scheme.lower(),
+        default.netloc.lower(),
+        default.path.rstrip("/"),
+    )
+
+
 def get_survey_return_url(*, completion=False):
     """Return the best available same-tab survey URL."""
 
@@ -432,6 +462,9 @@ def get_survey_return_url(*, completion=False):
         completion_url = build_completion_redirect_url()
         if completion_url:
             return completion_url
+
+    if should_prefer_qualtrics_resume_url(explicit_return_url):
+        return build_qualtrics_resume_url(completion=completion)
 
     if explicit_return_url:
         return explicit_return_url
@@ -559,6 +592,9 @@ def build_completion_redirect_url():
         return None
 
     base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
+    if should_prefer_qualtrics_resume_url(base_url):
+        return build_qualtrics_resume_url(completion=True)
+
     if not base_url:
         return build_qualtrics_resume_url(completion=True)
 
