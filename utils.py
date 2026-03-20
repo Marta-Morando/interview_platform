@@ -350,8 +350,9 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     )
     st.markdown(
         (
-            f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
-            f' target="_top">{escaped_label}</a>'
+            f"{reminder_html}<form action=\"{escaped_href}\" method=\"get\""
+            f' target="_top"><button class="survey-return-button"'
+            f' type="submit">{escaped_label}</button></form>'
         ),
         unsafe_allow_html=True,
     )
@@ -629,11 +630,12 @@ def render_completion_redirect():
         return
 
     # Render as a plain same-tab anchor. This keeps the return path as close as
-    # possible to the older, simpler behavior that was previously working.
+    # possible to a direct user navigation in the top-level browsing context.
     escaped_url = html.escape(redirect_url, quote=True)
     st.markdown(
-        f'<a class="survey-return-button" href="{escaped_url}"'
-        f' target="_top">Back to survey</a>',
+        f'<form action="{escaped_url}" method="get" target="_top">'
+        f'<button class="survey-return-button" type="submit">Back to survey</button>'
+        f"</form>",
         unsafe_allow_html=True,
     )
 
