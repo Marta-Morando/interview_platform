@@ -351,6 +351,19 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
         if reminder_text and not completion
         else ""
     )
+    if get_survey_return_mode() == getattr(
+        config, "RETURN_METHOD_HISTORY", "history"
+    ):
+        st.markdown(
+            build_history_return_markup(
+                confirm_label if not completion else label,
+                completion=completion,
+                reminder_html=reminder_html,
+            ),
+            unsafe_allow_html=True,
+        )
+        return True
+
     st.markdown(
         (
             f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
@@ -417,6 +430,97 @@ def build_qualtrics_resume_url(*, completion=False):
             )
 
     return urlunparse(parsed._replace(query=urlencode(query_params)))
+
+
+def build_default_survey_return_url(*, completion=False):
+    """Build the canonical survey link used for same-browser save-and-continue."""
+
+    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
+    if not default_return_url:
+        return None
+
+    if not completion:
+        return default_return_url
+
+    parsed_url = urlparse(default_return_url)
+    query_params = dict(parse_qsl(parsed_url.query, keep_blank_values=True))
+
+    username = st.session_state.get("username", "").strip()
+    username_param = getattr(config, "RETURN_USERNAME_PARAM", "interview_username")
+    if username and username_param:
+        query_params.setdefault(username_param, username)
+
+    response_id = get_query_param(
+        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
+    ) or get_cached_qualtrics_response_id()
+    response_id_param = getattr(config, "RETURN_RESPONSE_ID_PARAM", "response_id")
+    if response_id and response_id_param:
+        query_params.setdefault(response_id_param, response_id)
+
+    status_param = getattr(config, "RETURN_STATUS_PARAM", "interview_status")
+    if status_param:
+        query_params[status_param] = getattr(
+            config, "RETURN_STATUS_VALUE", "completed"
+        )
+
+    return urlunparse(parsed_url._replace(query=urlencode(query_params)))
+
+
+def build_history_return_markup(label, *, completion=False, reminder_html=""):
+    """Render a same-tab history.back control with a survey-link fallback."""
+
+    fallback_url = (
+        build_default_survey_return_url(completion=completion)
+        or build_qualtrics_resume_url(completion=completion)
+        or "#"
+    )
+    control_id = f"survey-return-{uuid.uuid4().hex}"
+    escaped_label = html.escape(label)
+    escaped_fallback_url = html.escape(fallback_url, quote=True)
+    completion_state_json = json.dumps({"aiSurveyReturnCompleted": True})
+
+    return (
+        f'{reminder_html}<a id="{control_id}" class="survey-return-button" '
+        f'href="{escaped_fallback_url}" target="_self">{escaped_label}</a>'
+        "<script>"
+        "(function() {"
+        f"  var link = document.getElementById({json.dumps(control_id)});"
+        "  if (!link || link.dataset.bound === '1') { return; }"
+        "  link.dataset.bound = '1';"
+        "  link.addEventListener('click', function(event) {"
+        "    event.preventDefault();"
+        "    var fallbackUrl = link.getAttribute('href');"
+        f"    var markCompletion = {'true' if completion else 'false'};"
+        "    if (markCompletion) {"
+        "      try {"
+        "        var state = {};"
+        "        if (window.name) {"
+        "          try { state = JSON.parse(window.name); } catch (error) { state = {}; }"
+        "        }"
+        "        state.aiSurveyReturnCompleted = true;"
+        "        window.name = JSON.stringify(state);"
+        "      } catch (error) {"
+        f"        try {{ window.name = {json.dumps(completion_state_json)}; }} catch (error2) {{}}"
+        "      }"
+        "    }"
+        "    var fallbackTimer = window.setTimeout(function() {"
+        "      window.location.assign(fallbackUrl);"
+        "    }, 700);"
+        "    try {"
+        "      window.addEventListener('pagehide', function() {"
+        "        window.clearTimeout(fallbackTimer);"
+        "      }, { once: true });"
+        "    } catch (error) {}"
+        "    try {"
+        "      window.history.back();"
+        "      return;"
+        "    } catch (error) {}"
+        "    window.clearTimeout(fallbackTimer);"
+        "    window.location.assign(fallbackUrl);"
+        "  });"
+        "})();"
+        "</script>"
+    )
 
 
 def should_prefer_qualtrics_resume_url(explicit_return_url):
@@ -664,6 +768,68 @@ def send_respondent_back_to_survey():
 
 def render_completion_redirect():
     """Render a return-to-survey link and optionally auto-redirect there."""
+
+    if get_survey_return_mode() == getattr(
+        config, "RETURN_METHOD_HISTORY", "history"
+    ):
+        st.markdown(
+            build_history_return_markup("Back to survey", completion=True),
+            unsafe_allow_html=True,
+        )
+
+        if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
+            delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)
+            fallback_url = (
+                build_default_survey_return_url(completion=True)
+                or build_qualtrics_resume_url(completion=True)
+                or ""
+            )
+            completion_state_json = json.dumps({"aiSurveyReturnCompleted": True})
+            components.html(
+                f"""
+                <script>
+                setTimeout(function() {{
+                    try {{
+                        var state = {{}};
+                        if (window.name) {{
+                            try {{ state = JSON.parse(window.name); }} catch (error) {{ state = {{}}; }}
+                        }}
+                        state.aiSurveyReturnCompleted = true;
+                        window.name = JSON.stringify(state);
+                    }} catch (error) {{
+                        try {{ window.name = {json.dumps(completion_state_json)}; }} catch (error2) {{}}
+                    }}
+
+                    var fallbackUrl = {json.dumps(fallback_url)};
+                    var fallbackTimer = window.setTimeout(function() {{
+                        if (fallbackUrl) {{
+                            window.location.assign(fallbackUrl);
+                        }}
+                    }}, 700);
+
+                    try {{
+                        window.addEventListener('pagehide', function() {{
+                            window.clearTimeout(fallbackTimer);
+                        }}, {{ once: true }});
+                    }} catch (error) {{
+                    }}
+
+                    try {{
+                        window.history.back();
+                        return;
+                    }} catch (error) {{
+                    }}
+
+                    window.clearTimeout(fallbackTimer);
+                    if (fallbackUrl) {{
+                        window.location.assign(fallbackUrl);
+                    }}
+                }}, {delay_ms});
+                </script>
+                """,
+                height=0,
+            )
+        return
 
     redirect_url = build_completion_redirect_url() or get_survey_return_url(completion=True)
     if not redirect_url:
