@@ -348,12 +348,11 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
         if reminder_text and not completion
         else ""
     )
-    st.markdown(
+    st.html(
         (
             f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
             f' target="_top">{escaped_label}</a>'
-        ),
-        unsafe_allow_html=True,
+        )
     )
     return True
 
@@ -631,10 +630,9 @@ def render_completion_redirect():
     # Render as a plain same-tab anchor. This keeps the return path as close as
     # possible to the older, simpler behavior that was previously working.
     escaped_url = html.escape(redirect_url, quote=True)
-    st.markdown(
+    st.html(
         f'<a class="survey-return-button" href="{escaped_url}"'
-        f' target="_top">Back to survey</a>',
-        unsafe_allow_html=True,
+        f' target="_top">Back to survey</a>'
     )
 
     if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
