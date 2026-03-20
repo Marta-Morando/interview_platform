@@ -589,47 +589,26 @@ def render_completion_redirect():
     if not redirect_url:
         return
 
-    json_url = json.dumps(redirect_url)
-
-    # Use components.html so the onclick can reliably navigate the parent/top frame
-    # even when Streamlit is embedded in a Qualtrics iframe. The st.markdown <a>
-    # approach does not work because React's dangerouslySetInnerHTML ignores onclick.
-    components.html(
-        f"""
-        <style>
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        a {{
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            min-height: 2rem;
-            padding: 0.25rem 0.8rem;
-            margin-top: 0.15rem;
-            border: 1px solid #2f3642;
-            border-radius: 999px;
-            background: #171a21;
-            color: #d6dae1;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-            cursor: pointer;
-        }}
-        a:hover {{ color: #eef2f7; border-color: #434c5c; }}
-        </style>
-        <a href="javascript:void(0)"
-           onclick="window.top.location.replace({json_url})">Back to survey</a>
-        """,
-        height=50,
+    # Render via st.markdown with target="_top" so the link navigates the top-level
+    # frame.  components.html() cannot do this because Streamlit's iframe sandbox
+    # policy omits allow-top-navigation, silently blocking window.top.location calls.
+    escaped_url = html.escape(redirect_url, quote=True)
+    st.markdown(
+        f'<a class="survey-return-button" href="{escaped_url}"'
+        f' target="_top">Back to survey</a>',
+        unsafe_allow_html=True,
     )
 
     if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
         delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)
+        json_url = json.dumps(redirect_url)
         components.html(
             f"""
             <script>
             setTimeout(function() {{
-                window.top.location.replace({json_url});
+                try {{ window.top.location.replace({json_url}); }} catch(e) {{
+                    window.location.replace({json_url});
+                }}
             }}, {delay_ms});
             </script>
             """,
