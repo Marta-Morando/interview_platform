@@ -354,14 +354,17 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     if get_survey_return_mode() == getattr(
         config, "RETURN_METHOD_HISTORY", "history"
     ):
-        st.markdown(
-            build_history_return_markup(
-                confirm_label if not completion else label,
-                completion=completion,
-                reminder_html=reminder_html,
-            ),
-            unsafe_allow_html=True,
-        )
+        if reminder_html:
+            st.markdown(reminder_html, unsafe_allow_html=True)
+        button_label = confirm_label if not completion else label
+        if st.button(
+            button_label,
+            key="survey_return_history_button_completion"
+            if completion
+            else "survey_return_history_button",
+            type="secondary",
+        ):
+            send_respondent_back_to_survey(completion=completion)
         return True
 
     st.markdown(
@@ -464,63 +467,6 @@ def build_default_survey_return_url(*, completion=False):
         )
 
     return urlunparse(parsed_url._replace(query=urlencode(query_params)))
-
-
-def build_history_return_markup(label, *, completion=False, reminder_html=""):
-    """Render a same-tab history.back control with a survey-link fallback."""
-
-    fallback_url = (
-        build_default_survey_return_url(completion=completion)
-        or build_qualtrics_resume_url(completion=completion)
-        or "#"
-    )
-    control_id = f"survey-return-{uuid.uuid4().hex}"
-    escaped_label = html.escape(label)
-    escaped_fallback_url = html.escape(fallback_url, quote=True)
-    completion_state_json = json.dumps({"aiSurveyReturnCompleted": True})
-
-    return (
-        f'{reminder_html}<a id="{control_id}" class="survey-return-button" '
-        f'href="{escaped_fallback_url}" target="_self">{escaped_label}</a>'
-        "<script>"
-        "(function() {"
-        f"  var link = document.getElementById({json.dumps(control_id)});"
-        "  if (!link || link.dataset.bound === '1') { return; }"
-        "  link.dataset.bound = '1';"
-        "  link.addEventListener('click', function(event) {"
-        "    event.preventDefault();"
-        "    var fallbackUrl = link.getAttribute('href');"
-        f"    var markCompletion = {'true' if completion else 'false'};"
-        "    if (markCompletion) {"
-        "      try {"
-        "        var state = {};"
-        "        if (window.name) {"
-        "          try { state = JSON.parse(window.name); } catch (error) { state = {}; }"
-        "        }"
-        "        state.aiSurveyReturnCompleted = true;"
-        "        window.name = JSON.stringify(state);"
-        "      } catch (error) {"
-        f"        try {{ window.name = {json.dumps(completion_state_json)}; }} catch (error2) {{}}"
-        "      }"
-        "    }"
-        "    var fallbackTimer = window.setTimeout(function() {"
-        "      window.location.assign(fallbackUrl);"
-        "    }, 700);"
-        "    try {"
-        "      window.addEventListener('pagehide', function() {"
-        "        window.clearTimeout(fallbackTimer);"
-        "      }, { once: true });"
-        "    } catch (error) {}"
-        "    try {"
-        "      window.history.back();"
-        "      return;"
-        "    } catch (error) {}"
-        "    window.clearTimeout(fallbackTimer);"
-        "    window.location.assign(fallbackUrl);"
-        "  });"
-        "})();"
-        "</script>"
-    )
 
 
 def should_prefer_qualtrics_resume_url(explicit_return_url):
@@ -726,29 +672,90 @@ def build_completion_redirect_url():
     return urlunparse(parsed_url._replace(query=urlencode(query_params)))
 
 
-def send_respondent_back_to_survey():
+def send_respondent_back_to_survey(*, completion=False, delay_ms=0):
     """Navigate back to the survey using the configured return method."""
 
     if get_survey_return_mode() == getattr(
         config, "RETURN_METHOD_HISTORY", "history"
     ):
-        components.html(
-            """
+        fallback_url = (
+            build_default_survey_return_url(completion=completion)
+            or build_qualtrics_resume_url(completion=completion)
+            or ""
+        )
+        completion_state_json = json.dumps({"aiSurveyReturnCompleted": True})
+        history_script = """
             <script>
             (function() {
-                const targets = [window.parent, window.top, window];
-                for (const target of targets) {
-                    try {
-                        target.history.back();
+                function markCompletion(target) {
+                    if (!__COMPLETION_FLAG__) {
                         return;
+                    }
+                    try {
+                        let state = {};
+                        if (target.name) {
+                            try {
+                                state = JSON.parse(target.name);
+                            } catch (error) {
+                                state = {};
+                            }
+                        }
+                        state.aiSurveyReturnCompleted = true;
+                        target.name = JSON.stringify(state);
                     } catch (error) {
+                        try {
+                            target.name = __COMPLETION_STATE__;
+                        } catch (error2) {
+                        }
                     }
                 }
+
+                function goBack() {
+                    const targets = [window.parent, window.top, window];
+                    for (const target of targets) {
+                        try {
+                            markCompletion(target);
+                            target.history.back();
+                            return;
+                        } catch (error) {
+                        }
+                    }
+                    if (__FALLBACK_LITERAL__) {
+                        window.top.location.assign(__FALLBACK_LITERAL__);
+                    }
+                }
+
+                const fallbackUrl = __FALLBACK_LITERAL__;
+                const fallbackTimer = window.setTimeout(function() {
+                    if (fallbackUrl) {
+                        try {
+                            window.top.location.assign(fallbackUrl);
+                            return;
+                        } catch (error) {
+                        }
+                        window.location.assign(fallbackUrl);
+                    }
+                }, __FALLBACK_DELAY__);
+
+                try {
+                    window.addEventListener('pagehide', function() {
+                        window.clearTimeout(fallbackTimer);
+                    }, { once: true });
+                } catch (error) {
+                }
+
+                window.setTimeout(goBack, __GO_BACK_DELAY__);
             })();
             </script>
-            """,
-            height=0,
+        """
+        history_script = (
+            history_script.replace("__COMPLETION_FLAG__", str(completion).lower())
+            .replace("__COMPLETION_STATE__", json.dumps(completion_state_json))
+            .replace("__FALLBACK_LITERAL__", json.dumps(fallback_url))
+            .replace("__FALLBACK_DELAY__", str(max(int(delay_ms), 0) + 900))
+            .replace("__GO_BACK_DELAY__", str(max(int(delay_ms), 0)))
         )
+        components.html(history_script, height=0)
         return True
 
     redirect_url = build_completion_redirect_url()
@@ -772,63 +779,16 @@ def render_completion_redirect():
     if get_survey_return_mode() == getattr(
         config, "RETURN_METHOD_HISTORY", "history"
     ):
-        st.markdown(
-            build_history_return_markup("Back to survey", completion=True),
-            unsafe_allow_html=True,
-        )
+        if st.button(
+            "Back to survey",
+            key="completion_return_history_button",
+            type="secondary",
+        ):
+            send_respondent_back_to_survey(completion=True)
 
         if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
             delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)
-            fallback_url = (
-                build_default_survey_return_url(completion=True)
-                or build_qualtrics_resume_url(completion=True)
-                or ""
-            )
-            completion_state_json = json.dumps({"aiSurveyReturnCompleted": True})
-            components.html(
-                f"""
-                <script>
-                setTimeout(function() {{
-                    try {{
-                        var state = {{}};
-                        if (window.name) {{
-                            try {{ state = JSON.parse(window.name); }} catch (error) {{ state = {{}}; }}
-                        }}
-                        state.aiSurveyReturnCompleted = true;
-                        window.name = JSON.stringify(state);
-                    }} catch (error) {{
-                        try {{ window.name = {json.dumps(completion_state_json)}; }} catch (error2) {{}}
-                    }}
-
-                    var fallbackUrl = {json.dumps(fallback_url)};
-                    var fallbackTimer = window.setTimeout(function() {{
-                        if (fallbackUrl) {{
-                            window.location.assign(fallbackUrl);
-                        }}
-                    }}, 700);
-
-                    try {{
-                        window.addEventListener('pagehide', function() {{
-                            window.clearTimeout(fallbackTimer);
-                        }}, {{ once: true }});
-                    }} catch (error) {{
-                    }}
-
-                    try {{
-                        window.history.back();
-                        return;
-                    }} catch (error) {{
-                    }}
-
-                    window.clearTimeout(fallbackTimer);
-                    if (fallbackUrl) {{
-                        window.location.assign(fallbackUrl);
-                    }}
-                }}, {delay_ms});
-                </script>
-                """,
-                height=0,
-            )
+            send_respondent_back_to_survey(completion=True, delay_ms=delay_ms)
         return
 
     redirect_url = build_completion_redirect_url() or get_survey_return_url(completion=True)
