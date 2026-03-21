@@ -320,6 +320,30 @@ def has_survey_return_target():
     return bool(get_survey_return_url())
 
 
+def _redirect_to(url, *, delay_ms=0):
+    """Redirect the browser to url using JavaScript via components.html.
+
+    Uses window.parent.location (same-origin with the Streamlit app) with
+    fallbacks to window.top and window.location.  This works reliably from
+    inside Streamlit's sandboxed component iframes across all browsers,
+    including Chrome incognito.
+    """
+    json_url = json.dumps(url)
+    delay = max(int(delay_ms), 0)
+    components.html(
+        f"""<script>
+        setTimeout(function() {{
+            try {{ window.parent.location.href = {json_url}; }} catch(e) {{
+                try {{ window.top.location.href = {json_url}; }} catch(e2) {{
+                    window.location.href = {json_url};
+                }}
+            }}
+        }}, {delay});
+        </script>""",
+        height=0,
+    )
+
+
 def render_survey_return_control(label="Back to survey", *, completion=False):
     """Render a survey-return control that works in the main page context."""
 
@@ -339,21 +363,17 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
         return True
 
     reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
+    if reminder_text and not completion:
+        st.caption(reminder_text)
+
     confirm_label = getattr(config, "SURVEY_RETURN_CONFIRM_LABEL", label).strip() or label
-    escaped_href = html.escape(href, quote=True)
-    escaped_label = html.escape(confirm_label if not completion else label)
-    escaped_reminder = html.escape(reminder_text)
-    reminder_html = (
-        f'<p class="survey-return-reminder">{escaped_reminder}</p>'
-        if reminder_text and not completion
-        else ""
-    )
-    st.html(
-        (
-            f"{reminder_html}<a class=\"survey-return-button\" href=\"{escaped_href}\""
-            f' target="_top">{escaped_label}</a>'
-        )
-    )
+    if st.button(
+        confirm_label if not completion else label,
+        key="survey_return_confirm_button",
+        type="secondary",
+    ):
+        _redirect_to(href)
+
     return True
 
 
@@ -457,30 +477,26 @@ def should_prefer_qualtrics_resume_url(explicit_return_url):
 
 
 def get_survey_return_url(*, completion=False):
-    """Return the best available same-tab survey URL."""
+    """Return the best available same-tab survey URL.
 
-    return_mode = get_survey_return_mode()
+    Prefers the Qualtrics Q_R resume URL (built from the ResponseID) over
+    the raw return_url captured from window.location.href.  The Q_R URL
+    works reliably across browsers and sessions, including Chrome incognito
+    where session cookies may be lost.
+    """
+
+    # Always prefer Q_R resume URL when we have a ResponseID
+    resume_url = build_qualtrics_resume_url(completion=completion)
+    if resume_url:
+        return resume_url
+
     explicit_return_url = get_query_param(
         getattr(config, "RETURN_URL_PARAM", "return_url")
     )
-    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
-
-    if completion:
-        completion_url = build_completion_redirect_url()
-        if completion_url:
-            return completion_url
-
     if explicit_return_url:
         return explicit_return_url
 
-    if return_mode == getattr(config, "RETURN_METHOD_HISTORY", "history"):
-        referrer = get_cached_request_referrer_url()
-        if referrer:
-            return referrer
-
-    return build_default_survey_return_url(completion=completion) or build_qualtrics_resume_url(
-        completion=completion
-    )
+    return build_default_survey_return_url(completion=completion)
 
 
 def validate_login_credentials(username, password):
@@ -587,17 +603,11 @@ def apply_url_login_if_available():
 
 
 def build_completion_redirect_url():
-    """Build a survey return URL with completion metadata appended."""
+    """Build a survey return URL with completion metadata."""
 
-    if get_survey_return_mode() == getattr(
-        config, "RETURN_METHOD_HISTORY", "history"
-    ):
-        return None
-
-    base_url = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
-    if not base_url:
-        return None
-    return base_url
+    return build_qualtrics_resume_url(completion=True) or get_query_param(
+        getattr(config, "RETURN_URL_PARAM", "return_url")
+    )
 
 
 def send_respondent_back_to_survey():
@@ -609,14 +619,7 @@ def send_respondent_back_to_survey():
     if not redirect_url:
         return False
 
-    components.html(
-        f"""
-        <script>
-        window.top.location.replace({json.dumps(redirect_url)});
-        </script>
-        """,
-        height=0,
-    )
+    _redirect_to(redirect_url)
     return True
 
 
@@ -627,29 +630,18 @@ def render_completion_redirect():
     if not redirect_url:
         return
 
-    # Render as a plain same-tab anchor. This keeps the return path as close as
-    # possible to the older, simpler behavior that was previously working.
+    # Visible fallback link rendered in the main DOM (not in a sandboxed
+    # iframe) so it works even if JavaScript redirect fails.
     escaped_url = html.escape(redirect_url, quote=True)
-    st.html(
+    st.markdown(
         f'<a class="survey-return-button" href="{escaped_url}"'
-        f' target="_top">Back to survey</a>'
+        f' target="_top">Back to survey</a>',
+        unsafe_allow_html=True,
     )
 
     if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
         delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)
-        json_url = json.dumps(redirect_url)
-        components.html(
-            f"""
-            <script>
-            setTimeout(function() {{
-                try {{ window.top.location.replace({json_url}); }} catch(e) {{
-                    window.location.replace({json_url});
-                }}
-            }}, {delay_ms});
-            </script>
-            """,
-            height=0,
-        )
+        _redirect_to(redirect_url, delay_ms=delay_ms)
 
 
 def check_password():
