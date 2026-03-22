@@ -338,12 +338,7 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     if completion:
         if st.button(label, key="survey_return_complete", type="secondary"):
             _navigate_to(href)
-            escaped = html.escape(href, quote=True)
-            st.markdown(
-                f'<a href="{escaped}" target="_top">'
-                f'Click here if not redirected</a>',
-                unsafe_allow_html=True,
-            )
+            st.link_button("Click here if not redirected", href)
         return True
 
     # During the interview: first click → show reminder, second → navigate
