@@ -9,7 +9,6 @@ import uuid
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 import config
 import dropbox_storage
@@ -289,59 +288,24 @@ def has_survey_return_target():
     return bool(get_survey_return_url())
 
 
-def _navigate_to(url):
-    """Navigate the browser to *url* using components.html().
-
-    Streamlit Cloud renders components.html() inside a sandboxed iframe.
-    Because ``allow-same-origin`` is present the script can reach the
-    parent document and inject an unsandboxed iframe whose script is free
-    to set ``window.top.location``.  Fallback strategies cover other
-    sandbox configurations.
-    """
-
-    json_url = json.dumps(url)
-    components.html(
-        f"""<script>
-        (function() {{
-            var url = {json_url};
-            // Strategy 1: inject unsandboxed iframe into parent
-            try {{
-                var doc = window.parent.document;
-                var f = doc.createElement('iframe');
-                f.style.display = 'none';
-                f.srcdoc = '<script>window.top.location.href = "'
-                    + url.replace(/"/g, '&quot;') + '";<\\/script>';
-                doc.body.appendChild(f);
-                return;
-            }} catch(e) {{}}
-            // Strategy 2: direct parent navigation
-            try {{ window.parent.location.href = url; return; }} catch(e) {{}}
-            // Strategy 3: direct top navigation
-            try {{ window.top.location.href = url; return; }} catch(e) {{}}
-            // Strategy 4: navigate current frame
-            window.location.href = url;
-        }})();
-        </script>""",
-        height=0,
-    )
-
-
 def render_survey_return_control(label="Back to survey", *, completion=False):
-    """Render a two-step return control: first click shows a reminder,
-    second click navigates back to the survey."""
+    """Render a survey-return control.
+
+    At completion: show a link button directly.
+    During interview: first click reveals a reminder + link button.
+    Uses st.link_button which reliably navigates (opens in a new tab).
+    """
 
     href = get_survey_return_url(completion=completion)
     if not href:
         return False
 
-    # At completion, skip the confirmation step
+    # At completion, show the link button directly
     if completion:
-        if st.button(label, key="survey_return_complete", type="secondary"):
-            _navigate_to(href)
-            st.link_button("Click here if not redirected", href)
+        st.link_button(label, href)
         return True
 
-    # During the interview: first click → show reminder, second → navigate
+    # During the interview: first click → show reminder + link button
     confirm_key = "survey_return_confirmed"
     if not st.session_state.get(confirm_key, False):
         if st.button(label, key="survey_return_initial", type="secondary"):
@@ -353,15 +317,7 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     if reminder_text:
         st.caption(reminder_text)
 
-    if st.button("Click again to go back", key="survey_return_confirm", type="secondary"):
-        _navigate_to(href)
-        escaped = html.escape(href, quote=True)
-        st.markdown(
-            f'<a href="{escaped}" target="_top">'
-            f'Click here if not redirected</a>',
-            unsafe_allow_html=True,
-        )
-
+    st.link_button("Click to go back to the survey", href)
     return True
 
 
