@@ -896,6 +896,13 @@ def save_backup(backups_directory, admin_alias):
                 transcript_text, transcript_path
             )
             if backup_saved and transcript_saved:
+                # Save metadata before returning
+                if hasattr(st.session_state, 'api_kwargs'):
+                    save_metadata(
+                        metadata_directory=config.METADATA_DIRECTORY,
+                        api_kwargs=st.session_state.api_kwargs,
+                        admin_alias=admin_alias,
+                    )
                 return
 
         # --- LOCAL STORAGE (original behaviour) ---
@@ -917,27 +924,28 @@ def save_backup(backups_directory, admin_alias):
         ) as f:
             json.dump(data, f)
 
+        # Save metadata after every message
+        if hasattr(st.session_state, 'api_kwargs'):
+            save_metadata(
+                metadata_directory=config.METADATA_DIRECTORY,
+                api_kwargs=st.session_state.api_kwargs,
+                admin_alias=admin_alias,
+            )
 
-def save_transcript_and_metadata(
-    transcripts_directory,
-    metadata_directory,
-    api_kwargs,
-    admin_alias,
-):
-    """Write the interview transcript and metadata.
+
+def save_metadata(metadata_directory, api_kwargs, admin_alias):
+    """Save interview metadata (timing, message counts, API params).
 
     Saves to Dropbox if enabled, otherwise saves to local disk.
 
     Parameters
     ----------
-    transcripts_directory : str | os.PathLike
-        Directory where the transcript `.txt` file will be written (local storage).
     metadata_directory : str | os.PathLike
         Directory where the metadata `.txt` file will be written (local storage).
     api_kwargs : dict
         Keyword arguments used in API call.
     admin_alias : str
-        Username for which no transcript or metadata should be stored.
+        Username for which no metadata should be stored.
 
     Returns
     -------
@@ -947,8 +955,7 @@ def save_transcript_and_metadata(
     # Don't store data for admin alias
     if st.session_state.username != admin_alias:
 
-        # --- Build transcript text ---
-        transcript_text = f"Respondent ID: {st.session_state.username}\n\n"
+        # Count messages
         user_messages = 0
         assistant_messages = 0
         for message in st.session_state.messages:
@@ -956,16 +963,13 @@ def save_transcript_and_metadata(
                 code in message["content"]
                 for code in config.CLOSING_MESSAGES.keys()
             ):
-                # Skip messages with codes
                 continue
             elif message["role"] == "assistant":
                 assistant_messages += 1
-                transcript_text += f"Interviewer: {message['content']}\n\n"
             elif message["role"] == "user":
                 user_messages += 1
-                transcript_text += f"Respondent: {message['content']}\n\n"
 
-        # --- Build metadata text ---
+        # Build metadata text
         current_time = time.time()
         times = st.session_state.times_previous_attempts + [
             (current_time - st.session_state.start_time_current_login) / 60
@@ -1030,42 +1034,27 @@ Total interviewer messages: {assistant_messages}
 
 ---
 
-{external_context_text}API call parameters at the time of concluding the interview (excluding messages and system prompt):
+{external_context_text}API call parameters (excluding messages and system prompt):
 
 {api_kwargs_text}
 
 ---
 
-System prompt at the time of concluding the interview:
+System prompt:
 
 {config.SYSTEM_PROMPT}
 """
 
         # --- DROPBOX STORAGE ---
         if dropbox_storage.is_dropbox_enabled():
-            transcript_path = (
-                f"{DROPBOX_BASE_PATH}/transcripts/{st.session_state.username}.txt"
-            )
             metadata_path = (
                 f"{DROPBOX_BASE_PATH}/metadata/{st.session_state.username}.txt"
             )
-            transcript_saved = dropbox_storage.upload_text(
-                transcript_text, transcript_path
-            )
-            metadata_saved = dropbox_storage.upload_text(meta_text, metadata_path)
-            if transcript_saved and metadata_saved:
+            if dropbox_storage.upload_text(meta_text, metadata_path):
                 return
 
         # --- LOCAL STORAGE (original behaviour) ---
-        with open(
-            os.path.join(
-                transcripts_directory,
-                f"{st.session_state.username}.txt",
-            ),
-            "w",
-        ) as f:
-            f.write(transcript_text)
-
+        os.makedirs(metadata_directory, exist_ok=True)
         with open(
             os.path.join(
                 metadata_directory,
@@ -1074,6 +1063,83 @@ System prompt at the time of concluding the interview:
             "w",
         ) as d:
             d.write(meta_text)
+
+
+def save_transcript_and_metadata(
+    transcripts_directory,
+    metadata_directory,
+    api_kwargs,
+    admin_alias,
+):
+    """Write the interview transcript and metadata.
+
+    Saves to Dropbox if enabled, otherwise saves to local disk.
+
+    Parameters
+    ----------
+    transcripts_directory : str | os.PathLike
+        Directory where the transcript `.txt` file will be written (local storage).
+    metadata_directory : str | os.PathLike
+        Directory where the metadata `.txt` file will be written (local storage).
+    api_kwargs : dict
+        Keyword arguments used in API call.
+    admin_alias : str
+        Username for which no transcript or metadata should be stored.
+
+    Returns
+    -------
+    None
+    """
+
+    # Don't store data for admin alias
+    if st.session_state.username != admin_alias:
+
+        # --- Build transcript text ---
+        transcript_text = f"Respondent ID: {st.session_state.username}\n\n"
+        for message in st.session_state.messages:
+            if message["role"] == "assistant" and any(
+                code in message["content"]
+                for code in config.CLOSING_MESSAGES.keys()
+            ):
+                # Skip messages with codes
+                continue
+            elif message["role"] == "assistant":
+                transcript_text += f"Interviewer: {message['content']}\n\n"
+            elif message["role"] == "user":
+                transcript_text += f"Respondent: {message['content']}\n\n"
+
+        # --- Save transcript ---
+        # --- DROPBOX STORAGE ---
+        if dropbox_storage.is_dropbox_enabled():
+            transcript_path = (
+                f"{DROPBOX_BASE_PATH}/transcripts/{st.session_state.username}.txt"
+            )
+            transcript_saved = dropbox_storage.upload_text(
+                transcript_text, transcript_path
+            )
+            if not transcript_saved:
+                # Fall back to local storage
+                with open(
+                    os.path.join(
+                        transcripts_directory,
+                        f"{st.session_state.username}.txt",
+                    ),
+                    "w",
+                ) as f:
+                    f.write(transcript_text)
+        else:
+            # --- LOCAL STORAGE (original behaviour) ---
+            with open(
+                os.path.join(
+                    transcripts_directory,
+                    f"{st.session_state.username}.txt",
+                ),
+                "w",
+            ) as f:
+                f.write(transcript_text)
+
+        # --- Save metadata ---
+        save_metadata(metadata_directory, api_kwargs, admin_alias)
 
 
 def backup_contains_closing_code(messages):

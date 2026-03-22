@@ -156,6 +156,7 @@ else:
 
 # The model parameter is shared across all APIs
 api_kwargs["model"] = config.MODEL
+st.session_state.api_kwargs = api_kwargs
 
 # API clients
 if config.API == "openai":
