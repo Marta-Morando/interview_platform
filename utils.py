@@ -247,19 +247,15 @@ def get_cached_qualtrics_response_id():
 
 
 def get_survey_return_url(*, completion=False):
-    """Build the best URL to return the respondent to Qualtrics.
+    """Build the URL to return the respondent to Qualtrics.
 
-    Primary: the captured page URL from the Qualtrics JS (preserves the
-    session cookie context so Qualtrics resumes the response).
-    Enhancement: Q_R param is appended when a ResponseID is available,
-    telling Qualtrics to resume the in-progress response.
-    Last resort: DEFAULT_SURVEY_RETURN_URL (may start a new response if
-    the cookie was lost and Q_R is not supported).
+    Always passes interview_status and response_id as URL params so that
+    Qualtrics can capture them as embedded data.  A Branch element in the
+    survey flow then skips the respondent past the AI interview block
+    when interview_status == "completed".
     """
 
-    # Prefer the captured page URL (set by Qualtrics JS at runtime)
-    explicit = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
-    base_url = explicit or getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
+    base_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
     if not base_url:
         return None
 
@@ -268,14 +264,13 @@ def get_survey_return_url(*, completion=False):
 
     qrid = get_cached_qualtrics_response_id()
     if qrid:
-        params["Q_R"] = qrid
+        params["response_id"] = qrid
+
+    username = st.session_state.get("username", "").strip()
+    if username:
+        params["interview_username"] = username
 
     if completion:
-        username = st.session_state.get("username", "").strip()
-        if username:
-            params["interview_username"] = username
-        if qrid:
-            params["response_id"] = qrid
         params["interview_status"] = "completed"
 
     return urlunparse(parsed._replace(query=urlencode(params)))
@@ -298,10 +293,6 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     href = get_survey_return_url(completion=completion)
     if not href:
         return False
-
-    # DEBUG: show the return URL so we can verify Q_R is present
-    qrid = get_cached_qualtrics_response_id()
-    st.caption(f"DEBUG — ResponseID: {qrid} | Return URL: {href}")
 
     # At completion, show the link button directly
     if completion:
