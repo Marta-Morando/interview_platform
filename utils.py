@@ -9,6 +9,7 @@ import uuid
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 import config
 import dropbox_storage
@@ -288,29 +289,84 @@ def has_survey_return_target():
     return bool(get_survey_return_url())
 
 
-def render_survey_return_control(label="Back to survey", *, completion=False):
-    """Render a clickable link back to the survey.
+def _navigate_to(url):
+    """Navigate the browser to *url* using components.html().
 
-    Uses a plain ``<a target="_top">`` tag so the browser navigates the
-    top-level frame.  This works reliably in all browsers and iframe
-    sandboxes, unlike JavaScript-based navigation.
+    Streamlit Cloud renders components.html() inside a sandboxed iframe.
+    Because ``allow-same-origin`` is present the script can reach the
+    parent document and inject an unsandboxed iframe whose script is free
+    to set ``window.top.location``.  Fallback strategies cover other
+    sandbox configurations.
     """
+
+    json_url = json.dumps(url)
+    components.html(
+        f"""<script>
+        (function() {{
+            var url = {json_url};
+            // Strategy 1: inject unsandboxed iframe into parent
+            try {{
+                var doc = window.parent.document;
+                var f = doc.createElement('iframe');
+                f.style.display = 'none';
+                f.srcdoc = '<script>window.top.location.href = "'
+                    + url.replace(/"/g, '&quot;') + '";<\\/script>';
+                doc.body.appendChild(f);
+                return;
+            }} catch(e) {{}}
+            // Strategy 2: direct parent navigation
+            try {{ window.parent.location.href = url; return; }} catch(e) {{}}
+            // Strategy 3: direct top navigation
+            try {{ window.top.location.href = url; return; }} catch(e) {{}}
+            // Strategy 4: navigate current frame
+            window.location.href = url;
+        }})();
+        </script>""",
+        height=0,
+    )
+
+
+def render_survey_return_control(label="Back to survey", *, completion=False):
+    """Render a two-step return control: first click shows a reminder,
+    second click navigates back to the survey."""
 
     href = get_survey_return_url(completion=completion)
     if not href:
         return False
 
+    # At completion, skip the confirmation step
+    if completion:
+        if st.button(label, key="survey_return_complete", type="secondary"):
+            _navigate_to(href)
+            escaped = html.escape(href, quote=True)
+            st.markdown(
+                f'<a href="{escaped}" target="_top">'
+                f'Click here if not redirected</a>',
+                unsafe_allow_html=True,
+            )
+        return True
+
+    # During the interview: first click → show reminder, second → navigate
+    confirm_key = "survey_return_confirmed"
+    if not st.session_state.get(confirm_key, False):
+        if st.button(label, key="survey_return_initial", type="secondary"):
+            st.session_state[confirm_key] = True
+            st.rerun()
+        return True
+
     reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
-    if reminder_text and not completion:
+    if reminder_text:
         st.caption(reminder_text)
 
-    escaped_url = html.escape(href, quote=True)
-    escaped_label = html.escape(label)
-    st.markdown(
-        f'<a class="survey-return-button" href="{escaped_url}"'
-        f' target="_top">{escaped_label}</a>',
-        unsafe_allow_html=True,
-    )
+    if st.button("Click again to go back", key="survey_return_confirm", type="secondary"):
+        _navigate_to(href)
+        escaped = html.escape(href, quote=True)
+        st.markdown(
+            f'<a href="{escaped}" target="_top">'
+            f'Click here if not redirected</a>',
+            unsafe_allow_html=True,
+        )
+
     return True
 
 
