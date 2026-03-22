@@ -249,34 +249,37 @@ def get_cached_qualtrics_response_id():
 def get_survey_return_url(*, completion=False):
     """Build the best URL to return the respondent to Qualtrics.
 
-    Primary: Q_R resume URL (works across browsers, including incognito).
-    Fallback 1: explicit return_url from the Qualtrics JS.
-    Fallback 2: DEFAULT_SURVEY_RETURN_URL (starts a new response).
+    Primary: the captured page URL from the Qualtrics JS (preserves the
+    session cookie context so Qualtrics resumes the response).
+    Enhancement: Q_R and Q_R_DEL params are appended when a ResponseID is
+    available, giving Qualtrics a cookie-independent fallback.
+    Last resort: DEFAULT_SURVEY_RETURN_URL (may start a new response if
+    the cookie was lost and Q_R is not supported).
     """
 
-    base_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
-    qrid = get_cached_qualtrics_response_id()
+    # Prefer the captured page URL (set by Qualtrics JS at runtime)
+    explicit = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
+    base_url = explicit or getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
+    if not base_url:
+        return None
 
-    if base_url and qrid:
-        parsed = urlparse(base_url)
-        params = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    parsed = urlparse(base_url)
+    params = dict(parse_qsl(parsed.query, keep_blank_values=True))
+
+    qrid = get_cached_qualtrics_response_id()
+    if qrid:
         params["Q_R"] = qrid
         params["Q_R_DEL"] = "1"
 
-        if completion:
-            username = st.session_state.get("username", "").strip()
-            if username:
-                params["interview_username"] = username
+    if completion:
+        username = st.session_state.get("username", "").strip()
+        if username:
+            params["interview_username"] = username
+        if qrid:
             params["response_id"] = qrid
-            params["interview_status"] = "completed"
+        params["interview_status"] = "completed"
 
-        return urlunparse(parsed._replace(query=urlencode(params)))
-
-    explicit = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
-    if explicit:
-        return explicit
-
-    return base_url
+    return urlunparse(parsed._replace(query=urlencode(params)))
 
 
 def has_survey_return_target():
