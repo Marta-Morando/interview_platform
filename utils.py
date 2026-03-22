@@ -251,8 +251,8 @@ def get_survey_return_url(*, completion=False):
 
     Primary: the captured page URL from the Qualtrics JS (preserves the
     session cookie context so Qualtrics resumes the response).
-    Enhancement: Q_R and Q_R_DEL params are appended when a ResponseID is
-    available, giving Qualtrics a cookie-independent fallback.
+    Enhancement: Q_R param is appended when a ResponseID is available,
+    telling Qualtrics to resume the in-progress response.
     Last resort: DEFAULT_SURVEY_RETURN_URL (may start a new response if
     the cookie was lost and Q_R is not supported).
     """
@@ -269,7 +269,6 @@ def get_survey_return_url(*, completion=False):
     qrid = get_cached_qualtrics_response_id()
     if qrid:
         params["Q_R"] = qrid
-        params["Q_R_DEL"] = "1"
 
     if completion:
         username = st.session_state.get("username", "").strip()
