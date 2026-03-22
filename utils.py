@@ -299,6 +299,10 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     if not href:
         return False
 
+    # DEBUG: show the return URL so we can verify Q_R is present
+    qrid = get_cached_qualtrics_response_id()
+    st.caption(f"DEBUG — ResponseID: {qrid} | Return URL: {href}")
+
     # At completion, show the link button directly
     if completion:
         st.link_button(label, href)
