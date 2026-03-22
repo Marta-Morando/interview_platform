@@ -183,25 +183,14 @@ ALLOW_URL_LOGIN = True
 URL_USERNAME_PARAM = "username"
 URL_PASSWORD_PARAM = "password"
 
-# If the interview URL includes a return URL, the app can offer a link back to the
-# survey and optionally redirect there automatically once the interview is completed.
-RETURN_URL_PARAM = "return_url"
-RETURN_METHOD_PARAM = "return_method"
-RETURN_METHOD_HISTORY = "history"
-RETURN_METHOD_URL = "url"
+# Survey return: the app builds a Qualtrics Q_R resume link from the ResponseID
+# passed as a URL parameter.  This works reliably across browsers (including
+# incognito) because it does not depend on session cookies.
+RETURN_URL_PARAM = "return_url"  # fallback explicit return URL from Qualtrics JS
 DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_6fEmPg7zvkxl65w"
 SURVEY_RETURN_REMINDER = (
     "These interview responses are an important part of our study. Please share as much as you can before continuing back to the survey."
 )
-SURVEY_RETURN_CONFIRM_LABEL = "Click again to go back"
-RETURN_RESPONSE_ID_SOURCE_PARAM = "respondent_id"
-RETURN_USERNAME_PARAM = "interview_username"
-RETURN_RESPONSE_ID_PARAM = "response_id"
-RETURN_STATUS_PARAM = "interview_status"
-RETURN_STATUS_VALUE = "completed"
-AUTO_REDIRECT_TO_RETURN_URL = False
-AUTO_REDIRECT_DELAY_MS = 2500
-QUALTRICS_RESPONSE_ID_PARAM = "qrid"  # URL param carrying Qualtrics ResponseID
 
 
 # Admin alias (no transcript or metadata saved for this username -- set in

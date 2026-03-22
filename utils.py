@@ -9,7 +9,6 @@ import uuid
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 import config
 import dropbox_storage
@@ -230,88 +229,54 @@ def get_query_param(name):
     return value or None
 
 
-def get_request_header(name):
-    """Return a request header from Streamlit context, if available."""
+def get_cached_qualtrics_response_id():
+    """Return the Qualtrics ResponseID from URL params, cached in session."""
 
-    if not name:
-        return None
+    cache_key = "_cached_qrid"
+    qrid = get_query_param("qrid") or get_query_param("respondent_id")
 
-    try:
-        headers = st.context.headers
-    except Exception:
-        return None
+    if qrid and not qrid.startswith("${"):
+        st.session_state[cache_key] = qrid
+        return qrid
 
-    candidates = [name, name.lower(), name.title()]
-    for candidate in candidates:
-        try:
-            value = headers.get(candidate)
-        except Exception:
-            value = None
-        if value:
-            return str(value).strip()
-
-    try:
-        for key, value in headers.items():
-            if str(key).lower() == name.lower() and value:
-                return str(value).strip()
-    except Exception:
-        return None
+    cached = st.session_state.get(cache_key)
+    if cached and not str(cached).startswith("${"):
+        return str(cached).strip()
 
     return None
 
 
-def get_request_referrer_url():
-    """Return the browser referrer URL for the current session, if usable."""
+def get_survey_return_url(*, completion=False):
+    """Build the best URL to return the respondent to Qualtrics.
 
-    referrer = get_request_header("referer")
-    if not referrer or referrer.startswith("${"):
-        return None
+    Primary: Q_R resume URL (works across browsers, including incognito).
+    Fallback 1: explicit return_url from the Qualtrics JS.
+    Fallback 2: DEFAULT_SURVEY_RETURN_URL (starts a new response).
+    """
 
-    if "interview-platform.streamlit.app" in referrer:
-        return None
+    base_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
+    qrid = get_cached_qualtrics_response_id()
 
-    return referrer
+    if base_url and qrid:
+        parsed = urlparse(base_url)
+        params = dict(parse_qsl(parsed.query, keep_blank_values=True))
+        params["Q_R"] = qrid
+        params["Q_R_DEL"] = "1"
 
+        if completion:
+            username = st.session_state.get("username", "").strip()
+            if username:
+                params["interview_username"] = username
+            params["response_id"] = qrid
+            params["interview_status"] = "completed"
 
-def get_cached_request_referrer_url():
-    """Return the initial non-app referrer URL, caching it across reruns."""
+        return urlunparse(parsed._replace(query=urlencode(params)))
 
-    session_key = "survey_return_referrer_url"
-    referrer = get_request_referrer_url()
-    if referrer:
-        st.session_state[session_key] = referrer
-        return referrer
+    explicit = get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
+    if explicit:
+        return explicit
 
-    cached_referrer = st.session_state.get(session_key)
-    if not cached_referrer:
-        return None
-
-    cached_referrer = str(cached_referrer).strip()
-    if not cached_referrer or cached_referrer.startswith("${"):
-        return None
-
-    if "interview-platform.streamlit.app" in cached_referrer:
-        return None
-
-    return cached_referrer
-
-
-def get_survey_return_mode():
-    """Return the configured survey-return mode, if any."""
-
-    return_method_param = getattr(config, "RETURN_METHOD_PARAM", "return_method")
-    requested_mode = (get_query_param(return_method_param) or "").strip().lower()
-
-    history_mode = getattr(config, "RETURN_METHOD_HISTORY", "history")
-    url_mode = getattr(config, "RETURN_METHOD_URL", "url")
-
-    if requested_mode == url_mode:
-        return url_mode
-
-    if get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url")):
-        return url_mode
-
-    return None
+    return base_url
 
 
 def has_survey_return_target():
@@ -320,183 +285,30 @@ def has_survey_return_target():
     return bool(get_survey_return_url())
 
 
-def _redirect_to(url, *, delay_ms=0):
-    """Redirect the browser to url using JavaScript via components.html.
-
-    Uses window.parent.location (same-origin with the Streamlit app) with
-    fallbacks to window.top and window.location.  This works reliably from
-    inside Streamlit's sandboxed component iframes across all browsers,
-    including Chrome incognito.
-    """
-    json_url = json.dumps(url)
-    delay = max(int(delay_ms), 0)
-    components.html(
-        f"""<script>
-        setTimeout(function() {{
-            try {{ window.parent.location.href = {json_url}; }} catch(e) {{
-                try {{ window.top.location.href = {json_url}; }} catch(e2) {{
-                    window.location.href = {json_url};
-                }}
-            }}
-        }}, {delay});
-        </script>""",
-        height=0,
-    )
-
-
 def render_survey_return_control(label="Back to survey", *, completion=False):
-    """Render a survey-return control that works in the main page context."""
+    """Render a clickable link back to the survey.
+
+    Uses a plain ``<a target="_top">`` tag so the browser navigates the
+    top-level frame.  This works reliably in all browsers and iframe
+    sandboxes, unlike JavaScript-based navigation.
+    """
 
     href = get_survey_return_url(completion=completion)
     if not href:
         return False
 
-    confirm_key = "survey_return_confirmed" if not completion else None
-    if not completion and not st.session_state.get(confirm_key, False):
-        if st.button(
-            label,
-            key="survey_return_initial_button",
-            type="secondary",
-        ):
-            st.session_state[confirm_key] = True
-            st.rerun()
-        return True
-
     reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
     if reminder_text and not completion:
         st.caption(reminder_text)
 
-    confirm_label = getattr(config, "SURVEY_RETURN_CONFIRM_LABEL", label).strip() or label
-    if st.button(
-        confirm_label if not completion else label,
-        key="survey_return_confirm_button",
-        type="secondary",
-    ):
-        _redirect_to(href)
-
+    escaped_url = html.escape(href, quote=True)
+    escaped_label = html.escape(label)
+    st.markdown(
+        f'<a class="survey-return-button" href="{escaped_url}"'
+        f' target="_top">{escaped_label}</a>',
+        unsafe_allow_html=True,
+    )
     return True
-
-
-def get_cached_qualtrics_response_id():
-    """Return the current or cached Qualtrics ResponseID for resume links."""
-
-    cache_key = "_cached_qrid"
-    qrid_param = getattr(config, "QUALTRICS_RESPONSE_ID_PARAM", "qrid")
-    qrid = get_query_param(qrid_param) or get_query_param(
-        getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "respondent_id")
-    )
-
-    if qrid and not qrid.startswith("${"):
-        st.session_state[cache_key] = qrid
-        return qrid
-
-    cached_qrid = st.session_state.get(cache_key)
-    if not cached_qrid:
-        return None
-
-    cached_qrid = str(cached_qrid).strip()
-    if not cached_qrid or cached_qrid.startswith("${"):
-        return None
-
-    return cached_qrid
-
-
-def build_qualtrics_resume_url(*, completion=False):
-    """Build a Qualtrics resume URL from the ResponseID when available."""
-
-    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
-    if not default_return_url:
-        return None
-
-    qrid = get_cached_qualtrics_response_id()
-    if not qrid:
-        return default_return_url
-
-    parsed = urlparse(default_return_url)
-    query_params = dict(parse_qsl(parsed.query, keep_blank_values=True))
-    query_params["Q_R"] = qrid
-    query_params["Q_R_DEL"] = "1"
-
-    if completion:
-        username = st.session_state.get("username", "").strip()
-        username_param = getattr(config, "RETURN_USERNAME_PARAM", "interview_username")
-        if username and username_param:
-            query_params.setdefault(username_param, username)
-
-        response_id_param = getattr(config, "RETURN_RESPONSE_ID_PARAM", "response_id")
-        if response_id_param:
-            query_params.setdefault(response_id_param, qrid)
-
-        status_param = getattr(config, "RETURN_STATUS_PARAM", "interview_status")
-        if status_param:
-            query_params[status_param] = getattr(
-                config, "RETURN_STATUS_VALUE", "completed"
-            )
-
-    return urlunparse(parsed._replace(query=urlencode(query_params)))
-
-
-def build_default_survey_return_url(*, completion=False):
-    """Build the canonical survey link used for same-browser save-and-continue."""
-
-    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
-    if not default_return_url:
-        return None
-
-    return default_return_url
-
-
-def should_prefer_qualtrics_resume_url(explicit_return_url):
-    """Return whether a supplied return_url should be replaced with a Q_R link."""
-
-    if not explicit_return_url:
-        return False
-
-    default_return_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
-    if not default_return_url:
-        return False
-
-    if not get_cached_qualtrics_response_id():
-        return False
-
-    try:
-        explicit = urlparse(explicit_return_url)
-        default = urlparse(default_return_url)
-    except Exception:
-        return False
-
-    return (
-        explicit.scheme.lower(),
-        explicit.netloc.lower(),
-        explicit.path.rstrip("/"),
-    ) == (
-        default.scheme.lower(),
-        default.netloc.lower(),
-        default.path.rstrip("/"),
-    )
-
-
-def get_survey_return_url(*, completion=False):
-    """Return the best available same-tab survey URL.
-
-    Prefers the Qualtrics Q_R resume URL (built from the ResponseID) over
-    the raw return_url captured from window.location.href.  The Q_R URL
-    works reliably across browsers and sessions, including Chrome incognito
-    where session cookies may be lost.
-    """
-
-    # Always prefer Q_R resume URL when we have a ResponseID
-    resume_url = build_qualtrics_resume_url(completion=completion)
-    if resume_url:
-        return resume_url
-
-    explicit_return_url = get_query_param(
-        getattr(config, "RETURN_URL_PARAM", "return_url")
-    )
-    if explicit_return_url:
-        return explicit_return_url
-
-    return build_default_survey_return_url(completion=completion)
 
 
 def validate_login_credentials(username, password):
@@ -602,46 +414,10 @@ def apply_url_login_if_available():
     return False
 
 
-def build_completion_redirect_url():
-    """Build a survey return URL with completion metadata."""
-
-    return build_qualtrics_resume_url(completion=True) or get_query_param(
-        getattr(config, "RETURN_URL_PARAM", "return_url")
-    )
-
-
-def send_respondent_back_to_survey():
-    """Navigate back to the survey using the configured return URL."""
-
-    redirect_url = build_completion_redirect_url() or get_survey_return_url(
-        completion=True
-    )
-    if not redirect_url:
-        return False
-
-    _redirect_to(redirect_url)
-    return True
-
-
 def render_completion_redirect():
-    """Render a return-to-survey link and optionally auto-redirect there."""
+    """Render a return-to-survey link after interview completion."""
 
-    redirect_url = build_completion_redirect_url() or get_survey_return_url(completion=True)
-    if not redirect_url:
-        return
-
-    # Visible fallback link rendered in the main DOM (not in a sandboxed
-    # iframe) so it works even if JavaScript redirect fails.
-    escaped_url = html.escape(redirect_url, quote=True)
-    st.markdown(
-        f'<a class="survey-return-button" href="{escaped_url}"'
-        f' target="_top">Back to survey</a>',
-        unsafe_allow_html=True,
-    )
-
-    if getattr(config, "AUTO_REDIRECT_TO_RETURN_URL", False):
-        delay_ms = max(int(getattr(config, "AUTO_REDIRECT_DELAY_MS", 0)), 0)
-        _redirect_to(redirect_url, delay_ms=delay_ms)
+    render_survey_return_control("Back to survey", completion=True)
 
 
 def check_password():
@@ -1219,9 +995,7 @@ def save_transcript_and_metadata(
             indent=2,
         )
 
-        external_response_id = get_query_param(
-            getattr(config, "RETURN_RESPONSE_ID_SOURCE_PARAM", "response_id")
-        )
+        external_response_id = get_query_param("respondent_id")
         # Discard unresolved Qualtrics piped-text literals (e.g. ${e://Field/ResponseID})
         if external_response_id and external_response_id.startswith("${"):
             external_response_id = None
