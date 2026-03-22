@@ -270,8 +270,7 @@ def get_survey_return_url(*, completion=False):
     if username:
         params["interview_username"] = username
 
-    if completion:
-        params["interview_status"] = "completed"
+    params["interview_status"] = "completed"
 
     return urlunparse(parsed._replace(query=urlencode(params)))
 
