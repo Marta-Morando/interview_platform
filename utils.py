@@ -201,9 +201,16 @@ def apply_readable_app_styles():
         <script>
         const hide = () => {
             const root = window.parent.document;
-            root.querySelectorAll('a, div, span, button, section').forEach(el => {
-                const txt = el.textContent || '';
-                if (/Created by|Hosted with|Manage app/i.test(txt) && txt.length < 80) {
+            root.querySelectorAll('*').forEach(el => {
+                const txt = (el.textContent || '').toLowerCase();
+                if (/marta|created by|hosted with|manage app/.test(txt) && txt.length < 120) {
+                    el.style.setProperty('display', 'none', 'important');
+                }
+            });
+            // Also hide fixed-position elements in the bottom-right corner
+            root.querySelectorAll('div, a, button, iframe').forEach(el => {
+                const s = window.parent.getComputedStyle(el);
+                if (s.position === 'fixed' && parseInt(s.bottom) < 60 && parseInt(s.right) < 60) {
                     el.style.setProperty('display', 'none', 'important');
                 }
             });
