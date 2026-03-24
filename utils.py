@@ -34,13 +34,18 @@ def apply_readable_app_styles():
         [data-testid="stAppDeployButton"],
         [data-testid="manage-app-button"],
         #stStreamlitMainMenu,
-        .viewerBadge_container__r5tak,
-        .styles_viewerBadge__CvC9N,
-        ._profileContainer_gzau3_53,
-        ._profilePreview_gzau3_63,
-        iframe[title="streamlit_app_badge"] {
+        div[class*="viewerBadge"],
+        div[class*="profileContainer"],
+        div[class*="profilePreview"],
+        div[class*="StatusWidget"],
+        a[class*="viewerBadge"],
+        iframe[title="streamlit_app_badge"],
+        footer {
             display: none !important;
             visibility: hidden !important;
+            height: 0 !important;
+            position: fixed !important;
+            z-index: -9999 !important;
         }
 
         .block-container {
@@ -188,6 +193,27 @@ def apply_readable_app_styles():
         </style>
         """,
         unsafe_allow_html=True,
+    )
+
+    # JS fallback to hide Streamlit Cloud badge (CSS class names change per build)
+    st.components.v1.html(
+        """
+        <script>
+        const hide = () => {
+            const root = window.parent.document;
+            root.querySelectorAll('a, div, span, button, section').forEach(el => {
+                const txt = el.textContent || '';
+                if (/Created by|Hosted with|Manage app/i.test(txt) && txt.length < 80) {
+                    el.style.setProperty('display', 'none', 'important');
+                }
+            });
+        };
+        hide();
+        new MutationObserver(hide).observe(window.parent.document.body,
+            {childList: true, subtree: true});
+        </script>
+        """,
+        height=0,
     )
 
 
