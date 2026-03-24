@@ -29,8 +29,18 @@ def apply_readable_app_styles():
         [data-testid="stHeader"],
         [data-testid="stToolbar"],
         [data-testid="stDecoration"],
-        [data-testid="stStatusWidget"] {
+        [data-testid="stStatusWidget"],
+        .stAppDeployButton,
+        [data-testid="stAppDeployButton"],
+        [data-testid="manage-app-button"],
+        #stStreamlitMainMenu,
+        .viewerBadge_container__r5tak,
+        .styles_viewerBadge__CvC9N,
+        ._profileContainer_gzau3_53,
+        ._profilePreview_gzau3_63,
+        iframe[title="streamlit_app_badge"] {
             display: none !important;
+            visibility: hidden !important;
         }
 
         .block-container {
