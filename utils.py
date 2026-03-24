@@ -898,13 +898,6 @@ def save_backup(backups_directory, admin_alias):
                 transcript_text, transcript_path
             )
             if backup_saved and transcript_saved:
-                # Save metadata before returning
-                if hasattr(st.session_state, 'api_kwargs'):
-                    save_metadata(
-                        metadata_directory=config.METADATA_DIRECTORY,
-                        api_kwargs=st.session_state.api_kwargs,
-                        admin_alias=admin_alias,
-                    )
                 return
 
         # --- LOCAL STORAGE (original behaviour) ---
@@ -926,13 +919,6 @@ def save_backup(backups_directory, admin_alias):
         ) as f:
             json.dump(data, f)
 
-        # Save metadata after every message
-        if hasattr(st.session_state, 'api_kwargs'):
-            save_metadata(
-                metadata_directory=config.METADATA_DIRECTORY,
-                api_kwargs=st.session_state.api_kwargs,
-                admin_alias=admin_alias,
-            )
 
 
 def save_metadata(metadata_directory, api_kwargs, admin_alias):
