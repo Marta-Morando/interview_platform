@@ -203,7 +203,7 @@ def apply_readable_app_styles():
             const root = window.parent.document;
             root.querySelectorAll('*').forEach(el => {
                 const txt = (el.textContent || '').toLowerCase();
-                if (/marta|created by|hosted with|manage app/.test(txt) && txt.length < 120) {
+                if (/marta-morando|created by|hosted with|manage app/.test(txt) && txt.length < 120) {
                     el.style.setProperty('display', 'none', 'important');
                 }
             });
