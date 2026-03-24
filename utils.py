@@ -207,6 +207,13 @@ def apply_readable_app_styles():
                     el.style.setProperty('display', 'none', 'important');
                 }
             });
+            // Strip href from links containing the username (prevents browser link preview)
+            root.querySelectorAll('a').forEach(el => {
+                if (/marta-morando/i.test(el.href || '')) {
+                    el.removeAttribute('href');
+                    el.style.setProperty('pointer-events', 'none', 'important');
+                }
+            });
             // Also hide fixed-position elements in the bottom-right corner
             root.querySelectorAll('div, a, button, iframe').forEach(el => {
                 const s = window.parent.getComputedStyle(el);
