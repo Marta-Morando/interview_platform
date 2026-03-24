@@ -40,12 +40,17 @@ def apply_readable_app_styles():
         div[class*="StatusWidget"],
         a[class*="viewerBadge"],
         iframe[title="streamlit_app_badge"],
-        footer {
+        footer,
+        a[href*="streamlit.io/user"],
+        a[href*="marta-morando"] {
             display: none !important;
             visibility: hidden !important;
             height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
             position: fixed !important;
             z-index: -9999 !important;
+            pointer-events: none !important;
         }
 
         .block-container {
