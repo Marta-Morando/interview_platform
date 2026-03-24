@@ -195,6 +195,21 @@ def apply_readable_app_styles():
             line-height: 1.4;
         }
 
+        /* Disable text selection on chat messages to discourage copy-paste */
+        [data-testid="stChatMessageContent"],
+        [data-testid="stChatMessageContent"] p,
+        [data-testid="stChatMessageContent"] div,
+        [data-testid="stChatMessageContent"] span,
+        [data-testid="stMarkdownContainer"],
+        [data-testid="stMarkdownContainer"] p,
+        [data-testid="stMarkdownContainer"] div,
+        [data-testid="stMarkdownContainer"] span {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+        }
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -229,6 +244,14 @@ def apply_readable_app_styles():
         hide();
         new MutationObserver(hide).observe(window.parent.document.body,
             {childList: true, subtree: true});
+
+        // Disable copy, paste, cut, and right-click context menu
+        const root = window.parent.document;
+        ['copy', 'paste', 'cut', 'contextmenu'].forEach(evt => {
+            root.addEventListener(evt, function(e) {
+                e.preventDefault();
+            }, true);
+        });
         </script>
         """,
         height=0,
