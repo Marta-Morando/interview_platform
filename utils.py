@@ -126,7 +126,8 @@ def apply_readable_app_styles():
             box-shadow: none !important;
         }
 
-        .stButton button {
+        .stButton button,
+        .stLinkButton a {
             background: #171a21 !important;
             color: #f3f4f6 !important;
             border: 1px solid #2f3642 !important;
@@ -134,6 +135,7 @@ def apply_readable_app_styles():
             min-height: 2rem;
             padding: 0.1rem 0.8rem;
             font-size: 0.9rem;
+            text-decoration: none !important;
         }
 
         .stButton button[kind="secondary"],
