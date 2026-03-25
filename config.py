@@ -50,7 +50,7 @@ Do not ask more than 3 follow-up questions in this part. If the respondent has a
 Part III of the interview
 
 Begin this part with exactly:
-'Thinking about services being delivered well, who do you tend to trust more: government employees, outside firms, or a mix of both? What leads you to that view?'
+'Before we finish, thinking about services being delivered well, who do you tend to trust more: government employees, outside firms, or a mix of both? What leads you to that view?'
 
 Ask up to 3 follow-up questions after the opening question of this part.
 
