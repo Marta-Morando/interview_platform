@@ -272,7 +272,7 @@ URL_PASSWORD_PARAM = "password"
 # passed as a URL parameter.  This works reliably across browsers (including
 # incognito) because it does not depend on session cookies.
 RETURN_URL_PARAM = "return_url"  # fallback explicit return URL from Qualtrics JS
-DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_6fEmPg7zvkxl65w"
+DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_aW2y4wKWDRsJS9o"
 SURVEY_RETURN_REMINDER = (
     "Le risposte a questa intervista sono una parte importante del nostro studio. Per favore, condividi il più possibile prima di tornare al questionario."
 )

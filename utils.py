@@ -12,10 +12,12 @@ import streamlit as st
 
 from lang import get_lang, get_string
 
-if get_lang() == "it":
-    import config_it as config
-else:
-    import config
+import config as _config_en
+import config_it as _config_it
+
+def _get_config():
+    return _config_it if get_lang() == "it" else _config_en
+
 import dropbox_storage
 
 
@@ -406,7 +408,7 @@ def validate_login_credentials(username, password):
     username = (username or "").strip()
     password = (password or "").strip()
 
-    if config.RANDOM_IDS:
+    if _get_config().RANDOM_IDS:
         try:
             username_int = int(username)
             password_int = int(password)
@@ -414,7 +416,7 @@ def validate_login_credentials(username, password):
             return False, get_string("login_int_error"), username
 
         password_correct = password_int == (
-            config.RANDOM_IDS_PW_ALPHA + username_int * config.RANDOM_IDS_PW_BETA
+            _get_config().RANDOM_IDS_PW_ALPHA + username_int * _get_config().RANDOM_IDS_PW_BETA
         )
     else:
         if not is_valid_username(username):
@@ -477,7 +479,7 @@ def apply_url_login_if_available():
     """Authenticate from query parameters when enabled in config.py."""
 
     if (
-        not config.LOGINS
+        not _get_config().LOGINS
         or not getattr(config, "ALLOW_URL_LOGIN", False)
         or st.session_state.get("password_correct", False)
     ):
@@ -650,13 +652,13 @@ def add_messages_to_api_kwargs(api, client_kwargs):
     if api == "openai":
         client_kwargs_transformed["input"] = client_kwargs_transformed.pop("messages")
         client_kwargs_transformed["input"].insert(
-            0, {"role": "developer", "content": config.SYSTEM_PROMPT}
+            0, {"role": "developer", "content": _get_config().SYSTEM_PROMPT}
         )
 
     # For the Azure API, add system prompt
     elif api == "azure":
         client_kwargs_transformed["messages"].insert(
-            0, {"role": "system", "content": config.SYSTEM_PROMPT}
+            0, {"role": "system", "content": _get_config().SYSTEM_PROMPT}
         )
 
     # For the Google API, rename "messages" to "contents", add required initial user
@@ -719,38 +721,38 @@ def iter_text_deltas(client, client_kwargs):
     """
 
     # Transform messages in client kwargs as needed for different APIs
-    client_kwargs_transformed = add_messages_to_api_kwargs(config.API, client_kwargs)
+    client_kwargs_transformed = add_messages_to_api_kwargs(_get_config().API, client_kwargs)
 
     # OpenAI API
-    if config.API == "openai":
+    if _get_config().API == "openai":
         stream = client.responses.create(**client_kwargs_transformed)
         for event in stream:
             if event.type == "response.output_text.delta":
                 yield event.delta
 
     # Anthropic API
-    elif config.API == "anthropic":
+    elif _get_config().API == "anthropic":
         with client.messages.stream(**client_kwargs_transformed) as stream:
             for delta in stream.text_stream:
                 if delta:
                     yield delta
 
     # Google API
-    elif config.API == "google":
+    elif _get_config().API == "google":
         for chunk in client.models.generate_content_stream(**client_kwargs_transformed):
             delta = getattr(chunk, "text", None)
             if delta:
                 yield delta
 
     # Azure API
-    elif config.API == "azure":
+    elif _get_config().API == "azure":
         for update in client.complete(**client_kwargs_transformed):
             if getattr(update, "choices", None):
                 delta = update.choices[0].delta.content
                 if delta:
                     yield delta
     else:
-        raise ValueError(f"Unknown API: {config.API}")
+        raise ValueError(f"Unknown API: {_get_config().API}")
 
 
 def stream_response(client, client_kwargs, message_placeholder, minimum_characters=5):
@@ -792,7 +794,7 @@ def stream_response(client, client_kwargs, message_placeholder, minimum_characte
     stopped_on_code = False
 
     # Store closing codes once to avoid repeated lookups
-    closing_codes = config.CLOSING_MESSAGES.keys()
+    closing_codes = _get_config().CLOSING_MESSAGES.keys()
 
     # Iterate over text deltas from the chat API
     for delta in iter_text_deltas(client, client_kwargs):
@@ -963,7 +965,7 @@ def save_backup(backups_directory, admin_alias):
         for message in st.session_state.messages:
             if message["role"] == "assistant" and any(
                 code in message["content"]
-                for code in config.CLOSING_MESSAGES.keys()
+                for code in _get_config().CLOSING_MESSAGES.keys()
             ):
                 continue
             elif message["role"] == "assistant":
@@ -986,7 +988,7 @@ def save_backup(backups_directory, admin_alias):
 
         # --- LOCAL STORAGE (original behaviour) ---
         # Save running transcript locally
-        transcripts_dir = config.TRANSCRIPTS_DIRECTORY
+        transcripts_dir = _get_config().TRANSCRIPTS_DIRECTORY
         os.makedirs(transcripts_dir, exist_ok=True)
         with open(
             os.path.join(transcripts_dir, f"{st.session_state.username}.txt"),
@@ -1033,7 +1035,7 @@ def save_metadata(metadata_directory, api_kwargs, admin_alias):
         for message in st.session_state.messages:
             if message["role"] == "assistant" and any(
                 code in message["content"]
-                for code in config.CLOSING_MESSAGES.keys()
+                for code in _get_config().CLOSING_MESSAGES.keys()
             ):
                 continue
             elif message["role"] == "assistant":
@@ -1114,7 +1116,7 @@ Total interviewer messages: {assistant_messages}
 
 System prompt:
 
-{config.SYSTEM_PROMPT}
+{_get_config().SYSTEM_PROMPT}
 """
 
         # --- DROPBOX STORAGE ---
@@ -1171,7 +1173,7 @@ def save_transcript_and_metadata(
         for message in st.session_state.messages:
             if message["role"] == "assistant" and any(
                 code in message["content"]
-                for code in config.CLOSING_MESSAGES.keys()
+                for code in _get_config().CLOSING_MESSAGES.keys()
             ):
                 # Skip messages with codes
                 continue
@@ -1220,7 +1222,7 @@ def backup_contains_closing_code(messages):
     return any(
         message.get("role") == "assistant"
         and any(
-            code in message.get("content", "") for code in config.CLOSING_MESSAGES.keys()
+            code in message.get("content", "") for code in _get_config().CLOSING_MESSAGES.keys()
         )
         for message in messages
     )

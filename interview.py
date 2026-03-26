@@ -15,10 +15,9 @@ from openai import OpenAI
 
 from lang import get_lang, get_string
 
-if get_lang() == "it":
-    import config_it as config
-else:
-    import config
+import config as _config_en
+import config_it as _config_it
+config = _config_it if get_lang() == "it" else _config_en
 from utils import (
     apply_readable_app_styles,
     check_password,
