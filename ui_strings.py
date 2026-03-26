@@ -1,0 +1,36 @@
+"""UI string translations for the interview app."""
+
+STRINGS = {
+    "en": {
+        "username_prompt": "Please enter a username to start the interview:",
+        "username_error": "Username must contain only letters, numbers, underscores, or hyphens.",
+        "interview_completed": "The interview has already been completed.",
+        "processing_voice": "_Processing voice input ..._",
+        "accept_transcription": "Proceed with this transcription.",
+        "reject_transcription": "Enter a new answer.",
+        "back_to_survey": "Back to survey",
+        "back_to_survey_link": "Click to go back to the survey",
+        "login_username": "Username",
+        "login_password": "Password",
+        "login_submit": "Log in",
+        "login_int_error": "Username and password must be integers.",
+        "login_invalid_error": "Username must contain only letters, numbers, underscores, or hyphens.",
+        "login_wrong": "User or password incorrect.",
+    },
+    "it": {
+        "username_prompt": "Inserisci un nome utente per iniziare l'intervista:",
+        "username_error": "Il nome utente può contenere solo lettere, numeri, trattini bassi o trattini.",
+        "interview_completed": "L'intervista è già stata completata.",
+        "processing_voice": "_Elaborazione dell'input vocale ..._",
+        "accept_transcription": "Procedi con questa trascrizione.",
+        "reject_transcription": "Inserisci una nuova risposta.",
+        "back_to_survey": "Torna al questionario",
+        "back_to_survey_link": "Clicca per tornare al questionario",
+        "login_username": "Nome utente",
+        "login_password": "Password",
+        "login_submit": "Accedi",
+        "login_int_error": "Nome utente e password devono essere numeri interi.",
+        "login_invalid_error": "Il nome utente può contenere solo lettere, numeri, trattini bassi o trattini.",
+        "login_wrong": "Nome utente o password non corretti.",
+    },
+}

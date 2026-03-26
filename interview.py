@@ -13,7 +13,12 @@ import dropbox_storage
 import streamlit as st
 from openai import OpenAI
 
-import config
+from lang import get_lang, get_string
+
+if get_lang() == "it":
+    import config_it as config
+else:
+    import config
 from utils import (
     apply_readable_app_styles,
     check_password,
@@ -64,15 +69,13 @@ else:
 
         # Manual input (only reached when REQUIRE_USERNAME_INPUT = True)
         username_input = st.text_input(
-            "Please enter a username to start the interview:",
+            get_string("username_prompt"),
             key="username_input",
         )
         if not username_input:
             st.stop()
         if not is_valid_username(username_input):
-            st.warning(
-                "Username must contain only letters, numbers, underscores, or hyphens."
-            )
+            st.warning(get_string("username_error"))
             st.stop()
         st.session_state.username = username_input.strip()
         st.rerun()
@@ -113,7 +116,7 @@ if "messages" not in st.session_state and interview_previously_completed:
             break
 
     if not code_found:
-        closing_message = "The interview has already been completed."
+        closing_message = get_string("interview_completed")
 
     st.session_state.interview_active = False
     st.markdown(closing_message)
@@ -286,7 +289,7 @@ if st.session_state.interview_active:
         if survey_return_available:
             action_spacer, action_col = st.columns([5.6, 2.1])
             with action_col:
-                render_survey_return_control("Back to survey")
+                render_survey_return_control(get_string("back_to_survey"))
 
     # If respondent uses written input
     if text_response:
@@ -315,7 +318,7 @@ if st.session_state.interview_active:
                 response_transcription_placeholder = st.empty()
                 if not st.session_state.transcription_done:
                     response_transcription_placeholder.markdown(
-                        "_Processing voice input ..._"
+                        get_string("processing_voice")
                     )
 
                     st.session_state.response_transcription = (
@@ -342,9 +345,9 @@ if st.session_state.interview_active:
 
             # Now create the buttons inside those placeholders
             accept_clicked = accept_button_placeholder.button(
-                "Proceed with this transcription."
+                get_string("accept_transcription")
             )
-            reject_clicked = reject_button_placeholder.button("Enter a new answer.")
+            reject_clicked = reject_button_placeholder.button(get_string("reject_transcription"))
 
             if reject_clicked or accept_clicked:
                 st.session_state.transcription_done = False

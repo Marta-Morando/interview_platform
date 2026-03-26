@@ -10,7 +10,12 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import streamlit as st
 
-import config
+from lang import get_lang, get_string
+
+if get_lang() == "it":
+    import config_it as config
+else:
+    import config
 import dropbox_storage
 
 
@@ -360,7 +365,9 @@ def has_survey_return_target():
     return bool(get_survey_return_url())
 
 
-def render_survey_return_control(label="Back to survey", *, completion=False):
+def render_survey_return_control(label=None, *, completion=False):
+    if label is None:
+        label = get_string("back_to_survey")
     """Render a survey-return control.
 
     At completion: show a link button directly.
@@ -389,7 +396,7 @@ def render_survey_return_control(label="Back to survey", *, completion=False):
     if reminder_text:
         st.caption(reminder_text)
 
-    st.link_button("Click to go back to the survey", href)
+    st.link_button(get_string("back_to_survey_link"), href)
     return True
 
 
@@ -404,7 +411,7 @@ def validate_login_credentials(username, password):
             username_int = int(username)
             password_int = int(password)
         except ValueError:
-            return False, "Username and password must be integers.", username
+            return False, get_string("login_int_error"), username
 
         password_correct = password_int == (
             config.RANDOM_IDS_PW_ALPHA + username_int * config.RANDOM_IDS_PW_BETA
@@ -413,7 +420,7 @@ def validate_login_credentials(username, password):
         if not is_valid_username(username):
             return (
                 False,
-                "Username must contain only letters, numbers, underscores, or hyphens.",
+                get_string("login_invalid_error"),
                 username,
             )
 
@@ -425,7 +432,7 @@ def validate_login_credentials(username, password):
     if password_correct:
         return True, None, username
 
-    return False, "User or password incorrect.", username
+    return False, get_string("login_wrong"), username
 
 
 def get_direct_launch_username():
@@ -499,7 +506,7 @@ def apply_url_login_if_available():
 def render_completion_redirect():
     """Render a return-to-survey link after interview completion."""
 
-    render_survey_return_control("Back to survey", completion=True)
+    render_survey_return_control(get_string("back_to_survey"), completion=True)
 
 
 def check_password():
@@ -546,9 +553,9 @@ def check_password():
 
         with st.form("Credentials"):
             if not survey_username:
-                st.text_input("Username", key="username")
-            st.text_input("Password", type="password", key="password")
-            st.form_submit_button("Log in", on_click=password_entered)
+                st.text_input(get_string("login_username"), key="username")
+            st.text_input(get_string("login_password"), type="password", key="password")
+            st.form_submit_button(get_string("login_submit"), on_click=password_entered)
 
     def password_entered():
         """Validate username and password and update session state.
