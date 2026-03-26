@@ -341,7 +341,7 @@ def get_survey_return_url(*, completion=False):
     when interview_status == "completed".
     """
 
-    base_url = getattr(config, "DEFAULT_SURVEY_RETURN_URL", None)
+    base_url = getattr(_get_config(), "DEFAULT_SURVEY_RETURN_URL", None)
     if not base_url:
         return None
 
@@ -394,7 +394,7 @@ def render_survey_return_control(label=None, *, completion=False):
             st.rerun()
         return True
 
-    reminder_text = getattr(config, "SURVEY_RETURN_REMINDER", "").strip()
+    reminder_text = getattr(_get_config(), "SURVEY_RETURN_REMINDER", "").strip()
     if reminder_text:
         st.caption(reminder_text)
 
@@ -441,7 +441,7 @@ def get_direct_launch_username():
     """Return a username from URL parameters for direct-launch survey handoffs."""
 
     query_names = [
-        getattr(config, "URL_USERNAME_PARAM", "username"),
+        getattr(_get_config(), "URL_USERNAME_PARAM", "username"),
         "respondent_id",
         "rid",
     ]
@@ -467,7 +467,7 @@ def initialize_survey_username():
         st.session_state.username = survey_username
         return survey_username
 
-    if getattr(config, "REQUIRE_USERNAME_INPUT", True):
+    if getattr(_get_config(), "REQUIRE_USERNAME_INPUT", True):
         return None
 
     anonymous_username = f"anon_{uuid.uuid4().hex[:8]}"
@@ -480,13 +480,13 @@ def apply_url_login_if_available():
 
     if (
         not _get_config().LOGINS
-        or not getattr(config, "ALLOW_URL_LOGIN", False)
+        or not getattr(_get_config(), "ALLOW_URL_LOGIN", False)
         or st.session_state.get("password_correct", False)
     ):
         return False
 
     username = get_direct_launch_username()
-    password = get_query_param(getattr(config, "URL_PASSWORD_PARAM", "password"))
+    password = get_query_param(getattr(_get_config(), "URL_PASSWORD_PARAM", "password"))
 
     if not username or not password:
         return False
@@ -1081,7 +1081,7 @@ def save_metadata(metadata_directory, api_kwargs, admin_alias):
         if external_response_id and external_response_id.startswith("${"):
             external_response_id = None
         survey_return_url_supplied = bool(
-            get_query_param(getattr(config, "RETURN_URL_PARAM", "return_url"))
+            get_query_param(getattr(_get_config(), "RETURN_URL_PARAM", "return_url"))
         )
         external_context_lines = []
         if external_response_id:
