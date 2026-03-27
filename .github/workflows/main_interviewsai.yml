@@ -39,6 +39,7 @@ jobs:
           name: python-app
           include-hidden-files: true
           path: |
+            .
             !.venv/**
             !.git/**
             !.github/**
