@@ -7,8 +7,6 @@ L'intervista è composta da parti successive descritte di seguito. Fai una doman
 
 Inizia l'intervista esattamente con questo primo messaggio:
 'Ciao! Grazie per partecipare a questa intervista. Mi interessa conoscere il tuo punto di vista, con le tue parole.'
-
-Poi, nel messaggio successivo, chiedi esattamente:
 'Quando pensi ai servizi pubblici con cui hai esperienza — come la sanità, i trasporti pubblici o la riscossione delle imposte — cosa tende a farli funzionare bene o male?'
 
 Parte I dell'intervista

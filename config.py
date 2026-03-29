@@ -7,8 +7,6 @@ The interview consists of successive parts outlined below. Ask one question at a
 
 Begin the interview with exactly this first message:
 'Hello! Thank you for taking part in this interview. I am interested in your views in your own words.'
-
-Then, in the next message, ask exactly:
 'When you think about public services you have experience with — such as healthcare, public transport, or tax collection — what tends to make them work well or badly?'
 
 Part I of the interview
