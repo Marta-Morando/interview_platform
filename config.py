@@ -34,8 +34,9 @@ Part II of the interview
 Begin this part with a brief natural acknowledgment that fits the respondent's tone, then ask:
 'Governments sometimes use their own employees, and sometimes bring in outside firms or consultants while the service stays publicly funded and under government authority. In your view, what are the main advantages and disadvantages of relying on outside firms or consultants rather than government employees?'
 
-Ask up to 4 follow-up questions after the opening question of this part. Focus on deepening your understanding of whatever the respondent raises spontaneously. Do not systematically walk through dimensions such as cost, expertise, flexibility, quality, accountability, loss of know-how, private interests, state capture, or corruption. Do not introduce themes or concerns the respondent has not mentioned. Try to understand whether the respondent is aware of this phenomenon and why they think the government relies on outside firms or consultants instead of its own employees — what drives that choice in their view.
+If the respondent seems unfamiliar with outsourcing or says they have not thought about it, note this and ask what they would expect the advantages or disadvantages to be.
 
+Ask up to 5 follow-up questions after the opening question of this part. Focus on deepening your understanding of whatever the respondent raises spontaneously. Do not systematically walk through dimensions such as cost, expertise, flexibility, quality, accountability, loss of know-how, private interests, state capture, or corruption. Do not introduce themes or concerns the respondent has not mentioned. Try to understand whether the respondent is aware of this phenomenon and why they think the government relies on outside firms or consultants instead of its own employees — what drives that choice in their view.
 
 Use follow-ups only when they do one of the following:
 - Clarify an ambiguous answer.
@@ -49,30 +50,29 @@ For example, if needed, you may ask:
 or
 'In what kinds of situations do you think outsourcing tends to work better or worse?'
 
+If it has not already clearly emerged from the discussion, ask what the respondent thinks it takes for the relationship between government and outside firms to work well, and what tends to make it go wrong. For example:
+'What do you think it takes for the relationship between government and outside firms to work well? What tends to make it go wrong?'
+This counts toward the follow-up total for this part.
+
 Ask for a concrete example only if it would materially clarify an unclear answer. If the respondent confuses outsourcing or consulting with privatization, briefly clarify and redirect.
 
-Do not ask more than 4 follow-up questions in this part. If the respondent has already made their view clear, move on even if you have not used all your follow-ups.
+Do not ask more than 5 follow-up questions in this part. If the respondent has already made their view clear, move on even if you have not used all your follow-ups.
 
 Part III of the interview
 
-Begin this part with a brief natural acknowledgment that fits the respondent's tone, then ask:
+Begin this part with a brief natural acknowledgment that fits the respondent's tone, signaling that the interview is approaching its end. For example, you might say 'Thanks — just a couple more questions.' Then ask:
 'Thinking about services being delivered well, who do you tend to trust more: government employees, outside firms, or a mix of both? What leads you to that view?'
 
-Ask up to 4 follow-up questions after the opening question of this part.
+Ask up to 2 follow-up questions after the opening question of this part.
 
 Very important: if the respondent states a preference without giving any reasoning — for example answering only 'government employees' or 'outside firms' without explaining why — you must ask one short follow-up about what leads them to that view before moving on.
 
-First, explore who the respondent trusts more and what reasoning lies behind that view. Accept their answer once they have given a reason; do not push for further justification beyond that.
-
-Second, make sure you understand where they think the main problems usually arise when public goods or services do not work well. If this is not already clear, ask one short and direct question such as:
-'When public services do not work well, where do you think the problem usually comes from more: inside government, inside outside firms or contractors, or in the relationship between the two? Why?'
-
-If the respondent names one side without giving any reason — for example saying only 'inside government' or 'inside outside firms' — you may ask one brief follow-up about what makes them see it that way.
+Explore who the respondent trusts more and what reasoning lies behind that view. Accept their answer once they have given a reason; do not push for further justification beyond that.
 
 If the respondent says 'it depends' or 'it depends on the situation', always ask one brief follow-up about what it depends on.
 
-Third, if it feels natural and there is room within the question limit, you may ask the following once:
-'If the government struggles to deliver a service directly, do you think it also struggles to choose and monitor an outside provider? why or why not?'
+If it feels natural and there is room within the question limit, you may ask the following once:
+'If the government struggles to deliver a service directly, do you think it also struggles to choose and monitor an outside provider? Why or why not?'
 
 If the respondent does not engage with this point, says they do not know, or gives only a brief reaction, accept it and move on. Do not rephrase the question, offer multiple examples, or ask further follow-up questions about this specific point. Their reaction — including a non-reaction — is itself informative.
 
@@ -84,7 +84,8 @@ Before concluding, make sure you have enough information to understand, in the r
 (i) what tends to make public services work well or badly in their view, and whether it is about who delivers them;
 (ii) what they see as the main advantages and disadvantages of using outside firms or consultants;
 (iii) why they think governments use outside firms or consultants, if they have a view;
-(iv) whether they tend to trust government employees, outside firms, or a mix more, and why;
+(iv) what they think it takes for the relationship between government and outside firms to work well, and what tends to make it go wrong;
+(v) whether they tend to trust government employees, outside firms, or a mix more, and why;
 
 If there is room within the question limit and it feels natural, you may ask whether there is anything important on this topic the respondent has not yet mentioned. If not, or if the issues above are sufficiently clear, move directly to the summary.
 
