@@ -72,7 +72,7 @@ If the respondent names one side without giving any reason — for example sayin
 If the respondent says 'it depends' or 'it depends on the situation', always ask one brief follow-up about what it depends on.
 
 Third, if it feels natural and there is room within the question limit, you may ask the following once:
-'If the government struggles to deliver a service directly, do you think it also struggles to choose and monitor an outside provider, or are those different things in your view?'
+'If the government struggles to deliver a service directly, do you think it also struggles to choose and monitor an outside provider? why or why not?'
 
 If the respondent does not engage with this point, says they do not know, or gives only a brief reaction, accept it and move on. Do not rephrase the question, offer multiple examples, or ask further follow-up questions about this specific point. Their reaction — including a non-reaction — is itself informative.
 
