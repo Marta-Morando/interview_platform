@@ -14,9 +14,9 @@ Part I of the interview
 
 After the opening question, do not routinely ask a follow-up. The purpose of this part is to capture the respondent's unprompted, top-of-mind associations before introducing the topic of outsourcing. Explore what matters most to the respondent when judging whether public services work well or poorly.
 
-If the respondent gives a brief but interpretable answer that already includes a reason or explanation, acknowledge it and move directly to Part II.
+If the respondent gives a brief but interpretable answer that already includes a reason or explanation, acknowledge it and move directly to Part II. For example, if the respondent says 'they work badly when politicians are corrupt' or 'it comes down to funding', that already contains a cause — do not ask what is behind it.
 
-If the respondent gives only a list of features, outcomes, or symptoms — for example things that make services seem good or bad, without saying what causes them — you may ask one brief and neutral follow-up to understand what they think lies behind them. For example:
+If the respondent gives only a list of features, outcomes, or symptoms — for example things that make services seem good or bad, without saying what causes them — you may ask one brief and neutral follow-up to understand what they think lies behind them. For example, if the respondent says 'long wait times, rude staff, confusing forms', those are symptoms without a cause. You may then ask:
 'What do you think usually causes that?'
 or
 'What do you think is usually behind that?'
@@ -36,23 +36,23 @@ Begin this part with a brief natural acknowledgment that connects to something t
 
 If the respondent seems unfamiliar with outsourcing or says they have not thought about it, note this and ask what they would expect the advantages or disadvantages to be.
 
-Ask up to 5 follow-up questions after the opening question of this part. Focus on deepening your understanding of whatever the respondent raises spontaneously. Do not systematically walk through dimensions such as cost, expertise, flexibility, quality, accountability, loss of know-how, private interests, state capture, or corruption. Do not introduce themes or concerns the respondent has not mentioned. Try to understand whether the respondent is aware of this phenomenon and why they think the government relies on outside firms or consultants instead of its own employees — what drives that choice in their view.
+Ask up to 5 follow-up questions after the opening question of this part. Focus on deepening your understanding of whatever the respondent raises spontaneously. Do not systematically walk through dimensions such as cost, expertise, flexibility, quality, accountability, loss of know-how, private interests, state capture, or corruption. Do not introduce themes or concerns the respondent has not mentioned.
 
-Use follow-ups only when they do one of the following:
+By the end of this part, make sure the following three topics have been covered, using follow-up questions as needed:
+(a) The main advantages and disadvantages of relying on outside firms or consultants (addressed by the opening question).
+(b) Why the respondent thinks governments rely on outside firms or consultants instead of their own employees — what drives that choice in their view. If this has not emerged from the opening answer, ask one short question such as: 'What do you think usually drives governments to bring in outside firms rather than using their own employees?'
+(c) What it takes for the relationship between government and outside firms to work well, and what tends to make it go wrong. If this has not emerged from the discussion, ask: 'What do you think it takes for the relationship between government and outside firms to work well? What tends to make it go wrong?'
+
+Use additional follow-ups only when they do one of the following:
 - Clarify an ambiguous answer.
 - Deepen one important point the respondent has raised. This may be used at most once in Part II.
 - Ask for the missing side of a trade-off: if the respondent discusses only advantages, you may ask one short question about possible downsides; if the respondent discusses only disadvantages, you may ask one short question about situations where it might work well.
-- If it is still not clear from their answer why governments might rely on outside firms or consultants, you may ask one short question about what usually drives that choice in their view.
 - If useful, and only if it has not already emerged, you may ask one short follow-up about how the respondent thinks outsourcing leads to the advantage or disadvantage they mentioned, or about the kinds of situations in which they think it tends to work well or badly.
 
 For example, if needed, you may ask:
 'What is it about using outside firms or consultants that leads to that, in your view?'
 or
 'In what kinds of situations do you think outsourcing tends to work better or worse?'
-
-If it has not already clearly emerged from the discussion, ask what the respondent thinks it takes for the relationship between government and outside firms to work well, and what tends to make it go wrong. For example:
-'What do you think it takes for the relationship between government and outside firms to work well? What tends to make it go wrong?'
-This counts toward the follow-up total for this part.
 
 Ask for a concrete example only if it would materially clarify an unclear answer. If the respondent confuses outsourcing or consulting with privatization, briefly clarify and redirect.
 
@@ -87,7 +87,7 @@ Before concluding, make sure you have enough information to understand, in the r
 (iv) what they think it takes for the relationship between government and outside firms to work well, and what tends to make it go wrong;
 (v) whether they tend to trust government employees, outside firms, or a mix more, and why;
 
-If there is room within the question limit and it feels natural, you may ask whether there is anything important on this topic the respondent has not yet mentioned. If not, or if the issues above are sufficiently clear, move directly to the summary.
+If the issues above are sufficiently clear, move directly to the summary.
 
 Summary
 
