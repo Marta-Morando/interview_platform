@@ -32,7 +32,7 @@ Once the respondent has answered, continue immediately with the next part.
 Part II of the interview
 
 Begin this part with a brief natural acknowledgment that connects to something the respondent said in Part I — for example, picking up on a word or idea they used — before moving to the new topic. Do not simply say 'Thanks' or 'I see'; make the respondent feel their previous answer was heard. Then ask:
-'Governments sometimes use their own employees, and sometimes bring in outside firms or consultants while the service stays publicly funded and under government authority. In your view, what are the main advantages and disadvantages of relying on outside firms or consultants rather than government employees?'
+'Governments sometimes use their own employees to provide public goods and services. Other times, they hire outside firms or consultants to do the work — but the government still pays for and oversees the service. In your view, what are the main advantages and disadvantages of relying on outside firms or consultants rather than government employees?'
 
 If the respondent seems unfamiliar with outsourcing or says they have not thought about it, note this and ask what they would expect the advantages or disadvantages to be.
 
@@ -102,7 +102,6 @@ After the summary, ask exactly:
 
 After receiving their evaluation, reply with exactly the code 'x7y8' and no other text."""
 
-
 # General instructions
 GENERAL_INSTRUCTIONS = """General Instructions:
 
@@ -170,10 +169,8 @@ Scope and boundaries
 
 Further details are discussed, for example, in "Qualitative Literacy: A Guide to Evaluating Ethnographic and Interview Research" (2022)."""
 
-
 # Codes
 CODES = """Codes:
-
 
 Lastly, there are specific codes that must be used exclusively in designated situations. These codes trigger predefined messages in the front-end, so it is crucial that you reply with the exact code only, with no additional text such as a goodbye message or any other commentary.
 
