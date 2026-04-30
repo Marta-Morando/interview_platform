@@ -275,7 +275,7 @@ URL_USERNAME_PARAM = "username"
 URL_PASSWORD_PARAM = "password"
 
 RETURN_URL_PARAM = "return_url"
-DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_3fwOpetXCHBkrEG"
+DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_eQFvWHmy8gtR5Xg"
 SURVEY_RETURN_REMINDER = (
     "Queste risposte all’intervista sono una parte importante del nostro studio. Prima di tornare al questionario, raccontaci il più possibile."
 )
