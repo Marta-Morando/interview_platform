@@ -204,7 +204,7 @@ INPUT_MODE = "text_and_voice"  # set as "text" or "voice" or "text_and_voice"
 TEXT_INPUT_INSTRUCTIONS = "Scrivi qui"
 
 
-VOICE_INPUT_INSTRUCTIONS = "Per usare l’input vocale, clicca su 🎤 per iniziare a registrare. Aspetta che l’icona cambi, poi inizia a parlare. Clicca su ⏹️ per fermare la registrazione. L’input vocale potrebbe non essere supportato su alcuni browser e dispositivi."
+VOICE_INPUT_INSTRUCTIONS = "Puoi rispondere anche a voce. Clicca su 🎤, consenti l’uso del microfono se richiesto, parla normalmente e poi clicca su ⏹️ quando hai finito. Se la registrazione non funziona, puoi scrivere la risposta."
 
 VOICE = "coral"  # or eg onyx, nova, sage, alloy (only used in full_voice_interview.py)
 

@@ -356,7 +356,9 @@ if st.session_state.interview_active:
                         )
                     else:
                         if transcription:
-                            response_transcription_placeholder.markdown(transcription)
+                            response_transcription_placeholder.markdown(
+                                f"**{get_string('transcription_detected')}**\n\n{transcription}"
+                            )
                         else:
                             response_transcription_placeholder.warning(
                                 get_string("empty_transcription")
@@ -367,7 +369,7 @@ if st.session_state.interview_active:
                 else:
                     if st.session_state.response_transcription:
                         response_transcription_placeholder.markdown(
-                            st.session_state.response_transcription
+                            f"**{get_string('transcription_detected')}**\n\n{st.session_state.response_transcription}"
                         )
                     else:
                         response_transcription_placeholder.warning(
