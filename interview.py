@@ -339,22 +339,40 @@ if st.session_state.interview_active:
                         get_string("processing_voice")
                     )
 
-                    st.session_state.response_transcription = (
-                        client_audio.audio.transcriptions.create(
+                    try:
+                        transcription_response = client_audio.audio.transcriptions.create(
                             model=config.MODEL_TRANSCRIPTION,
                             file=voice_response,
                             language=config.TRANSCRIPTION_LANGUAGE,
-                        ).text
-                    )
+                        )
+                        if isinstance(transcription_response, str):
+                            transcription = transcription_response.strip()
+                        else:
+                            transcription = transcription_response.text.strip()
+                    except Exception:
+                        transcription = ""
+                        response_transcription_placeholder.warning(
+                            get_string("transcription_error")
+                        )
+                    else:
+                        if transcription:
+                            response_transcription_placeholder.markdown(transcription)
+                        else:
+                            response_transcription_placeholder.warning(
+                                get_string("empty_transcription")
+                            )
 
-                    response_transcription_placeholder.markdown(
-                        st.session_state.response_transcription
-                    )
+                    st.session_state.response_transcription = transcription
                     st.session_state.transcription_done = True
                 else:
-                    response_transcription_placeholder.markdown(
-                        st.session_state.response_transcription
-                    )
+                    if st.session_state.response_transcription:
+                        response_transcription_placeholder.markdown(
+                            st.session_state.response_transcription
+                        )
+                    else:
+                        response_transcription_placeholder.warning(
+                            get_string("empty_transcription")
+                        )
 
             # Ask them to accept or reject
             col_accept, col_reject = st.columns([1, 1])
@@ -363,9 +381,11 @@ if st.session_state.interview_active:
             reject_button_placeholder = col_reject.empty()
 
             # Now create the buttons inside those placeholders
-            accept_clicked = accept_button_placeholder.button(
-                get_string("accept_transcription")
-            )
+            accept_clicked = False
+            if st.session_state.response_transcription:
+                accept_clicked = accept_button_placeholder.button(
+                    get_string("accept_transcription")
+                )
             reject_clicked = reject_button_placeholder.button(get_string("reject_transcription"))
 
             if reject_clicked or accept_clicked:
