@@ -51,6 +51,25 @@ st.set_page_config(
 dropbox_storage.show_dropbox_warning_if_needed()
 apply_readable_app_styles()
 
+
+def get_secret(name):
+    """Read a secret from Streamlit secrets locally or Azure app settings online."""
+    try:
+        value = st.secrets.get(name)
+    except Exception:
+        value = None
+    if value:
+        return value
+
+    value = os.environ.get(name)
+    if value:
+        return value
+
+    raise RuntimeError(
+        f"Missing secret {name}. Add it to .streamlit/secrets.toml or Azure App Service application settings."
+    )
+
+
 # Check if login screen is enabled
 if config.LOGINS:
     # Check password (displays login screen)
@@ -163,13 +182,13 @@ st.session_state.api_kwargs = api_kwargs
 # API clients
 if config.API == "openai":
 
-    client = OpenAI(api_key=st.secrets["KEY_OPENAI"])
+    client = OpenAI(api_key=get_secret("KEY_OPENAI"))
     api_kwargs["stream"] = True
 
 elif config.API == "anthropic":
     import anthropic
 
-    client = anthropic.Anthropic(api_key=st.secrets["KEY_ANTHROPIC"])
+    client = anthropic.Anthropic(api_key=get_secret("KEY_ANTHROPIC"))
     api_kwargs["system"] = config.SYSTEM_PROMPT
     # Set max tokens default if no value set in config.py
     api_kwargs.setdefault("max_tokens", 4096)
@@ -177,7 +196,7 @@ elif config.API == "anthropic":
 elif config.API == "google":
     from google import genai
 
-    client = genai.Client(api_key=st.secrets["KEY_GOOGLE"])
+    client = genai.Client(api_key=get_secret("KEY_GOOGLE"))
     api_kwargs.setdefault("config", {})["system_instruction"] = config.SYSTEM_PROMPT
 
 
@@ -186,9 +205,9 @@ elif config.API == "azure":
     from azure.core.credentials import AzureKeyCredential
 
     client = ChatCompletionsClient(
-        endpoint=st.secrets["ENDPOINT_AZURE"],
-        credential=AzureKeyCredential(st.secrets["KEY_AZURE"]),
-        api_version=st.secrets["VERSION_AZURE"],
+        endpoint=get_secret("ENDPOINT_AZURE"),
+        credential=AzureKeyCredential(get_secret("KEY_AZURE")),
+        api_version=get_secret("VERSION_AZURE"),
     )
     api_kwargs["stream"] = True
 
@@ -202,7 +221,7 @@ if config.INPUT_MODE not in ["text", "voice", "text_and_voice"]:
     )
 if "voice" in config.INPUT_MODE:
     client_audio = OpenAI(
-        api_key=st.secrets["KEY_OPENAI"],
+        api_key=get_secret("KEY_OPENAI"),
     )
 
 
@@ -324,6 +343,7 @@ if st.session_state.interview_active:
                         client_audio.audio.transcriptions.create(
                             model=config.MODEL_TRANSCRIPTION,
                             file=voice_response,
+                            language=config.TRANSCRIPTION_LANGUAGE,
                         ).text
                     )
 

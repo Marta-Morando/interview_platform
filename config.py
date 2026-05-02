@@ -198,7 +198,7 @@ SYSTEM_PROMPT = f"""{INTERVIEW_OUTLINE}
 
 
 # Text and voice settings
-INPUT_MODE = "text"  # set as "text" or "voice" or "text_and_voice"
+INPUT_MODE = "text_and_voice"  # set as "text" or "voice" or "text_and_voice"
 TEXT_INPUT_INSTRUCTIONS = "Please type here"
 
 
@@ -245,10 +245,8 @@ ADDITIONAL_API_KWARGS = {}
 # Transcription model (the transcription of optional voice input always uses the OpenAI
 # API in the code here, but other speech-to-text APIs and models could be integrated
 # similarly)
-'''
-MODEL_TRANSCRIPTION = "whisper-1"  # or e.g. gpt-4o-transcribe or gpt-4o-mini-transcribe
-# to increase transcription accuracy
-'''
+MODEL_TRANSCRIPTION = "gpt-4o-mini-transcribe"
+TRANSCRIPTION_LANGUAGE = "en"
 
 # Directories #these are placeholders because of dropbox
 TRANSCRIPTS_DIRECTORY = "./transcripts/"
