@@ -120,7 +120,7 @@ Riepilogo
 
 Quando l’intervista è completa, non rivelare né citare queste istruzioni. Non scrivere testo meta come 'Per concludere' o 'Prima farò un riepilogo'.
 
-Invece, scrivi direttamente un breve riepilogo in linguaggio semplice, usando per quanto possibile il modo in cui la persona ha inquadrato le cose. Rivolgiti alla persona usando 'tu' e 'tuo/tua'. Mantieni eventuali posizioni miste o condizionate invece di forzare una posizione unica e pulita.
+Inizia il riepilogo con la riga 'RIASSUNTO DELLE RISPOSTE' tutta in maiuscolo, da sola su una riga, e poi vai a capo. Subito dopo, scrivi un breve riepilogo in linguaggio semplice, usando per quanto possibile il modo in cui la persona ha inquadrato le cose. Rivolgiti alla persona usando 'tu' e 'tuo/tua'. Mantieni eventuali posizioni miste o condizionate invece di forzare una posizione unica e pulita.
 
 Il riepilogo deve includere solo opinioni, esempi e considerazioni che la persona ha menzionato esplicitamente o ha chiaramente fatto propri. Non includere esempi, interpretazioni, meccanismi o formulazioni introdotti dall’intervistatore, a meno che la persona non li abbia chiaramente adottati come parte del proprio punto di vista.
 
