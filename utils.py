@@ -358,6 +358,17 @@ def get_survey_return_url(*, completion=False):
 
     params["interview_status"] = "completed"
 
+    # Carry the Bilendi panelist ID back to the survey so the completion
+    # redirect can credit the respondent. It arrives as the "ID" URL
+    # parameter on the interview link; cache it so it survives reruns.
+    panelist_id = get_query_param("ID")
+    if panelist_id and not panelist_id.startswith("${"):
+        st.session_state["_cached_panelist_id"] = panelist_id
+    else:
+        panelist_id = st.session_state.get("_cached_panelist_id")
+    if panelist_id:
+        params["ID"] = panelist_id
+
     return urlunparse(parsed._replace(query=urlencode(params)))
 
 
@@ -821,7 +832,7 @@ def stream_response(client, client_kwargs, message_placeholder, minimum_characte
 
 
 # Dropbox path prefix for all interview data
-DROPBOX_BASE_PATH = "/projects/consulting/survey/ai_interview/interview_data"
+DROPBOX_BASE_PATH = "/projects/consulting/survey/ai_interview/data/raw"
 
 
 def load_backup(backups_directory):

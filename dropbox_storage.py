@@ -119,7 +119,7 @@ def upload_text(content, dropbox_path):
     content : str
         The text content to upload.
     dropbox_path : str
-        The full path in Dropbox (e.g. "/interview_data/transcripts/user1.txt").
+        The full path in Dropbox (e.g. "/data/raw/transcripts/user1.txt").
     """
     dbx = get_dropbox_client()
     if dbx:
@@ -143,7 +143,7 @@ def upload_json(data, dropbox_path):
     data : dict or list
         The data to serialize and upload.
     dropbox_path : str
-        The full path in Dropbox (e.g. "/interview_data/backups/user1.json").
+        The full path in Dropbox (e.g. "/data/raw/backups/user1.json").
     """
     dbx = get_dropbox_client()
     if dbx:
