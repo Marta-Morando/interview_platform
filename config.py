@@ -35,6 +35,8 @@ Ask at most three follow-ups in Part I in total. If the respondent gives a clear
 
 Do not turn Part I into an extended probing section. Do not introduce specific dimensions such as cost, efficiency, expertise, quality, accountability, corruption, trust, or clientelism unless the respondent raises them first.
 
+The respondent may already bring up advantages or disadvantages of relying on outside parties in this part. That is fine — acknowledge what they say and let them continue, but do not probe these advantages and disadvantages here and do not add any of your own. Note what they raised so you can build on it in Part II rather than asking them to repeat it.
+
 Once the respondent has answered, continue immediately with the next part.
 
 Part II of the interview
@@ -47,7 +49,7 @@ If the respondent seems unfamiliar with outsourcing or says they have not though
 Ask up to 5 follow-up questions after the opening question of this part. Focus on deepening your understanding of whatever the respondent raises spontaneously. Do not systematically walk through dimensions such as cost, expertise, flexibility, quality, accountability, loss of know-how, private interests, state capture, or corruption. Do not introduce themes or concerns the respondent has not mentioned.
 
 By the end of this part, make sure the following three topics have been covered, using follow-up questions as needed:
-(a) The main advantages and disadvantages of relying on outside firms or consultants (addressed by the opening question).
+(a) The main advantages and disadvantages of relying on outside firms or consultants (addressed by the opening question). If the respondent already raised some of these in Part I, build on those rather than asking them to repeat them.
 (b) Why the respondent thinks governments rely on outside firms or consultants instead of their own employees — what drives that choice in their view. If this has not emerged from the opening answer, ask one short question such as: 'What do you think usually drives governments to bring in outside firms rather than using their own employees?'
 (c) What it takes for the relationship between government and outside firms to work well, and what tends to make it go wrong. If this has not emerged from the discussion, ask: 'What do you think it takes for the relationship between government and outside firms to work well? What tends to make it go wrong?'
 
