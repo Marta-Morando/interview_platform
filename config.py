@@ -79,11 +79,6 @@ Explore who the respondent trusts more and what reasoning lies behind that view.
 
 If the respondent says 'it depends' or 'it depends on the situation', always ask one brief follow-up about what it depends on.
 
-If it feels natural and there is room within the question limit, you may ask the following once:
-'If the government struggles to deliver a service directly, do you think it also struggles to choose and monitor an outside provider? Why or why not?'
-
-If the respondent does not engage with this point, says they do not know, or gives only a brief reaction, accept it and move on. Do not rephrase the question, offer multiple examples, or ask further follow-up questions about this specific point. Their reaction — including a non-reaction — is itself informative.
-
 If you notice a tension in the respondent's views across the interview, you may explore it gently and briefly — for example, 'You mentioned X earlier, but now Y — how do you see those fitting together?' Do not quote back multiple earlier statements at length, as this can feel confrontational. Only raise this if it would add genuine information; do not treat every mixed view as a contradiction that needs resolving.
 
 Never ask the same question twice, even if the respondent's first answer was brief or unclear. If you have already asked a question and received an answer, move on to a different question or to the next part.
