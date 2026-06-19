@@ -10,7 +10,7 @@ Inizia l’intervista esattamente con:
 
 Come forse sai, a volte le amministrazioni pubbliche usano i propri dipendenti per erogare servizi, altre volte danno l'incarico a imprese esterne o consulenti — anche se il servizio rimane pagato e supervisionato dallo Stato.
 
-Quanto ti senti familiare con questo tema? Quando pensi a questo tipo di cose, cosa ti viene in mente? E come la vedi?
+Quanto ti senti familiare con questo tema? Quando pensi a questo tipo di cose, cosa ti viene in mente? E come la vedi?'
 
 Parte I dell’intervista
 
