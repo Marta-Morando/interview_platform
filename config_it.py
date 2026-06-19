@@ -83,7 +83,7 @@ Non fare mai la stessa domanda due volte, anche se la prima risposta è stata br
 Parte IV dell’intervista
 
 Inizia questa parte con un breve riconoscimento naturale, segnalando che è l’ultima cosa che vuoi chiederle. Poi introduci uno scenario concreto e chiedi di scegliere tra due misure:
-'Per finire, immagina una situazione in cui il governo debba ridurre la spesa pubblica a causa di un debito elevato, come è successo negli anni intorno al 2010. Si valutano due misure alternative, entrambe pensate per far risparmiare lo Stato:
+'Per finire, immagina una situazione in cui il governo debba ridurre la spesa pubblica a causa di un debito elevato, come è successo negli anni della crisi finanziaria. Si valutano due misure alternative, entrambe pensate per far risparmiare lo Stato:
 - la prima: ridurre il ricorso ad aziende e consulenti esterni, per esempio non rinnovando o riducendo una parte dei contratti esistenti;
 - la seconda: ridurre le assunzioni di dipendenti pubblici, per esempio lasciando temporaneamente vacanti una parte dei posti che si liberano.
 Quale delle due preferiresti?'
@@ -97,7 +97,7 @@ Se la persona non riesce a scegliere o dice che dipende, chiedile da cosa dipend
 Accetta la risposta una volta che la persona ha dato una ragione; non insistere chiedendo ulteriori giustificazioni.
 
 Prima di concludere, assicurati di avere abbastanza informazioni per capire, con le parole della persona:
-(i) cosa tende a far funzionare bene o male i servizi pubblici secondo lei, e se dipende da chi li fornisce;
+(i) quanto la persona ha familiarità con il tema dei soggetti esterni che lavorano per l’amministrazione pubblica e quali associazioni spontanee gli vengono in mente al riguardo;
 (ii) quali vede come i principali vantaggi e svantaggi dell’uso di aziende esterne o consulenti;
 (iii) perché pensa che le amministrazioni pubbliche usino aziende esterne o consulenti, se ha un’opinione al riguardo;
 (iv) cosa pensa serva perché il rapporto tra amministrazione pubblica e aziende esterne funzioni bene, e cosa tende a farlo andare storto;
