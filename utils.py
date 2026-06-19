@@ -440,23 +440,42 @@ def has_survey_return_target():
     return bool(get_survey_return_url())
 
 
+def _render_return_link(label, href):
+    """Render a survey-return link that navigates the current tab (same-tab).
+
+    The interview opens as a top-level page (the Qualtrics button uses
+    target="_self"), so a plain anchor with target="_self" replaces the
+    interview page with the survey, matching the original handoff. This
+    avoids st.link_button, which always opens a new tab.
+    """
+
+    safe_href = html.escape(href, quote=True)
+    safe_label = html.escape(label)
+    st.markdown(
+        f'<a href="{safe_href}" target="_self" rel="noopener" '
+        f'style="display:inline-block;padding:0.5rem 1rem;border-radius:0.5rem;'
+        f'background:#26abf9;color:#ffffff;text-decoration:none;font-weight:600;">'
+        f"{safe_label}</a>",
+        unsafe_allow_html=True,
+    )
+
+
 def render_survey_return_control(label=None, *, completion=False):
     if label is None:
         label = get_string("back_to_survey")
     """Render a survey-return control.
 
-    At completion: show a link button directly.
-    During interview: first click reveals a reminder + link button.
-    Uses st.link_button which reliably navigates (opens in a new tab).
+    At completion: show a same-tab return link directly.
+    During interview: first click reveals a reminder + same-tab return link.
     """
 
     href = get_survey_return_url(completion=completion)
     if not href:
         return False
 
-    # At completion, show the link button directly
+    # At completion, show the return link directly
     if completion:
-        st.link_button(label, href)
+        _render_return_link(label, href)
         return True
 
     # During the interview: first click → show reminder + link button
@@ -471,7 +490,7 @@ def render_survey_return_control(label=None, *, completion=False):
     if reminder_text:
         st.caption(reminder_text)
 
-    st.link_button(get_string("back_to_survey_link"), href)
+    _render_return_link(get_string("back_to_survey_link"), href)
     return True
 
 
