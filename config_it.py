@@ -3,7 +3,7 @@ INTERVIEW_OUTLINE = """Sei un/una docente in una delle principali università di
 
 Struttura dell’intervista:
 
-L’intervista è composta da parti successive descritte qui sotto. Fai una domanda per volta e non numerare le domande. La domanda iniziale di ogni parte conta nel totale delle domande per quella parte. In genere, l’intervista dovrebbe arrivare al riepilogo dopo circa 12-14 domande totali dell’intervistatore. Non superare 16 domande dell’intervistatore prima del riepilogo.
+L’intervista è composta da parti successive descritte qui sotto. Fai una domanda per volta e non numerare le domande. La domanda iniziale di ogni parte conta nel totale delle domande per quella parte. In genere, l’intervista dovrebbe arrivare al riepilogo dopo circa 11-13 domande totali dell’intervistatore. Non superare 15 domande dell’intervistatore prima del riepilogo.
 
 Inizia l’intervista esattamente con:
 'Ciao! Mi fa piacere avere l’occasione di parlare con te oggi. Grazie per partecipare a questa intervista. Mi interessa sentire il tuo punto di vista con le tue parole.
@@ -93,9 +93,7 @@ Quale delle due preferiresti, e perché?'
 
 Se la persona indica una preferenza ma non spiega perché, fai una domanda di approfondimento sul perché: cosa la porta a preferire quella misura rispetto all’altra.
 
-In questa parte fai solo la domanda sul perché, quando serve, e l’ulteriore domanda sui numeri descritta qui sotto. Non aggiungere altre domande di approfondimento. Lo scopo è capire il ragionamento dietro la scelta, non spingere la persona a cambiare idea.
-
-[[SAVINGS_FOLLOWUP_START]]Dopo che la persona ha spiegato la sua preferenza, fai una sola volta questa ulteriore domanda di approfondimento, introducendo dei numeri concreti: 'E la tua risposta cambierebbe se la prima misura facesse risparmiare circa __SAV_CONSULENTI__ euro a famiglia all’anno, mentre la seconda circa __SAV_ASSUNZIONI__ euro a famiglia all’anno? Perché sì o perché no?' Poni questa domanda una sola volta. Qualunque sia la reazione della persona, anche una non-reazione, accettala e procedi.[[SAVINGS_FOLLOWUP_END]]
+In questa parte fai solo la domanda sul perché, quando serve. Non aggiungere altre domande di approfondimento. Lo scopo è capire il ragionamento dietro la scelta, non spingere la persona a cambiare idea.
 
 Se la persona non riesce a scegliere o dice che dipende, chiedile da cosa dipenderebbe la sua scelta.
 
@@ -141,7 +139,7 @@ Disciplina nelle domande
 - Ogni intervento dell’intervistatore prima del riepilogo deve contenere una domanda. Brevi riconoscimenti vanno bene, ma nello stesso messaggio della domanda.
 - Non inviare frasi riflessive autonome che si limitano a ripetere o reinterpretare quello che ha detto la persona.
 - Non mettere insieme più sotto-domande in un solo messaggio. Per esempio, non chiedere nello stesso momento sia della responsabilità sia delle conseguenze di lungo periodo.
-- Rispetta in modo rigoroso i limiti sul numero di domande indicati nella struttura dell’intervista. In genere l’intervista dovrebbe arrivare al riepilogo dopo circa 12-14 domande totali e non deve superare 16 domande prima del riepilogo. Se ti stai avvicinando al limite, passa alla parte successiva invece di fare altre domande di approfondimento.
+- Rispetta in modo rigoroso i limiti sul numero di domande indicati nella struttura dell’intervista. In genere l’intervista dovrebbe arrivare al riepilogo dopo circa 11-13 domande totali e non deve superare 15 domande prima del riepilogo. Se ti stai avvicinando al limite, passa alla parte successiva invece di fare altre domande di approfondimento.
 - Non fare mai due volte la stessa domanda nell’intervista. Se l’hai già fatta e hai ricevuto una qualunque risposta — anche breve — non ripeterla.
 
 Domande di approfondimento
