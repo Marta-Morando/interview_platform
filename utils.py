@@ -332,6 +332,68 @@ def get_cached_qualtrics_response_id():
     return None
 
 
+SAVINGS_FOLLOWUP_START = "[[SAVINGS_FOLLOWUP_START]]"
+SAVINGS_FOLLOWUP_END = "[[SAVINGS_FOLLOWUP_END]]"
+
+
+def get_cached_conjoint_savings():
+    """Return the two conjoint savings figures as strings: (consulenti, assunzioni).
+
+    They arrive on the interview link as the 'sav_consulenti' and 'sav_assunzioni'
+    URL parameters, mirroring the amounts the Qualtrics conjoint randomized for this
+    respondent (currently one of 135, 175, 215 euros per household per year). They are
+    cached in session state so they survive Streamlit reruns that drop query params.
+    Returns (None, None) if either value is missing or still an unresolved Qualtrics
+    piped-text literal.
+    """
+
+    values = []
+    for name, cache_key in (
+        ("sav_consulenti", "_cached_sav_consulenti"),
+        ("sav_assunzioni", "_cached_sav_assunzioni"),
+    ):
+        value = get_query_param(name)
+        if value and not value.startswith("${"):
+            digits = "".join(ch for ch in value if ch.isdigit())
+            if digits:
+                st.session_state[cache_key] = digits
+                values.append(digits)
+                continue
+        values.append(st.session_state.get(cache_key))
+
+    if values[0] and values[1]:
+        return values[0], values[1]
+    return None, None
+
+
+def get_system_prompt():
+    """Return the system prompt with the Part IV conjoint follow-up resolved.
+
+    If per-respondent savings figures were supplied on the interview link, the optional
+    savings follow-up is kept with the figures substituted in. Otherwise that follow-up
+    is removed entirely, so the interviewer never invents numbers.
+    """
+
+    prompt = _get_config().SYSTEM_PROMPT
+    sav_consulenti, sav_assunzioni = get_cached_conjoint_savings()
+
+    if sav_consulenti and sav_assunzioni:
+        prompt = prompt.replace(SAVINGS_FOLLOWUP_START, "").replace(
+            SAVINGS_FOLLOWUP_END, ""
+        )
+        prompt = prompt.replace("__SAV_CONSULENTI__", sav_consulenti)
+        prompt = prompt.replace("__SAV_ASSUNZIONI__", sav_assunzioni)
+    else:
+        start = prompt.find(SAVINGS_FOLLOWUP_START)
+        end = prompt.find(SAVINGS_FOLLOWUP_END)
+        if start != -1 and end != -1:
+            # Drop the blank line that preceded the block too, to avoid a double gap.
+            cut_start = start - 2 if prompt[:start].endswith("\n\n") else start
+            prompt = prompt[:cut_start] + prompt[end + len(SAVINGS_FOLLOWUP_END):]
+
+    return prompt
+
+
 def get_survey_return_url(*, completion=False):
     """Build the URL to return the respondent to Qualtrics.
 
@@ -663,13 +725,13 @@ def add_messages_to_api_kwargs(api, client_kwargs):
     if api == "openai":
         client_kwargs_transformed["input"] = client_kwargs_transformed.pop("messages")
         client_kwargs_transformed["input"].insert(
-            0, {"role": "developer", "content": _get_config().SYSTEM_PROMPT}
+            0, {"role": "developer", "content": get_system_prompt()}
         )
 
     # For the Azure API, add system prompt
     elif api == "azure":
         client_kwargs_transformed["messages"].insert(
-            0, {"role": "system", "content": _get_config().SYSTEM_PROMPT}
+            0, {"role": "system", "content": get_system_prompt()}
         )
 
     # For the Google API, rename "messages" to "contents", add required initial user
@@ -1094,6 +1156,7 @@ def save_metadata(metadata_directory, api_kwargs, admin_alias):
         survey_return_url_supplied = bool(
             get_query_param(getattr(_get_config(), "RETURN_URL_PARAM", "return_url"))
         )
+        sav_consulenti, sav_assunzioni = get_cached_conjoint_savings()
         external_context_lines = []
         if external_response_id:
             external_context_lines.append(
@@ -1101,6 +1164,11 @@ def save_metadata(metadata_directory, api_kwargs, admin_alias):
             )
         if survey_return_url_supplied:
             external_context_lines.append("Survey return URL supplied: yes")
+        if sav_consulenti and sav_assunzioni:
+            external_context_lines.append(
+                f"Conjoint savings shown (consulenti / assunzioni): "
+                f"{sav_consulenti} / {sav_assunzioni} euros per household per year"
+            )
         external_context_text = (
             "\n".join(external_context_lines) + "\n\n---\n\n"
             if external_context_lines
@@ -1127,7 +1195,7 @@ Total interviewer messages: {assistant_messages}
 
 System prompt:
 
-{_get_config().SYSTEM_PROMPT}
+{get_system_prompt()}
 """
 
         # --- DROPBOX STORAGE ---

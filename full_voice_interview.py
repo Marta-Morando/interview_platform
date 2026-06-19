@@ -24,6 +24,7 @@ import config
 from utils import (
     apply_readable_app_styles,
     check_password,
+    get_system_prompt,
     has_survey_return_target,
     initialize_survey_username,
     is_valid_username,
@@ -206,7 +207,7 @@ transcript_container = st.container()
 if not st.session_state.messages and st.session_state.interview_active:
     with transcript_container:
         st.session_state.messages.append(
-            {"role": "system", "content": config.SYSTEM_PROMPT}
+            {"role": "system", "content": get_system_prompt()}
         )
         with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
             message_placeholder = st.empty()

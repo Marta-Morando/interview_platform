@@ -21,6 +21,7 @@ config = _config_it if get_lang() == "it" else _config_en
 from utils import (
     apply_readable_app_styles,
     check_password,
+    get_system_prompt,
     has_survey_return_target,
     initialize_survey_username,
     is_valid_username,
@@ -189,7 +190,7 @@ elif config.API == "anthropic":
     import anthropic
 
     client = anthropic.Anthropic(api_key=get_secret("KEY_ANTHROPIC"))
-    api_kwargs["system"] = config.SYSTEM_PROMPT
+    api_kwargs["system"] = get_system_prompt()
     # Set max tokens default if no value set in config.py
     api_kwargs.setdefault("max_tokens", 4096)
 
@@ -197,7 +198,7 @@ elif config.API == "google":
     from google import genai
 
     client = genai.Client(api_key=get_secret("KEY_GOOGLE"))
-    api_kwargs.setdefault("config", {})["system_instruction"] = config.SYSTEM_PROMPT
+    api_kwargs.setdefault("config", {})["system_instruction"] = get_system_prompt()
 
 
 elif config.API == "azure":
