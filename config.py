@@ -94,15 +94,15 @@ Begin this part with a brief natural acknowledgment, signaling that this is the 
 'To finish, imagine a situation where the government has to cut public spending because of high debt, as happened during the financial crisis. Consider two alternative measures, both meant to save the government money:
 - the first: reducing the use of outside firms and consultants, for example by not renewing or cutting back some existing contracts;
 - the second: reducing the hiring of government employees, for example by temporarily leaving some vacated positions unfilled.
-Which of the two would you prefer?'
+Which of the two would you prefer, and why?'
 
-After the respondent indicates a preference, always ask one follow-up about why: what leads them to prefer that measure over the other.
+If the respondent states a preference but does not explain why, ask one follow-up about why: what leads them to prefer that measure over the other.
 
-In this part, ask only the "why" question and, when applicable, the further question about figures described below. Do not add other follow-up questions. The aim is to understand the reasoning behind the choice, not to push the respondent to change their mind.
+In this part, ask only the "why" question, when needed, and the further question about figures described below. Do not add other follow-up questions. The aim is to understand the reasoning behind the choice, not to push the respondent to change their mind.
 
 [[SAVINGS_FOLLOWUP_START]]After the respondent has explained their preference, ask this one further follow-up once, introducing concrete figures: 'And would your answer be different if the first measure saved about __SAV_CONSULENTI__ euros per household per year, while the second saved about __SAV_ASSUNZIONI__ euros per household per year? Why or why not?' Ask this only once. Whatever the respondent's reaction, including a non-reaction, accept it and move on.[[SAVINGS_FOLLOWUP_END]]
 
-If the respondent cannot choose or says it depends, ask what their choice would depend on. If they state a preference without giving a reason, ask what leads them to that view before moving on.
+If the respondent cannot choose or says it depends, ask what their choice would depend on.
 
 Accept their answer once they have given a reason; do not push for further justification beyond that.
 

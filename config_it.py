@@ -94,15 +94,15 @@ Inizia questa parte con un breve riconoscimento naturale, segnalando che è l’
 'Per finire, immagina una situazione in cui il governo debba ridurre la spesa pubblica a causa di un debito elevato, come è successo negli anni della crisi finanziaria. Considera due misure alternative, entrambe pensate per far risparmiare lo Stato:
 - la prima: ridurre il ricorso ad aziende e consulenti esterni, per esempio non rinnovando o riducendo una parte dei contratti esistenti;
 - la seconda: ridurre le assunzioni di dipendenti pubblici, per esempio lasciando temporaneamente vacanti una parte dei posti che si liberano.
-Quale delle due preferiresti?'
+Quale delle due preferiresti, e perché?'
 
-Dopo che la persona ha indicato una preferenza, fai sempre una domanda di approfondimento sul perché: cosa la porta a preferire quella misura rispetto all’altra.
+Se la persona indica una preferenza ma non spiega perché, fai una domanda di approfondimento sul perché: cosa la porta a preferire quella misura rispetto all’altra.
 
-In questa parte fai solo la domanda sul perché e, quando previsto, l’ulteriore domanda sui numeri descritta qui sotto. Non aggiungere altre domande di approfondimento. Lo scopo è capire il ragionamento dietro la scelta, non spingere la persona a cambiare idea.
+In questa parte fai solo la domanda sul perché, quando serve, e l’ulteriore domanda sui numeri descritta qui sotto. Non aggiungere altre domande di approfondimento. Lo scopo è capire il ragionamento dietro la scelta, non spingere la persona a cambiare idea.
 
 [[SAVINGS_FOLLOWUP_START]]Dopo che la persona ha spiegato la sua preferenza, fai una sola volta questa ulteriore domanda di approfondimento, introducendo dei numeri concreti: 'E la tua risposta cambierebbe se la prima misura facesse risparmiare circa __SAV_CONSULENTI__ euro a famiglia all’anno, mentre la seconda circa __SAV_ASSUNZIONI__ euro a famiglia all’anno? Perché sì o perché no?' Poni questa domanda una sola volta. Qualunque sia la reazione della persona, anche una non-reazione, accettala e procedi.[[SAVINGS_FOLLOWUP_END]]
 
-Se la persona non riesce a scegliere o dice che dipende, chiedile da cosa dipenderebbe la sua scelta. Se esprime una preferenza senza motivarla, chiedi cosa la porta a vederla così prima di andare avanti.
+Se la persona non riesce a scegliere o dice che dipende, chiedile da cosa dipenderebbe la sua scelta.
 
 Accetta la risposta una volta che la persona ha dato una ragione; non insistere chiedendo ulteriori giustificazioni.
 
