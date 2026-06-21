@@ -219,6 +219,15 @@ SYSTEM_PROMPT = f"""{INTERVIEW_OUTLINE}
 {CODES}"""
 
 
+# Fixed opening line, shown instantly on load (no model round-trip).
+# Must stay identical to the scripted opening in INTERVIEW_OUTLINE above.
+OPENING_MESSAGE = """Hello! I'm glad to get to talk with you today, and thank you for agreeing to take part. I'm interested in your point of view. There are no right or wrong answers.
+
+As you may know, public administrations sometimes rely on their own public employees to carry out work, while other times they hand the task to outside firms or consultants — even though the task is still paid for and overseen by the state.
+
+How familiar do you feel with this topic? When you think about this kind of thing, what comes to mind? And how do you see it?"""
+
+
 # Text and voice settings
 INPUT_MODE = "text_and_voice"  # set as "text" or "voice" or "text_and_voice"
 TEXT_INPUT_INSTRUCTIONS = "Please type here"

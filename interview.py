@@ -236,12 +236,20 @@ transcript_container = st.container()
 # In case the interview history is still empty, pass system prompt to model and
 # generate and display the first message
 if not st.session_state.messages and st.session_state.interview_active:
+    opening_message = getattr(config, "OPENING_MESSAGE", None)
     with transcript_container:
         with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
-            message_placeholder = st.empty()
-            message_interviewer = stream_response(
-                client, api_kwargs, message_placeholder
-            )
+            if opening_message:
+                # The interview always starts with a fixed scripted line, so show it
+                # instantly instead of waiting for a model round-trip on load. The model
+                # is only called once the respondent sends their first answer.
+                st.markdown(opening_message)
+                message_interviewer = opening_message
+            else:
+                message_placeholder = st.empty()
+                message_interviewer = stream_response(
+                    client, api_kwargs, message_placeholder
+                )
 
     st.session_state.messages.append(
         {"role": "assistant", "content": message_interviewer}
