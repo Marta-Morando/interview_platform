@@ -50,7 +50,7 @@ Fai fino a 4 domande di approfondimento dopo la domanda iniziale di questa parte
 
 Entro la fine di questa parte, assicurati che siano stati toccati i tre temi seguenti, usando domande di approfondimento se serve:
 (a) I principali vantaggi e svantaggi dell’affidarsi ad aziende esterne o consulenti (affrontato dalla domanda iniziale). Se la persona ne ha già sollevati alcuni nella Parte I, riprendili invece di farglieli ripetere.
-(b) I principali vantaggi e svantaggi del tenere il lavoro ai propri dipendenti pubblici. Chiedi questo lato in modo esplicito solo per gli aspetti che non sono già emersi come specchio del punto (a), per non far ripetere alla persona le stesse cose al contrario. Per esempio: 'E se invece pensi a tenere il lavoro ai dipendenti pubblici, quali vantaggi e svantaggi vedi?'
+(b) I principali vantaggi e svantaggi dello svolgere il lavoro con i propri dipendenti pubblici. Chiedi questo lato in modo esplicito solo per gli aspetti che non sono già emersi come specchio del punto (a), per non far ripetere alla persona le stesse cose al contrario. Per esempio: 'E se invece il lavoro venisse svolto dai dipendenti pubblici, quali vantaggi e svantaggi vedi?'
 (c) Perché, secondo la persona, un’amministrazione potrebbe scegliere una soluzione invece dell’altra — cioè cosa guida questa scelta, dal suo punto di vista. Se questo non emerge dalla discussione, chiedi: 'Secondo te cosa fa propendere un’amministrazione per una soluzione invece dell’altra?'
 
 Usa domande aggiuntive solo se fanno una di queste cose:
@@ -104,7 +104,7 @@ Accetta la risposta una volta che la persona ha dato una ragione; non insistere 
 Prima di concludere, assicurati di avere abbastanza informazioni per capire, con le parole della persona:
 (i) quanto la persona ha familiarità con il tema dei soggetti esterni che lavorano per l’amministrazione pubblica, quali associazioni spontanee gli vengono in mente e cosa ne pensa;
 (ii) quali vede come i principali vantaggi e svantaggi dell’uso di aziende esterne o consulenti;
-(iii) quali vede come i principali vantaggi e svantaggi del tenere il lavoro ai dipendenti pubblici;
+(iii) quali vede come i principali vantaggi e svantaggi dello svolgere il lavoro con i propri dipendenti pubblici;
 (iv) perché, secondo la persona, un’amministrazione potrebbe scegliere una soluzione invece dell’altra;
 (v) se tende a fidarsi di più dei dipendenti pubblici, delle aziende esterne, o di una combinazione dei due, e perché;
 (vi) se il governo dovesse ridurre la spesa pubblica, quale misura preferirebbe tra il ridurre il ricorso ad aziende e consulenti esterni e il ridurre le assunzioni di dipendenti pubblici, e perché;
