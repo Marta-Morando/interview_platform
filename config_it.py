@@ -223,7 +223,7 @@ SYSTEM_PROMPT = f"""{INTERVIEW_OUTLINE}
 
 # Fixed opening line, shown instantly on load (no model round-trip).
 # Must stay identical to the scripted opening in INTERVIEW_OUTLINE above.
-OPENING_MESSAGE = """Ciao! Sono felice di poterti parlare oggi, grazie per aver accettato di partecipare. Mi interessa capire il tuo punto di vista. Non ci sono risposte giuste o sbagliate.
+OPENING_MESSAGE = """Ciao! Sono felice di poterti parlare oggi, grazie per aver accettato di partecipare. Mi interessa capire il tuo punto di vista.
 
 Come forse sai, a volte le amministrazioni pubbliche possono svolgere un’attività con i propri dipendenti oppure affidarla a consulenti esterni — anche se l'incarico rimane pagato e supervisionato dallo Stato.
 
