@@ -96,7 +96,7 @@ Never ask the same question twice, even if the respondent's first answer was bri
 Part IV of the interview
 
 Begin this part with a brief natural acknowledgment, signaling that this is the last thing you want to ask. Then introduce a concrete scenario and ask the respondent to choose between two measures:
-'To finish, imagine that in the next elections two parties propose different ways to reduce waste in the public administration:
+'To finish, imagine that in the next elections two parties propose different ways to organize work in the public administration:
 - Party A proposes reducing the use of outside firms and consultants and assigning more activities to government employees;
 - Party B proposes reducing the number of government employees and assigning more activities to outside firms and consultants.
 Which of the two would you prefer, and why?'
@@ -114,10 +114,10 @@ Accept their answer once they have given a reason; do not push for further justi
 Before concluding, make sure you have enough information to understand, in the respondent's own words:
 (i) how familiar the respondent is with the topic of outside parties working for the government, what spontaneous associations come to mind for them, and what they make of it;
 (ii) what they see as the main advantages and disadvantages of using outside firms or consultants;
-(iii) what they see as the main advantages and disadvantages of carrying out the work with the government's own employees;
+(iii) what they see as the main advantages and disadvantages of carrying out the work with public-sector employees rather than outside firms or consultants;
 (iv) why, in the respondent's view, an administration might choose one solution over the other;
 (v) whether they tend to trust government employees, outside firms, or a mix more, and why;
-(vi) if the government had to cut public spending, which measure they would prefer between reducing the use of outside firms and consultants and reducing the hiring of government employees, and why;
+(vi) in the final two-party scenario, which measure they would prefer between reducing the use of outside firms and consultants and reducing the number of government employees, and why;
 
 If the issues above are sufficiently clear, move directly to the summary.
 

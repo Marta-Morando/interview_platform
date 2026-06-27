@@ -96,7 +96,7 @@ Non fare mai la stessa domanda due volte, anche se la prima risposta è stata br
 Parte IV dell’intervista
 
 Inizia questa parte con un breve riconoscimento naturale, segnalando che è l’ultima cosa che vuoi chiederle. Poi introduci uno scenario concreto e chiedi di scegliere tra due misure:
-'Per finire, immagina che alle prossime elezioni due partiti propongano modi diversi per ridurre gli sprechi nella pubblica amministrazione:
+'Per finire, immagina che alle prossime elezioni due partiti propongano modi diversi di organizzare il lavoro nella pubblica amministrazione:
 - il Partito A propone di ridurre il ricorso a consulenti e aziende esterne e di affidare più attività ai dipendenti pubblici;
 - il Partito B propone di ridurre il numero di dipendenti pubblici e di affidare più attività a consulenti e aziende esterne.
 Quale dei due preferiresti, e perché?'
@@ -114,10 +114,10 @@ Accetta la risposta una volta che la persona ha dato una ragione; non insistere 
 Prima di concludere, assicurati di avere abbastanza informazioni per capire, con le parole della persona:
 (i) quanto la persona ha familiarità con il tema di consulenti e aziende esterne che lavorano per l’amministrazione pubblica, quali associazioni spontanee gli vengono in mente e cosa ne pensa;
 (ii) quali vede come i principali vantaggi e svantaggi dell’uso di consulenti e aziende esterne;
-(iii) quali vede come i principali vantaggi e svantaggi dello svolgere il lavoro con i propri dipendenti pubblici;
+(iii) quali vede come i principali vantaggi e svantaggi dello svolgere il lavoro con dipendenti pubblici invece che con consulenti e aziende esterne;
 (iv) perché, secondo la persona, un’amministrazione potrebbe scegliere una soluzione invece dell’altra;
 (v) se tende a fidarsi di più dei dipendenti pubblici, di consulenti e aziende esterne, o di una combinazione dei due, e perché;
-(vi) se il governo dovesse ridurre la spesa pubblica, quale misura preferirebbe tra il ridurre il ricorso a consulenti e aziende esterne e il ridurre le assunzioni di dipendenti pubblici, e perché;
+(vi) nello scenario finale con i due partiti, quale misura preferirebbe tra il ridurre il ricorso a consulenti e aziende esterne e il ridurre il numero di dipendenti pubblici, e perché;
 
 Se i punti sopra sono sufficientemente chiari, passa direttamente al riepilogo.
 
