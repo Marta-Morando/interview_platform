@@ -860,6 +860,37 @@ def stream_response(client, client_kwargs, message_placeholder, minimum_characte
 DROPBOX_BASE_PATH = "/projects/consulting/survey/ai_interview/data/raw"
 
 
+def _load_backup_data(backups_directory):
+    """Fetch the current user's backup once and reuse it within the session.
+
+    Both is_interview_completed() and load_backup() need the same backup file on
+    the first load. Without this, each downloads it separately, adding an extra
+    Dropbox round-trip before the first question appears. The parsed data is
+    cached in session_state and fetched at most once per session.
+
+    Returns the parsed backup dict, or None if no backup exists.
+    """
+    if "_backup_data_cache" in st.session_state:
+        return st.session_state["_backup_data_cache"]
+
+    data = None
+    try:
+        if dropbox_storage.is_dropbox_enabled():
+            backup_path = f"{DROPBOX_BASE_PATH}/backups/{st.session_state.username}.json"
+            data = dropbox_storage.download_json(backup_path)
+        else:
+            with open(
+                os.path.join(backups_directory, f"{st.session_state.username}.json"),
+                "r",
+            ) as f:
+                data = json.load(f)
+    except Exception:
+        data = None
+
+    st.session_state["_backup_data_cache"] = data
+    return data
+
+
 def load_backup(backups_directory):
     """Load backup data for the current user, from Dropbox if enabled or from disk.
 
@@ -891,32 +922,11 @@ def load_backup(backups_directory):
     # Try to load backup data if it exists
     try:
 
-        # --- DROPBOX STORAGE ---
-        if dropbox_storage.is_dropbox_enabled():
-            dropbox_path = f"{DROPBOX_BASE_PATH}/backups/{st.session_state.username}.json"
-            data = dropbox_storage.download_json(dropbox_path)
-            if data is None and not dropbox_storage.is_dropbox_enabled():
-                with open(
-                    os.path.join(
-                        backups_directory,
-                        f"{st.session_state.username}.json",
-                    ),
-                    "r",
-                ) as f:
-                    data = json.load(f)
-            elif data is None:
-                raise FileNotFoundError("No backup found in Dropbox")
-
-        # --- LOCAL STORAGE (original behaviour) ---
-        else:
-            with open(
-                os.path.join(
-                    backups_directory,
-                    f"{st.session_state.username}.json",
-                ),
-                "r",
-            ) as f:
-                data = json.load(f)
+        # Fetch the backup once (cached per session) so is_interview_completed
+        # and load_backup do not each download the same file from Dropbox.
+        data = _load_backup_data(backups_directory)
+        if data is None:
+            raise FileNotFoundError("No backup found")
 
         # Number of user answers given by text vs voice input
         num_text_and_voice_answers = data["num_text_and_voice_answers"]
@@ -1273,22 +1283,13 @@ def is_interview_completed(metadata_directory, backups_directory):
         metadata_path = f"{DROPBOX_BASE_PATH}/metadata/{username}.txt"
         if dropbox_storage.file_exists(metadata_path):
             return True
+    else:
+        metadata_path = os.path.join(metadata_directory, f"{username}.txt")
+        if os.path.exists(metadata_path):
+            return True
 
-        backup_path = f"{DROPBOX_BASE_PATH}/backups/{username}.json"
-        backup_data = dropbox_storage.download_json(backup_path) or {}
-        return backup_contains_closing_code(backup_data.get("messages", []))
-
-    metadata_path = os.path.join(metadata_directory, f"{username}.txt")
-    if os.path.exists(metadata_path):
-        return True
-
-    backup_path = os.path.join(backups_directory, f"{username}.json")
-    try:
-        with open(backup_path, "r") as f:
-            backup_data = json.load(f)
-    except Exception:
-        return False
-
+    # Reuse the cached backup so we do not download it a second time.
+    backup_data = _load_backup_data(backups_directory) or {}
     return backup_contains_closing_code(backup_data.get("messages", []))
 
 
