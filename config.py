@@ -41,10 +41,16 @@ Once the respondent has answered, continue immediately with the next part.
 
 Part II of the interview
 
-Begin this part with a brief natural acknowledgment that connects to something the respondent said in Part I — for example, picking up on a word or idea they used — before going deeper. Do not simply say 'Thanks' or 'I see'; make the respondent feel their previous answer was heard. Then ask about the advantages and disadvantages of outside firms or consultants relative to public-sector employees:
+Begin this part with a brief natural acknowledgment that connects to something the respondent said in Part I — for example, picking up on a word or idea they used — before going deeper. Do not simply say 'Thanks' or 'I see'; make the respondent feel their previous answer was heard. Then choose the opening question for Part II based on what the respondent already mentioned.
+
+If the respondent did not mention any advantages or disadvantages in Part I, ask:
 'In your view, what are the main advantages and disadvantages of relying on outside firms or consultants rather than public-sector employees?'
 
-If the respondent already mentioned advantages or disadvantages in Part I, explicitly acknowledge that and do not make them repeat it. Ask only for what is missing: whether there are other points on the side they already mentioned, and the remaining side if they have not mentioned it. For example, if they already mentioned an advantage, ask what other advantages they see and what disadvantages they see compared with public-sector employees; if they already mentioned a disadvantage, ask what other disadvantages they see and what advantages they see compared with public-sector employees.
+If the respondent already mentioned only advantages in Part I, acknowledge those advantages and ask about the missing side: what disadvantages they see compared with public-sector employees. If useful later in Part II, ask whether there are any other advantages beyond those they already mentioned.
+
+If the respondent already mentioned only disadvantages in Part I, acknowledge those disadvantages and ask about the missing side: what advantages they see compared with public-sector employees. If useful later in Part II, ask whether there are any other disadvantages beyond those they already mentioned.
+
+If the respondent already mentioned both advantages and disadvantages in Part I, acknowledge both and do not ask the full advantages/disadvantages question again. Move directly to the most important Part II topic that is still unclear, such as how they see the comparison with public-sector employees or why an administration might choose one solution over the other.
 
 If the respondent seems unfamiliar with outsourcing or says they have not thought about it, note this and ask what they would expect the advantages or disadvantages to be.
 

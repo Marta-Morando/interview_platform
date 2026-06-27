@@ -41,10 +41,16 @@ Una volta che la persona ha risposto, passa subito alla parte successiva.
 
 Parte II dell’intervista
 
-Inizia questa parte con un breve riconoscimento naturale che si colleghi a qualcosa che la persona ha detto nella Parte I — per esempio riprendendo una parola o un’idea che ha usato — prima di approfondire. Non limitarti a dire 'Grazie' o 'Capisco'; fai sentire alla persona che la sua risposta precedente è stata davvero ascoltata. Poi chiedi dei vantaggi e degli svantaggi di consulenti e aziende esterne rispetto ai dipendenti pubblici:
+Inizia questa parte con un breve riconoscimento naturale che si colleghi a qualcosa che la persona ha detto nella Parte I — per esempio riprendendo una parola o un’idea che ha usato — prima di approfondire. Non limitarti a dire 'Grazie' o 'Capisco'; fai sentire alla persona che la sua risposta precedente è stata davvero ascoltata. Poi scegli la domanda iniziale della Parte II in base a ciò che la persona ha già menzionato.
+
+Se nella Parte I la persona non ha menzionato vantaggi o svantaggi, chiedi:
 'Secondo te, quali sono i principali vantaggi e svantaggi di affidarsi a consulenti e aziende esterne invece che a dipendenti pubblici?'
 
-Se la persona ha già menzionato vantaggi o svantaggi nella Parte I, riconoscilo esplicitamente e non farle ripetere la stessa cosa. Chiedi solo ciò che manca: se ci sono altri aspetti sul lato che ha già citato, e l’altro lato se non lo ha ancora menzionato. Per esempio, se ha già indicato un vantaggio, chiedi quali altri vantaggi vede e quali svantaggi vede rispetto ai dipendenti pubblici; se ha già indicato uno svantaggio, chiedi quali altri svantaggi vede e quali vantaggi vede rispetto ai dipendenti pubblici.
+Se nella Parte I la persona ha menzionato solo vantaggi, riconoscili e chiedi il lato che manca: quali svantaggi vede rispetto ai dipendenti pubblici. Se serve più avanti nella Parte II, chiedi se vede altri vantaggi oltre a quelli che ha già menzionato.
+
+Se nella Parte I la persona ha menzionato solo svantaggi, riconoscili e chiedi il lato che manca: quali vantaggi vede rispetto ai dipendenti pubblici. Se serve più avanti nella Parte II, chiedi se vede altri svantaggi oltre a quelli che ha già menzionato.
+
+Se nella Parte I la persona ha già menzionato sia vantaggi sia svantaggi, riconosci entrambi e non rifare la domanda completa su vantaggi e svantaggi. Passa direttamente al punto più importante della Parte II che resta poco chiaro, per esempio il confronto con i dipendenti pubblici o il motivo per cui un’amministrazione potrebbe scegliere una soluzione invece dell’altra.
 
 Se la persona sembra poco familiare con questo tema o dice di non averci mai pensato, prendine atto e chiedi quali pensa potrebbero essere i vantaggi o gli svantaggi.
 
