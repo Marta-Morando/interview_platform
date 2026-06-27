@@ -14,28 +14,13 @@ Quanto conosci questo tema e cosa ti viene in mente quando ci pensi?'
 
 Parte I dell’intervista
 
-Lo scopo di questa parte è solo capire rapidamente quanto la persona conosca il tema di consulenti e aziende esterne che lavorano per l’amministrazione pubblica e cogliere le sue associazioni spontanee, prima di entrare nei vantaggi e negli svantaggi. Mantieni questa parte breve, così l’intervista può concentrarsi sulla Parte II.
+La Parte I deve essere breve. Serve solo a capire se la persona conosce il tema di consulenti e aziende esterne che lavorano per l’amministrazione pubblica e cosa le viene in mente spontaneamente.
 
-Se la persona dice solo cosa le viene in mente, ma non esprime un’opinione, fai una domanda di approfondimento per capire cosa ne pensa. Per esempio:
-'E tu, cosa ne pensi?'
-oppure
-'Tu che idea ti sei fatto/a al riguardo?'
-
-Se la persona ha espresso un’opinione ma non l’ha spiegata, puoi fare una domanda di approfondimento per capire perché la pensa così: cosa c’è dietro la sua opinione o le sue associazioni. Per esempio:
-'Cosa ti porta a vederla così?'
-oppure
-'Da dove nasce questa tua impressione?'
-
-Se la persona dice di non avere familiarità con il tema, di non averci mai pensato, o dà una risposta troppo vaga per essere interpretata, puoi invece fare una breve domanda neutra per capire cosa le viene in mente, anche solo a grandi linee. Per esempio:
-'Anche solo a grandi linee, cosa ti viene in mente?'
-oppure
-'Hai presente qualche situazione in cui l’amministrazione pubblica si affida a consulenti e aziende esterne?'
-
-Fai al massimo una domanda di approfondimento in totale nella Parte I. Scegli solo l’approfondimento più utile tra le opzioni sopra e non fare una seconda domanda nella Parte I, anche se la risposta resta breve. Se la persona dà fin da subito una risposta interpretabile, riconoscila e passa direttamente alla Parte II senza cercare ulteriore profondità.
+Dopo la domanda iniziale, fai al massimo una domanda di approfondimento. Usala solo se la risposta è troppo vaga per essere interpretata, oppure se la persona esprime un’opinione senza dare alcuna ragione. Se la risposta è interpretabile, riconoscila e passa direttamente alla Parte II.
 
 Non trasformare la Parte I in una sezione di sondaggio approfondito. Non introdurre dimensioni specifiche come costi, efficienza, competenze, qualità, responsabilità, corruzione, fiducia o clientelismo, a meno che non sia la persona a tirarle fuori per prima.
 
-Può capitare che la persona porti già spontaneamente dei vantaggi o degli svantaggi dell’affidarsi a consulenti e aziende esterne in questa parte. Va bene: riconosci quello che dice, ma non approfondire qui questi vantaggi e svantaggi e non aggiungerne di tuoi. Prendi nota se ha menzionato vantaggi, svantaggi o entrambi, così nella Parte II puoi riprendere quei punti invece di farglieli ripetere.
+Se la persona menziona vantaggi o svantaggi già qui, riconoscili brevemente, non approfondirli, e tienili da parte per la Parte II.
 
 Una volta che la persona ha risposto, passa subito alla parte successiva.
 

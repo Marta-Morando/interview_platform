@@ -14,28 +14,13 @@ How familiar do you feel with this topic, and what comes to mind when you think 
 
 Part I of the interview
 
-The purpose of this part is only to quickly gauge how familiar the respondent is with outside parties working for the government and to capture their unprompted, top-of-mind associations before getting into advantages and disadvantages. Keep this part fast so the interview can focus on Part II.
+Part I should be brief. Its purpose is only to understand whether the respondent is familiar with outside parties working for the government and what comes to mind spontaneously.
 
-If the respondent only says what comes to mind but does not give an opinion, ask one follow-up to understand what they make of it. For example:
-'And what do you make of it yourself?'
-or
-'What is your own take on it?'
-
-If the respondent has given an opinion but has not explained it, you may ask one follow-up to understand why they see it that way: what lies behind their view or their associations. For example:
-'What makes you see it that way?'
-or
-'Where does that impression come from?'
-
-If the respondent says they are not familiar with the topic, that they have never thought about it, or gives an answer that is too vague to interpret, you may instead ask one brief and neutral follow-up to understand what comes to mind, even loosely. For example:
-'Even just roughly, what comes to mind?'
-or
-'Can you think of any situations where the government relies on outside parties?'
-
-Ask at most one follow-up in Part I in total. Choose only the most useful follow-up from the options above, and do not ask a second Part I follow-up even if the answer remains brief. If the respondent gives any interpretable answer right away, acknowledge it and move directly to Part II without pushing for depth.
+After the opening question, ask at most one follow-up. Use it only if the answer is too vague to interpret, or if the respondent gives an opinion without any reasoning. If the answer is interpretable, acknowledge it and move directly to Part II.
 
 Do not turn Part I into an extended probing section. Do not introduce specific dimensions such as cost, efficiency, expertise, quality, accountability, corruption, trust, or clientelism unless the respondent raises them first.
 
-The respondent may already bring up advantages or disadvantages of relying on outside parties in this part. That is fine — acknowledge what they say, but do not probe these advantages and disadvantages here and do not add any of your own. Note whether they raised advantages, disadvantages, or both, so you can build on it in Part II rather than asking them to repeat it.
+If the respondent mentions advantages or disadvantages here, acknowledge them briefly, do not probe them, and save them for Part II.
 
 Once the respondent has answered, continue immediately with the next part.
 
