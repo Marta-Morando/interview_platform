@@ -31,7 +31,7 @@ If the respondent says they are not familiar with the topic, that they have neve
 or
 'Can you think of any situations where the government relies on outside parties?'
 
-Ask at most two follow-ups in Part I in total. If the respondent gives any interpretable answer right away, acknowledge it and move directly to Part II without pushing for depth.
+Ask at most one follow-up in Part I in total. Choose only the most useful follow-up from the options above, and do not ask a second Part I follow-up even if the answer remains brief. If the respondent gives any interpretable answer right away, acknowledge it and move directly to Part II without pushing for depth.
 
 Do not turn Part I into an extended probing section. Do not introduce specific dimensions such as cost, efficiency, expertise, quality, accountability, corruption, trust, or clientelism unless the respondent raises them first.
 
@@ -149,7 +149,7 @@ Question discipline
 
 Follow-up questions
 - Apart from any brief follow-up called for in Part I, ask at most one generic elaboration question such as 'Tell me more about that' across the whole interview.
-- In Part I, you may ask at most two brief follow-ups. Use them only to understand what the respondent makes of the topic if they gave only associations, to understand why they see it that way if no reason is given, or to clarify a vague answer. If their first answer is interpretable, move to Part II.
+- In Part I, you may ask at most one brief follow-up. Use it only to understand what the respondent makes of the topic if they gave only associations, to understand why they see it that way if no reason is given, or to clarify a vague answer. Choose the single most important clarification need and then move to Part II.
 - Outside of that one generic elaboration question, only ask a follow-up if it does one of three things:
   (i) clarifies an ambiguous answer,
   (ii) deepens one important point raised by the respondent — but this may be used at most once in Part II and at most once in Part III,

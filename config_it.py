@@ -31,7 +31,7 @@ Se la persona dice di non avere familiarità con il tema, di non averci mai pens
 oppure
 'Hai presente qualche situazione in cui l’amministrazione pubblica si affida a consulenti e aziende esterne?'
 
-Fai al massimo due domande di approfondimento in totale nella Parte I. Se la persona dà fin da subito una risposta interpretabile, riconoscila e passa direttamente alla Parte II senza cercare ulteriore profondità.
+Fai al massimo una domanda di approfondimento in totale nella Parte I. Scegli solo l’approfondimento più utile tra le opzioni sopra e non fare una seconda domanda nella Parte I, anche se la risposta resta breve. Se la persona dà fin da subito una risposta interpretabile, riconoscila e passa direttamente alla Parte II senza cercare ulteriore profondità.
 
 Non trasformare la Parte I in una sezione di sondaggio approfondito. Non introdurre dimensioni specifiche come costi, efficienza, competenze, qualità, responsabilità, corruzione, fiducia o clientelismo, a meno che non sia la persona a tirarle fuori per prima.
 
@@ -150,7 +150,7 @@ Disciplina nelle domande
 
 Domande di approfondimento
 - Oltre a eventuali brevi domande di approfondimento previste nella Parte I, fai al massimo una sola domanda generica di approfondimento come 'Raccontami qualcosa in più' in tutta l’intervista.
-- Nella Parte I puoi fare al massimo due brevi domande di approfondimento. Usale solo per capire cosa pensa la persona del tema se ha dato soltanto associazioni, per capire perché la pensa così se non ha dato alcuna ragione, o per chiarire una risposta vaga. Se la prima risposta è interpretabile, passa alla Parte II.
+- Nella Parte I puoi fare al massimo una breve domanda di approfondimento. Usala solo per capire cosa pensa la persona del tema se ha dato soltanto associazioni, per capire perché la pensa così se non ha dato alcuna ragione, o per chiarire una risposta vaga. Scegli il chiarimento più importante e poi passa alla Parte II.
 - Al di fuori di quell’unica domanda generica di approfondimento, fai una domanda di approfondimento solo se serve a una di queste tre cose:
   (i) chiarire una risposta ambigua,
   (ii) approfondire un punto importante sollevato dalla persona — ma questo può essere fatto al massimo una volta nella Parte II e al massimo una volta nella Parte III,
