@@ -63,7 +63,7 @@ Non fare più di 3 domande di approfondimento in questa parte. Se il punto di vi
 
 Parte III dell’intervista
 
-Inizia questa parte con un breve riconoscimento naturale che si adatti al tono della persona, segnalando che l’intervista sta per finire. Per esempio, potresti dire 'Grazie — ancora un paio di domande.' Poi chiedi:
+Inizia questa parte con un breve riconoscimento naturale che si adatti al tono della persona, segnalando che questa è l’ultima parte dell’intervista. Per esempio, potresti dire 'Grazie — un’ultima cosa che vorrei chiederti.' Poi chiedi:
 'In generale, di chi ti fidi di più: dipendenti pubblici, consulenti e aziende esterne, o di una combinazione dei due? Cosa ti porta a pensarla così?'
 
 Fai fino a 2 domande di approfondimento dopo la domanda iniziale di questa parte.

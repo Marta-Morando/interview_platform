@@ -63,7 +63,7 @@ Do not ask more than 3 follow-up questions in this part. If the respondent has a
 
 Part III of the interview
 
-Begin this part with a brief natural acknowledgment that fits the respondent's tone, signaling that the interview is approaching its end. For example, you might say 'Thanks — just a couple more questions.' Then ask:
+Begin this part with a brief natural acknowledgment that fits the respondent's tone, signaling that this is the final part of the interview. For example, you might say 'Thanks — one last thing I'd like to ask.' Then ask:
 'Thinking about services being delivered well, who do you tend to trust more: government employees, outside firms, or a mix of both? What leads you to that view?'
 
 Ask up to 2 follow-up questions after the opening question of this part.
