@@ -43,14 +43,13 @@ Ask up to 3 follow-up questions after the opening question of this part. Focus o
 
 By the end of this part, make sure the following three topics have been covered, using follow-up questions as needed:
 (a) The main advantages and disadvantages of relying on outside firms or consultants relative to public-sector employees (addressed by the opening question). If the respondent already raised some of these in Part I, acknowledge them and ask only for other points or for the side they did not mention.
-(b) The main advantages and disadvantages of carrying out the work with public-sector employees rather than outside firms or consultants. By default, treat this as already covered: the advantages of consultants are usually the mirror image of the disadvantages of public employees, and vice versa, so asking it explicitly makes the respondent repeat the same trade-off in reverse. Ask the public-employee side directly only if the respondent's account of consultants left it genuinely unexplored. If you do ask, for example: 'And compared with using outside firms or consultants, what advantages or disadvantages do you see in having public-sector employees do the work?'
+(b) The main advantages and disadvantages of carrying out the work with public-sector employees rather than outside firms or consultants. Do ask about this side. Do not assume it is just the mirror image of point (a): public employees can have distinctive features that are not simply the reverse of a consultant's drawbacks. Ask it so as to invite what is new rather than a mechanical restatement, for example: 'And thinking about public-sector employees doing the work instead, are there advantages or disadvantages you would add that haven't already come up?' If the respondent has clearly already covered the public-employee side while talking about consultants, acknowledge that and do not force them to repeat it in reverse.
 (c) Why, in the respondent's view, an administration might choose one solution over the other — that is, what drives that choice from their point of view. If this does not emerge from the discussion, ask: 'What do you think makes an administration lean toward one solution rather than the other?'
 
 Use additional follow-ups only when they do one of the following:
 - Clarify an ambiguous answer.
 - Deepen one important point the respondent has raised. This may be used at most once in Part II.
 - Ask for the missing side of a trade-off: if the respondent discusses only advantages of consultants relative to public-sector employees, you may ask one short question about possible downsides; if the respondent discusses only disadvantages, you may ask one short question about situations where consultants might work better.
-- If useful, and only if it has not already emerged, you may ask one short follow-up about how the respondent thinks outsourcing leads to the advantage or disadvantage they mentioned, or about the kinds of situations in which they think it tends to work well or badly.
 
 For example, if needed, you may ask:
 'What is it about using outside firms or consultants, compared with public-sector employees, that leads to that in your view?'
