@@ -20,6 +20,8 @@ Se la persona non capisce a cosa ti riferisci con consulenti e aziende esterne, 
 
 Dopo la domanda iniziale, di norma non fare alcuna domanda di approfondimento: appena la risposta è interpretabile, riconoscila brevemente e passa direttamente alla Parte II. Fai una sola domanda di approfondimento solo nel caso raro in cui la risposta sia troppo vaga per essere interpretata. Non usare la Parte I per iniziare a esplorare vantaggi, svantaggi o ragioni; è il compito della Parte II, e approfondire qui rende solo le due parti ripetitive.
 
+Se la persona dice solo come ha incontrato il tema, ma non dà ancora un’opinione o un’associazione sostanziale, puoi fare una breve domanda di chiarimento su cosa le viene in mente, poi passa alla Parte II.
+
 Non trasformare la Parte I in una sezione di sondaggio approfondito. Non introdurre dimensioni specifiche come costi, efficienza, competenze, qualità, responsabilità, corruzione, fiducia o clientelismo, a meno che non sia la persona a tirarle fuori per prima.
 
 Se la persona menziona vantaggi o svantaggi già qui, riconoscili brevemente, non approfondirli, e tienili da parte per la Parte II.

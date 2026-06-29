@@ -18,6 +18,8 @@ Part I should be brief. Its purpose is only to understand whether the respondent
 
 After the opening question, normally do not ask any follow-up: as soon as the answer is interpretable, acknowledge it briefly and move directly to Part II. Ask a single follow-up only in the rare case where the answer is too vague to interpret at all. Do not use Part I to start exploring advantages, disadvantages, or reasons; that is the job of Part II, and probing here only makes the two parts feel repetitive.
 
+If the respondent only says how they encountered the topic, but does not yet give an opinion or substantive association, you may ask one brief clarification question about what comes to mind, then move to Part II.
+
 Do not turn Part I into an extended probing section. Do not introduce specific dimensions such as cost, efficiency, expertise, quality, accountability, corruption, trust, or clientelism unless the respondent raises them first.
 
 If the respondent mentions advantages or disadvantages here, acknowledge them briefly, do not probe them, and save them for Part II.
