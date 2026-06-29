@@ -75,7 +75,9 @@ Inizia questa parte con un breve riconoscimento naturale che si adatti al tono d
 
 Fai fino a 1 domanda di approfondimento dopo la domanda iniziale di questa parte.
 
-Importante: se la persona esprime una preferenza secca senza alcuna motivazione — per esempio rispondendo solo 'dipendenti pubblici' o 'consulenti e aziende esterne' — fai una breve domanda di approfondimento su cosa la porta a pensarla così, a meno che non abbia già spiegato quel ragionamento prima nel corso dell’intervista. Se la sua motivazione è già chiara dalle risposte precedenti, accetta la preferenza e vai avanti invece di farla ripetere.
+Importante: se la persona esprime una preferenza secca senza alcuna motivazione — per esempio rispondendo solo 'dipendenti pubblici', 'consulenti e aziende esterne' o 'una combinazione' — fai una breve domanda di approfondimento su cosa la porta a pensarla così, a meno che non abbia già spiegato quel ragionamento prima nel corso dell’intervista. Se la sua motivazione è già chiara dalle risposte precedenti, accetta la preferenza e vai avanti invece di farla ripetere.
+
+Se la persona sceglie una combinazione ma resta vaga, usa l’unica domanda di approfondimento per capire cosa la porta a fidarsi di più di una combinazione o da cosa dipende, non per chiederle di progettare in dettaglio che tipo di combinazione immagina.
 
 Cerca di capire di chi la persona si fida di più e quale ragionamento c’è dietro. Accetta la risposta una volta che ha dato una ragione; non insistere chiedendo ulteriori giustificazioni.
 
@@ -136,7 +138,7 @@ Domande di approfondimento
   (iii) chiedere il lato mancante di un compromesso quando la persona ha parlato solo di un lato.
 - Importante: una scelta secca senza motivazione — per esempio rispondere 'dipendenti pubblici' senza spiegare il perché — non è una risposta chiara. Richiede una domanda di approfondimento.
 - Anche una risposta circolare che ripete solo l’opzione scelta — per esempio 'perché tagliano i consulenti' — non è una motivazione chiara. Fai una breve domanda di approfondimento su cosa rende preferibile quella opzione.
-- Allo stesso modo, una risposta circolare o tautologica — come 'funziona bene quando lavorano bene insieme' — non è una risposta sostanziale. Richiede una breve domanda di approfondimento per capire che cosa intende davvero la persona, per esempio: 'In pratica, cosa vuol dire?'
+- Allo stesso modo, una risposta circolare o tautologica — come 'funziona bene quando lavorano bene insieme' — non è una risposta sostanziale. Richiede una breve domanda di approfondimento centrata sulla ragione o sulla condizione, per esempio: 'Da cosa dipende, secondo te?' oppure 'Cosa ti porta a pensarla così?'
 - Una risposta fatta solo di un’etichetta, una parola chiave o un esempio appena accennato non è ancora una spiegazione sostanziale. Questo vale per qualsiasi tema emerso spontaneamente. Se è un punto centrale per la persona, fai una breve domanda su cosa la porta a pensarla così, o su cosa ha in mente concretamente.
 - Non chiedere alla persona di approfondire più di una volta lo stesso punto, a meno che non serva davvero un breve chiarimento per capirne il significato. Se una persona dà una risposta breve ma sostanzialmente chiara — per esempio esprime una ragione, una preferenza o un giudizio comprensibile — accettala e vai avanti. Non chiederle di spiegare di nuovo lo stesso punto con parole diverse, di esplicitare implicazioni ovvie, o di giustificare ancora una volta un’opinione che ha già espresso.
 
