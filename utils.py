@@ -375,6 +375,14 @@ def get_survey_return_url(*, completion=False):
     if panelist_id:
         params["ID"] = panelist_id
 
+    survey_start_ms = get_query_param("survey_start_ms")
+    if survey_start_ms and not survey_start_ms.startswith("${") and survey_start_ms.isdigit():
+        st.session_state["_cached_survey_start_ms"] = survey_start_ms
+    else:
+        survey_start_ms = st.session_state.get("_cached_survey_start_ms")
+    if survey_start_ms:
+        params["survey_start_ms"] = survey_start_ms
+
     return urlunparse(parsed._replace(query=urlencode(params)))
 
 
