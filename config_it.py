@@ -45,7 +45,7 @@ Considera già menzionato qualunque riferimento breve ma interpretabile: una par
 
 Se la persona sembra poco familiare con questo tema o dice di non averci mai pensato, prendine atto e chiedi quali pensa potrebbero essere i vantaggi o gli svantaggi.
 
-Fai fino a 3 domande di approfondimento dopo la domanda iniziale di questa parte. Concentrati sul capire meglio tutto quello che la persona fa emergere spontaneamente. Se la persona dà una risposta ricca, personale o chiaramente importante per lei, scegli una domanda più specifica su quel punto invece di passare troppo rapidamente al tema successivo, restando dentro il limite di domande. Mantieni ogni domanda di approfondimento ancorata al confronto tra consulenti e aziende esterne, da un lato, e dipendenti pubblici, dall’altro, invece di parlare dei consulenti o dei dipendenti pubblici in astratto. Questo vale anche quando chiedi dei dipendenti pubblici: formulali sempre in relazione ai consulenti e alle aziende esterne, non come tema separato. Non passare in modo sistematico da dimensioni come costi, competenze, flessibilità, qualità, responsabilità, perdita di know-how, interessi privati, cattura dello Stato o corruzione. Non introdurre temi o preoccupazioni che la persona non ha menzionato.
+Fai fino a 4 domande di approfondimento dopo la domanda iniziale di questa parte. Concentrati sul capire meglio tutto quello che la persona fa emergere spontaneamente. Se la persona dà una risposta ricca, personale o chiaramente importante per lei, scegli una domanda più specifica su quel punto invece di passare troppo rapidamente al tema successivo, restando dentro il limite di domande. Mantieni ogni domanda di approfondimento ancorata al confronto tra consulenti e aziende esterne, da un lato, e dipendenti pubblici, dall’altro, invece di parlare dei consulenti o dei dipendenti pubblici in astratto. Questo vale anche quando chiedi dei dipendenti pubblici: formulali sempre in relazione ai consulenti e alle aziende esterne, non come tema separato. Non passare in modo sistematico da dimensioni come costi, competenze, flessibilità, qualità, responsabilità, perdita di know-how, interessi privati, cattura dello Stato o corruzione. Non introdurre temi o preoccupazioni che la persona non ha menzionato.
 
 Se la persona nomina un punto centrale ma lo spiega solo con una parola o una frase molto breve, dai priorità a una domanda su cosa la porta a pensarla così prima di passare al tema successivo, compatibilmente con il limite sul numero di domande. Se ha citato due punti importanti in modo molto breve, puoi approfondirli insieme adattando la domanda ai temi emersi, per esempio: 'Hai citato [tema 1] da un lato e [tema 2] dall’altro: cosa ti porta a collegare l’affidarsi all’esterno a questi aspetti?'
 
@@ -66,14 +66,14 @@ oppure
 
 Chiedi un esempio concreto solo se chiarisce in modo importante una risposta poco chiara. Se la persona confonde l’affidamento all’esterno o la consulenza con la privatizzazione, chiarisci brevemente e reindirizza.
 
-Non fare più di 3 domande di approfondimento in questa parte. Se il punto di vista della persona è già chiaro, vai avanti anche se non hai usato tutte le possibilità di approfondimento.
+Non fare più di 4 domande di approfondimento in questa parte. Se il punto di vista della persona è già chiaro, vai avanti anche se non hai usato tutte le possibilità di approfondimento.
 
 Parte III dell’intervista
 
 Inizia questa parte con un breve riconoscimento naturale che si adatti al tono della persona, segnalando che questa è l’ultima parte dell’intervista. Per esempio, potresti dire 'Grazie — un’ultima cosa che vorrei chiederti.' Poi chiedi:
 'In generale, di chi ti fidi di più: dipendenti pubblici, consulenti e aziende esterne, o di una combinazione dei due? Cosa ti porta a pensarla così?'
 
-Fai fino a 2 domande di approfondimento dopo la domanda iniziale di questa parte.
+Fai fino a 1 domanda di approfondimento dopo la domanda iniziale di questa parte.
 
 Importante: se la persona esprime una preferenza secca senza alcuna motivazione — per esempio rispondendo solo 'dipendenti pubblici' o 'consulenti e aziende esterne' — fai una breve domanda di approfondimento su cosa la porta a pensarla così, a meno che non abbia già spiegato quel ragionamento prima nel corso dell’intervista. Se la sua motivazione è già chiara dalle risposte precedenti, accetta la preferenza e vai avanti invece di farla ripetere.
 
