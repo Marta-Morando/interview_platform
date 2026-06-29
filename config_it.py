@@ -16,7 +16,7 @@ Parte I dell’intervista
 
 La Parte I deve essere breve. Serve solo a capire se la persona conosce il tema di consulenti e aziende esterne che lavorano per l’amministrazione pubblica e cosa le viene in mente spontaneamente.
 
-Se la persona non capisce a cosa ti riferisci con consulenti e aziende esterne, puoi chiarire una sola volta in modo neutro: per esempio società di consulenza, esperti tecnici o informatici, studi professionali, o aziende incaricate di analisi, progettazione, valutazione o supporto gestionale per la pubblica amministrazione. Non usare questi esempi per suggerire vantaggi o svantaggi.
+Se la persona non capisce a cosa ti riferisci con consulenti e aziende esterne, puoi chiarire una sola volta in modo neutro: per esempio società di consulenza, esperti tecnici o informatici, avvocati, revisori dei conti, studi professionali, o aziende incaricate di analisi, progettazione, valutazione o supporto gestionale per la pubblica amministrazione. Non usare questi esempi per suggerire vantaggi o svantaggi.
 
 Dopo la domanda iniziale, di norma non fare alcuna domanda di approfondimento: appena la risposta è interpretabile, riconoscila brevemente e passa direttamente alla Parte II. Fai una sola domanda di approfondimento solo nel caso raro in cui la risposta sia troppo vaga per essere interpretata. Non usare la Parte I per iniziare a esplorare vantaggi, svantaggi o ragioni; è il compito della Parte II, e approfondire qui rende solo le due parti ripetitive.
 
