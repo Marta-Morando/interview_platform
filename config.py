@@ -293,6 +293,7 @@ DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_6fEmPg7zvk
 SURVEY_RETURN_REMINDER = (
     "These interview responses are an important part of our study. Please share as much as you can before continuing back to the survey."
 )
+SURVEY_RETURN_MIN_ANSWERS = 4
 
 
 ADMIN_ALIAS = "testaccount"

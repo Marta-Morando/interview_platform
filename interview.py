@@ -288,7 +288,11 @@ if not st.session_state.interview_active and is_interview_completed(
 if st.session_state.interview_active:
     # Container for the chat and voice input elements used by the respondent
     response_container = st.container()
-    survey_return_available = has_survey_return_target()
+    answers_given = sum(st.session_state.num_text_and_voice_answers)
+    survey_return_available = (
+        has_survey_return_target()
+        and answers_given >= config.SURVEY_RETURN_MIN_ANSWERS
+    )
 
     with response_container:
         # Divider between chat and inputs
