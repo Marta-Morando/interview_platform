@@ -5,6 +5,7 @@
 
 
 import os
+import logging
 import random
 import time
 from copy import deepcopy
@@ -33,497 +34,505 @@ from utils import (
     save_transcript_and_metadata,
     stream_response,
 )
+try:
 
 
-#
-# 1. Set up interview environment
-#
+    #
+    # 1. Set up interview environment
+    #
 
-# Set page title and icon
-st.set_page_config(
-    page_title="Interview",
-    page_icon=config.AVATAR_INTERVIEWER,
-    menu_items={
-        "Get help": None,
-        "Report a bug": None,
-        "About": None,
-    },
-)
-dropbox_storage.show_dropbox_warning_if_needed()
-apply_readable_app_styles()
-
-
-def get_secret(name):
-    """Read a secret from Streamlit secrets locally or Azure app settings online."""
-    try:
-        value = st.secrets.get(name)
-    except Exception:
-        value = None
-    if value:
-        return value
-
-    value = os.environ.get(name)
-    if value:
-        return value
-
-    raise RuntimeError(
-        f"Missing secret {name}. Add it to .streamlit/secrets.toml or Azure App Service application settings."
+    # Set page title and icon
+    st.set_page_config(
+        page_title="Interview",
+        page_icon=config.AVATAR_INTERVIEWER,
+        menu_items={
+            "Get help": None,
+            "Report a bug": None,
+            "About": None,
+        },
     )
+    dropbox_storage.show_dropbox_warning_if_needed()
+    apply_readable_app_styles()
 
 
-# Check if login screen is enabled
-if config.LOGINS:
-    # Check password (displays login screen)
-    pwd_correct, username = check_password()
-    if not pwd_correct:
-        st.stop()
+    def get_secret(name):
+        """Read a secret from Streamlit secrets locally or Azure app settings online."""
+        try:
+            value = st.secrets.get(name)
+        except Exception:
+            value = None
+        if value:
+            return value
+
+        value = os.environ.get(name)
+        if value:
+            return value
+
+        raise RuntimeError(
+            f"Missing secret {name}. Add it to .streamlit/secrets.toml or Azure App Service application settings."
+        )
+
+
+    # Check if login screen is enabled
+    if config.LOGINS:
+        # Check password (displays login screen)
+        pwd_correct, username = check_password()
+        if not pwd_correct:
+            st.stop()
+        else:
+            st.session_state.username = username
+    # Otherwise ask the respondent to enter a username without password
     else:
-        st.session_state.username = username
-# Otherwise ask the respondent to enter a username without password
-else:
-    # Until username confirmed, show the input and stop
-    if "username" not in st.session_state:
-        if initialize_survey_username():
+        # Until username confirmed, show the input and stop
+        if "username" not in st.session_state:
+            if initialize_survey_username():
+                st.rerun()
+
+            # Manual input (only reached when REQUIRE_USERNAME_INPUT = True)
+            username_input = st.text_input(
+                get_string("username_prompt"),
+                key="username_input",
+            )
+            if not username_input:
+                st.stop()
+            if not is_valid_username(username_input):
+                st.warning(get_string("username_error"))
+                st.stop()
+            st.session_state.username = username_input.strip()
             st.rerun()
 
-        # Manual input (only reached when REQUIRE_USERNAME_INPUT = True)
-        username_input = st.text_input(
-            get_string("username_prompt"),
-            key="username_input",
+    # Directories (only create local folders when Dropbox is not enabled)
+    if not dropbox_storage.is_dropbox_enabled():
+        if not os.path.exists(config.TRANSCRIPTS_DIRECTORY):
+            os.makedirs(config.TRANSCRIPTS_DIRECTORY)
+        if not os.path.exists(config.METADATA_DIRECTORY):
+            os.makedirs(config.METADATA_DIRECTORY)
+        if not os.path.exists(config.BACKUPS_DIRECTORY):
+            os.makedirs(config.BACKUPS_DIRECTORY)
+
+
+    # Check if interview has been completed and, if so, only display closing message
+    interview_previously_completed = is_interview_completed(
+        config.METADATA_DIRECTORY, config.BACKUPS_DIRECTORY
+    )
+    if "messages" not in st.session_state and interview_previously_completed:
+        st.session_state.messages = []
+        st.session_state.interview_active = False
+
+        code_found = False
+        try:
+            messages, _, _, _ = load_backup(backups_directory=config.BACKUPS_DIRECTORY)
+        except Exception:
+            messages = []
+
+        # Display closing message
+        for code in config.CLOSING_MESSAGES.keys():
+            if any(
+                code in message["content"]
+                for message in messages
+                if message["role"] == "assistant"
+            ):
+                code_found = True
+                closing_message = config.CLOSING_MESSAGES[code]
+                break
+
+        if not code_found:
+            closing_message = get_string("interview_completed")
+
+        st.session_state.interview_active = False
+        st.markdown(closing_message)
+        render_completion_redirect()
+        st.stop()
+
+    # If interview has not yet been completed, initialise session states
+    if "interview_active" not in st.session_state:
+        st.session_state.interview_active = True
+
+    # Start time for this login
+    if "start_time_current_login" not in st.session_state:
+        st.session_state.start_time_current_login = time.time()
+
+    # Initialise messages, times using dashboard, and the number of voice and text answers
+    if "messages" not in st.session_state:
+        # Returns [], time.time(), [], [0, 0] if no data in the backup directory is found
+        (
+            st.session_state.messages,
+            st.session_state.start_time,
+            st.session_state.times_previous_attempts,
+            st.session_state.num_text_and_voice_answers,
+        ) = load_backup(backups_directory=config.BACKUPS_DIRECTORY)
+
+    # Create Boolean to track if transcription of voice input is done
+    if "transcription_done" not in st.session_state:
+        st.session_state.transcription_done = False
+
+    # Key for voice input element
+    if "voice_input_key" not in st.session_state:
+        st.session_state.voice_input_key = random.uniform(0, 1)
+
+    # Initialise API kwargs
+    if isinstance(config.ADDITIONAL_API_KWARGS, dict):
+        api_kwargs = deepcopy(config.ADDITIONAL_API_KWARGS)
+    else:
+        raise ValueError(
+            "ADDITIONAL_API_KWARGS must be specified as a dictionary in config.py, either empty or containing valid additional API parameters."
         )
-        if not username_input:
-            st.stop()
-        if not is_valid_username(username_input):
-            st.warning(get_string("username_error"))
-            st.stop()
-        st.session_state.username = username_input.strip()
-        st.rerun()
 
-# Directories (only create local folders when Dropbox is not enabled)
-if not dropbox_storage.is_dropbox_enabled():
-    if not os.path.exists(config.TRANSCRIPTS_DIRECTORY):
-        os.makedirs(config.TRANSCRIPTS_DIRECTORY)
-    if not os.path.exists(config.METADATA_DIRECTORY):
-        os.makedirs(config.METADATA_DIRECTORY)
-    if not os.path.exists(config.BACKUPS_DIRECTORY):
-        os.makedirs(config.BACKUPS_DIRECTORY)
+    # The model parameter is shared across all APIs
+    api_kwargs["model"] = config.MODEL
+    st.session_state.api_kwargs = api_kwargs
 
+    # API clients
+    if config.API == "openai":
 
-# Check if interview has been completed and, if so, only display closing message
-interview_previously_completed = is_interview_completed(
-    config.METADATA_DIRECTORY, config.BACKUPS_DIRECTORY
-)
-if "messages" not in st.session_state and interview_previously_completed:
-    st.session_state.messages = []
-    st.session_state.interview_active = False
+        client = OpenAI(api_key=get_secret("KEY_OPENAI"))
+        api_kwargs["stream"] = True
 
-    code_found = False
-    try:
-        messages, _, _, _ = load_backup(backups_directory=config.BACKUPS_DIRECTORY)
-    except Exception:
-        messages = []
+    elif config.API == "anthropic":
+        import anthropic
 
-    # Display closing message
-    for code in config.CLOSING_MESSAGES.keys():
-        if any(
-            code in message["content"]
-            for message in messages
-            if message["role"] == "assistant"
-        ):
-            code_found = True
-            closing_message = config.CLOSING_MESSAGES[code]
-            break
+        client = anthropic.Anthropic(api_key=get_secret("KEY_ANTHROPIC"))
+        api_kwargs["system"] = get_system_prompt()
+        # Set max tokens default if no value set in config.py
+        api_kwargs.setdefault("max_tokens", 4096)
 
-    if not code_found:
-        closing_message = get_string("interview_completed")
+    elif config.API == "google":
+        from google import genai
 
-    st.session_state.interview_active = False
-    st.markdown(closing_message)
-    render_completion_redirect()
-    st.stop()
-
-# If interview has not yet been completed, initialise session states
-if "interview_active" not in st.session_state:
-    st.session_state.interview_active = True
-
-# Start time for this login
-if "start_time_current_login" not in st.session_state:
-    st.session_state.start_time_current_login = time.time()
-
-# Initialise messages, times using dashboard, and the number of voice and text answers
-if "messages" not in st.session_state:
-    # Returns [], time.time(), [], [0, 0] if no data in the backup directory is found
-    (
-        st.session_state.messages,
-        st.session_state.start_time,
-        st.session_state.times_previous_attempts,
-        st.session_state.num_text_and_voice_answers,
-    ) = load_backup(backups_directory=config.BACKUPS_DIRECTORY)
-
-# Create Boolean to track if transcription of voice input is done
-if "transcription_done" not in st.session_state:
-    st.session_state.transcription_done = False
-
-# Key for voice input element
-if "voice_input_key" not in st.session_state:
-    st.session_state.voice_input_key = random.uniform(0, 1)
-
-# Initialise API kwargs
-if isinstance(config.ADDITIONAL_API_KWARGS, dict):
-    api_kwargs = deepcopy(config.ADDITIONAL_API_KWARGS)
-else:
-    raise ValueError(
-        "ADDITIONAL_API_KWARGS must be specified as a dictionary in config.py, either empty or containing valid additional API parameters."
-    )
-
-# The model parameter is shared across all APIs
-api_kwargs["model"] = config.MODEL
-st.session_state.api_kwargs = api_kwargs
-
-# API clients
-if config.API == "openai":
-
-    client = OpenAI(api_key=get_secret("KEY_OPENAI"))
-    api_kwargs["stream"] = True
-
-elif config.API == "anthropic":
-    import anthropic
-
-    client = anthropic.Anthropic(api_key=get_secret("KEY_ANTHROPIC"))
-    api_kwargs["system"] = get_system_prompt()
-    # Set max tokens default if no value set in config.py
-    api_kwargs.setdefault("max_tokens", 4096)
-
-elif config.API == "google":
-    from google import genai
-
-    client = genai.Client(api_key=get_secret("KEY_GOOGLE"))
-    api_kwargs.setdefault("config", {})["system_instruction"] = get_system_prompt()
+        client = genai.Client(api_key=get_secret("KEY_GOOGLE"))
+        api_kwargs.setdefault("config", {})["system_instruction"] = get_system_prompt()
 
 
-elif config.API == "azure":
-    from azure.ai.inference import ChatCompletionsClient
-    from azure.core.credentials import AzureKeyCredential
+    elif config.API == "azure":
+        from azure.ai.inference import ChatCompletionsClient
+        from azure.core.credentials import AzureKeyCredential
 
-    client = ChatCompletionsClient(
-        endpoint=get_secret("ENDPOINT_AZURE"),
-        credential=AzureKeyCredential(get_secret("KEY_AZURE")),
-        api_version=get_secret("VERSION_AZURE"),
-    )
-    api_kwargs["stream"] = True
+        client = ChatCompletionsClient(
+            endpoint=get_secret("ENDPOINT_AZURE"),
+            credential=AzureKeyCredential(get_secret("KEY_AZURE")),
+            api_version=get_secret("VERSION_AZURE"),
+        )
+        api_kwargs["stream"] = True
 
-else:
-    raise ValueError(f"Unknown API: {config.API}")
+    else:
+        raise ValueError(f"Unknown API: {config.API}")
 
-# Check if voice input is enabled
-if config.INPUT_MODE not in ["text", "voice", "text_and_voice"]:
-    raise ValueError(
-        "Please set INPUT_MODE to 'text', 'voice', or 'text_and_voice' in config.py."
-    )
-if "voice" in config.INPUT_MODE:
-    client_audio = OpenAI(
-        api_key=get_secret("KEY_OPENAI"),
-    )
-
-
-#
-# 2. Display first message or previous conversation
-#
-
-# Define a container for the chat history
-transcript_container = st.container()
-
-# In case the interview history is still empty, pass system prompt to model and
-# generate and display the first message
-if not st.session_state.messages and st.session_state.interview_active:
-    opening_message = getattr(config, "OPENING_MESSAGE", None)
-    with transcript_container:
-        with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
-            if opening_message:
-                # The interview always starts with a fixed scripted line, so show it
-                # instantly instead of waiting for a model round-trip on load. The model
-                # is only called once the respondent sends their first answer.
-                st.markdown(opening_message)
-                message_interviewer = opening_message
-            else:
-                message_placeholder = st.empty()
-                message_interviewer = stream_response(
-                    client, api_kwargs, message_placeholder
-                )
-
-    st.session_state.messages.append(
-        {"role": "assistant", "content": message_interviewer}
-    )
-    save_backup(
-        backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
-    )
-
-# Otherwise, display the previous conversation
-else:
-    with transcript_container:
-        # Don't display system messages
-        for message in st.session_state.messages:
-            if message["role"] == "assistant":
-                avatar = config.AVATAR_INTERVIEWER
-            elif message["role"] == "user":
-                avatar = config.AVATAR_RESPONDENT
-            else:
-                continue
-
-            # Only display messages without codes
-            if not any(code in message["content"] for code in config.CLOSING_MESSAGES):
-                with st.chat_message(message["role"], avatar=avatar):
-                    st.markdown(message["content"])
-
-if not st.session_state.interview_active and is_interview_completed(
-    config.METADATA_DIRECTORY, config.BACKUPS_DIRECTORY
-):
-    render_completion_redirect()
+    # Check if voice input is enabled
+    if config.INPUT_MODE not in ["text", "voice", "text_and_voice"]:
+        raise ValueError(
+            "Please set INPUT_MODE to 'text', 'voice', or 'text_and_voice' in config.py."
+        )
+    if "voice" in config.INPUT_MODE:
+        client_audio = OpenAI(
+            api_key=get_secret("KEY_OPENAI"),
+        )
 
 
-#
-# 3. Main chat if interview is active
-#
+    #
+    # 2. Display first message or previous conversation
+    #
 
-if st.session_state.interview_active:
-    # Container for the chat and voice input elements used by the respondent
-    response_container = st.container()
-    answers_given = sum(st.session_state.num_text_and_voice_answers)
-    survey_return_available = (
-        has_survey_return_target()
-        and answers_given >= config.SURVEY_RETURN_MIN_ANSWERS
-    )
+    # Define a container for the chat history
+    transcript_container = st.container()
 
-    with response_container:
-        # Divider between chat and inputs
-        st.divider()
-
-        # Written message input for respondent
-        text_input_element = st.empty()
-        if "text" in config.INPUT_MODE:
-            text_response = text_input_element.chat_input(
-                config.TEXT_INPUT_INSTRUCTIONS
-            )
-        else:
-            text_response = None
-
-        # Alternative voice input
-        voice_input_element = st.empty()
-        if "voice" in config.INPUT_MODE:
-            voice_response = voice_input_element.audio_input(
-                config.VOICE_INPUT_INSTRUCTIONS,
-                key=st.session_state.voice_input_key,
-            )
-        else:
-            voice_response = None
-
-        if survey_return_available:
-            action_spacer, action_col = st.columns([5.6, 2.1])
-            with action_col:
-                render_survey_return_control(get_string("back_to_survey"))
-
-    # If respondent uses written input
-    if text_response:
-        st.session_state.pop("survey_return_confirmed", None)
-        message_respondent = text_response
-
-        # Increase statistic for number of text answers given by respondent
-        st.session_state.num_text_and_voice_answers[0] += 1
-
+    # In case the interview history is still empty, pass system prompt to model and
+    # generate and display the first message
+    if not st.session_state.messages and st.session_state.interview_active:
+        opening_message = getattr(config, "OPENING_MESSAGE", None)
         with transcript_container:
-            with st.chat_message("user", avatar=config.AVATAR_RESPONDENT):
-                st.markdown(message_respondent)
-
-    # If respondent uses voice input
-    elif voice_response:
-        # Do not display chat and voice inputs anymore for now
-        text_input_element.empty()
-        voice_input_element.empty()
-
-        # Until message accepted
-        message_respondent = None
-
-        with transcript_container:
-            # Show respondent transcription
-            with st.chat_message("user", avatar=config.AVATAR_RESPONDENT):
-                response_transcription_placeholder = st.empty()
-                if not st.session_state.transcription_done:
-                    response_transcription_placeholder.markdown(
-                        get_string("processing_voice")
+            with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
+                if opening_message:
+                    # The interview always starts with a fixed scripted line, so show it
+                    # instantly instead of waiting for a model round-trip on load. The model
+                    # is only called once the respondent sends their first answer.
+                    st.markdown(opening_message)
+                    message_interviewer = opening_message
+                else:
+                    message_placeholder = st.empty()
+                    message_interviewer = stream_response(
+                        client, api_kwargs, message_placeholder
                     )
 
-                    try:
-                        transcription_response = client_audio.audio.transcriptions.create(
-                            model=config.MODEL_TRANSCRIPTION,
-                            file=voice_response,
-                            language=config.TRANSCRIPTION_LANGUAGE,
+        st.session_state.messages.append(
+            {"role": "assistant", "content": message_interviewer}
+        )
+        save_backup(
+            backups_directory=config.BACKUPS_DIRECTORY, admin_alias=config.ADMIN_ALIAS
+        )
+
+    # Otherwise, display the previous conversation
+    else:
+        with transcript_container:
+            # Don't display system messages
+            for message in st.session_state.messages:
+                if message["role"] == "assistant":
+                    avatar = config.AVATAR_INTERVIEWER
+                elif message["role"] == "user":
+                    avatar = config.AVATAR_RESPONDENT
+                else:
+                    continue
+
+                # Only display messages without codes
+                if not any(code in message["content"] for code in config.CLOSING_MESSAGES):
+                    with st.chat_message(message["role"], avatar=avatar):
+                        st.markdown(message["content"])
+
+    if not st.session_state.interview_active and is_interview_completed(
+        config.METADATA_DIRECTORY, config.BACKUPS_DIRECTORY
+    ):
+        render_completion_redirect()
+
+
+    #
+    # 3. Main chat if interview is active
+    #
+
+    if st.session_state.interview_active:
+        # Container for the chat and voice input elements used by the respondent
+        response_container = st.container()
+        answers_given = sum(st.session_state.num_text_and_voice_answers)
+        survey_return_available = (
+            has_survey_return_target()
+            and answers_given >= config.SURVEY_RETURN_MIN_ANSWERS
+        )
+
+        with response_container:
+            # Divider between chat and inputs
+            st.divider()
+
+            # Written message input for respondent
+            text_input_element = st.empty()
+            if "text" in config.INPUT_MODE:
+                text_response = text_input_element.chat_input(
+                    config.TEXT_INPUT_INSTRUCTIONS
+                )
+            else:
+                text_response = None
+
+            # Alternative voice input
+            voice_input_element = st.empty()
+            if "voice" in config.INPUT_MODE:
+                voice_response = voice_input_element.audio_input(
+                    config.VOICE_INPUT_INSTRUCTIONS,
+                    key=st.session_state.voice_input_key,
+                )
+            else:
+                voice_response = None
+
+            if survey_return_available:
+                action_spacer, action_col = st.columns([5.6, 2.1])
+                with action_col:
+                    render_survey_return_control(get_string("back_to_survey"))
+
+        # If respondent uses written input
+        if text_response:
+            st.session_state.pop("survey_return_confirmed", None)
+            message_respondent = text_response
+
+            # Increase statistic for number of text answers given by respondent
+            st.session_state.num_text_and_voice_answers[0] += 1
+
+            with transcript_container:
+                with st.chat_message("user", avatar=config.AVATAR_RESPONDENT):
+                    st.markdown(message_respondent)
+
+        # If respondent uses voice input
+        elif voice_response:
+            # Do not display chat and voice inputs anymore for now
+            text_input_element.empty()
+            voice_input_element.empty()
+
+            # Until message accepted
+            message_respondent = None
+
+            with transcript_container:
+                # Show respondent transcription
+                with st.chat_message("user", avatar=config.AVATAR_RESPONDENT):
+                    response_transcription_placeholder = st.empty()
+                    if not st.session_state.transcription_done:
+                        response_transcription_placeholder.markdown(
+                            get_string("processing_voice")
                         )
-                        if isinstance(transcription_response, str):
-                            transcription = transcription_response.strip()
+
+                        try:
+                            transcription_response = client_audio.audio.transcriptions.create(
+                                model=config.MODEL_TRANSCRIPTION,
+                                file=voice_response,
+                                language=config.TRANSCRIPTION_LANGUAGE,
+                            )
+                            if isinstance(transcription_response, str):
+                                transcription = transcription_response.strip()
+                            else:
+                                transcription = transcription_response.text.strip()
+                        except Exception:
+                            transcription = ""
+                            response_transcription_placeholder.warning(
+                                get_string("transcription_error")
+                            )
                         else:
-                            transcription = transcription_response.text.strip()
-                    except Exception:
-                        transcription = ""
-                        response_transcription_placeholder.warning(
-                            get_string("transcription_error")
-                        )
+                            if transcription:
+                                response_transcription_placeholder.markdown(
+                                    f"**{get_string('transcription_detected')}**\n\n{transcription}"
+                                )
+                            else:
+                                response_transcription_placeholder.warning(
+                                    get_string("empty_transcription")
+                                )
+
+                        st.session_state.response_transcription = transcription
+                        st.session_state.transcription_done = True
                     else:
-                        if transcription:
+                        if st.session_state.response_transcription:
                             response_transcription_placeholder.markdown(
-                                f"**{get_string('transcription_detected')}**\n\n{transcription}"
+                                f"**{get_string('transcription_detected')}**\n\n{st.session_state.response_transcription}"
                             )
                         else:
                             response_transcription_placeholder.warning(
                                 get_string("empty_transcription")
                             )
 
-                    st.session_state.response_transcription = transcription
-                    st.session_state.transcription_done = True
-                else:
-                    if st.session_state.response_transcription:
-                        response_transcription_placeholder.markdown(
-                            f"**{get_string('transcription_detected')}**\n\n{st.session_state.response_transcription}"
-                        )
-                    else:
-                        response_transcription_placeholder.warning(
-                            get_string("empty_transcription")
-                        )
+                # Ask them to accept or reject
+                col_accept, col_reject = st.columns([1, 1])
 
-            # Ask them to accept or reject
-            col_accept, col_reject = st.columns([1, 1])
+                accept_button_placeholder = col_accept.empty()
+                reject_button_placeholder = col_reject.empty()
 
-            accept_button_placeholder = col_accept.empty()
-            reject_button_placeholder = col_reject.empty()
+                # Now create the buttons inside those placeholders
+                accept_clicked = False
+                if st.session_state.response_transcription:
+                    accept_clicked = accept_button_placeholder.button(
+                        get_string("accept_transcription")
+                    )
+                reject_clicked = reject_button_placeholder.button(get_string("reject_transcription"))
 
-            # Now create the buttons inside those placeholders
-            accept_clicked = False
-            if st.session_state.response_transcription:
-                accept_clicked = accept_button_placeholder.button(
-                    get_string("accept_transcription")
-                )
-            reject_clicked = reject_button_placeholder.button(get_string("reject_transcription"))
+                if reject_clicked or accept_clicked:
+                    st.session_state.transcription_done = False
+                    accept_button_placeholder.empty()
+                    reject_button_placeholder.empty()
 
-            if reject_clicked or accept_clicked:
-                st.session_state.transcription_done = False
-                accept_button_placeholder.empty()
-                reject_button_placeholder.empty()
-
-            # If user rejects, reset voice input and rerun
-            if reject_clicked:
-                st.session_state.voice_input_key = random.uniform(0, 1)
-                st.rerun()
-
-            # If user accepts, then proceed with the chat API call
-            if accept_clicked:
-                st.session_state.pop("survey_return_confirmed", None)
-                message_respondent = st.session_state.response_transcription
-
-                # Increase statistic for number of voice answers given by respondent
-                st.session_state.num_text_and_voice_answers[1] += 1
-
-                with response_container:
+                # If user rejects, reset voice input and rerun
+                if reject_clicked:
                     st.session_state.voice_input_key = random.uniform(0, 1)
-                    chat_key = random.uniform(0, 1)
+                    st.rerun()
 
-                    # Written message input for respondent
-                    if "text" in config.INPUT_MODE:
-                        text_response = text_input_element.chat_input(
-                            config.TEXT_INPUT_INSTRUCTIONS,
-                            key=chat_key,
-                        )
-                    else:
-                        text_response = None
+                # If user accepts, then proceed with the chat API call
+                if accept_clicked:
+                    st.session_state.pop("survey_return_confirmed", None)
+                    message_respondent = st.session_state.response_transcription
 
-                    # Alternative voice input
-                    if "voice" in config.INPUT_MODE:
-                        voice_response = voice_input_element.audio_input(
-                            config.VOICE_INPUT_INSTRUCTIONS,
-                            key=st.session_state.voice_input_key,
-                        )
-                    else:
-                        voice_response = None
+                    # Increase statistic for number of voice answers given by respondent
+                    st.session_state.num_text_and_voice_answers[1] += 1
 
-    # If neither voice nor text input given so far, set message to None
-    else:
-        message_respondent = None
+                    with response_container:
+                        st.session_state.voice_input_key = random.uniform(0, 1)
+                        chat_key = random.uniform(0, 1)
 
-    # Once the user response has been given
-    if message_respondent:
-        # Append message
-        st.session_state.messages.append(
-            {"role": "user", "content": message_respondent}
-        )
+                        # Written message input for respondent
+                        if "text" in config.INPUT_MODE:
+                            text_response = text_input_element.chat_input(
+                                config.TEXT_INPUT_INSTRUCTIONS,
+                                key=chat_key,
+                            )
+                        else:
+                            text_response = None
 
-        with transcript_container:
-            # Generate and display interviewer response to message
-            with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
-                # Create placeholder for message in chat interface
-                message_placeholder = st.empty()
+                        # Alternative voice input
+                        if "voice" in config.INPUT_MODE:
+                            voice_response = voice_input_element.audio_input(
+                                config.VOICE_INPUT_INSTRUCTIONS,
+                                key=st.session_state.voice_input_key,
+                            )
+                        else:
+                            voice_response = None
 
-                # Stream response from chat API
-                message_interviewer = stream_response(
-                    client=client,
-                    client_kwargs=api_kwargs,
-                    message_placeholder=message_placeholder,
-                )
+        # If neither voice nor text input given so far, set message to None
+        else:
+            message_respondent = None
 
-                # Display closing message if code is in the message and end interview
-                for code in config.CLOSING_MESSAGES.keys():
-                    if code in message_interviewer:
-                        # Set flag
-                        st.session_state.interview_active = False
+        # Once the user response has been given
+        if message_respondent:
+            # Append message
+            st.session_state.messages.append(
+                {"role": "user", "content": message_respondent}
+            )
 
-                        # Display closing message
-                        closing_message = config.CLOSING_MESSAGES[code]
-                        st.markdown(closing_message)
+            with transcript_container:
+                # Generate and display interviewer response to message
+                with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
+                    # Create placeholder for message in chat interface
+                    message_placeholder = st.empty()
 
-                        st.session_state.messages.append(
-                            {
-                                "role": "assistant",
-                                "content": message_interviewer,  # original message
-                            }
-                        )
-                        st.session_state.messages.append(
-                            {
-                                "role": "assistant",
-                                "content": closing_message,  # displayed message
-                            }
-                        )
+                    # Stream response from chat API
+                    message_interviewer = stream_response(
+                        client=client,
+                        client_kwargs=api_kwargs,
+                        message_placeholder=message_placeholder,
+                    )
 
-                        # Store final transcript and backup
-                        save_transcript_and_metadata(
-                            transcripts_directory=config.TRANSCRIPTS_DIRECTORY,
-                            metadata_directory=config.METADATA_DIRECTORY,
-                            api_kwargs=api_kwargs,
-                            admin_alias=config.ADMIN_ALIAS,
-                        )
+                    # Display closing message if code is in the message and end interview
+                    for code in config.CLOSING_MESSAGES.keys():
+                        if code in message_interviewer:
+                            # Set flag
+                            st.session_state.interview_active = False
+
+                            # Display closing message
+                            closing_message = config.CLOSING_MESSAGES[code]
+                            st.markdown(closing_message)
+
+                            st.session_state.messages.append(
+                                {
+                                    "role": "assistant",
+                                    "content": message_interviewer,  # original message
+                                }
+                            )
+                            st.session_state.messages.append(
+                                {
+                                    "role": "assistant",
+                                    "content": closing_message,  # displayed message
+                                }
+                            )
+
+                            # Store final transcript and backup
+                            save_transcript_and_metadata(
+                                transcripts_directory=config.TRANSCRIPTS_DIRECTORY,
+                                metadata_directory=config.METADATA_DIRECTORY,
+                                api_kwargs=api_kwargs,
+                                admin_alias=config.ADMIN_ALIAS,
+                            )
+                            save_backup(
+                                backups_directory=config.BACKUPS_DIRECTORY,
+                                admin_alias=config.ADMIN_ALIAS,
+                            )
+
+                            # Clear chat and voice input elements upon completion of the
+                            # interview (seems slightly faster than relying only on rerun)
+                            text_input_element.empty()
+                            voice_input_element.empty()
+                            st.rerun()
+
+                    # Otherwise (i.e. if no code in message) arrive here
+
+                    # Append message
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": message_interviewer}
+                    )
+
+                    # Attempt a backup save but continue interview if writing fails
+                    try:
                         save_backup(
                             backups_directory=config.BACKUPS_DIRECTORY,
                             admin_alias=config.ADMIN_ALIAS,
                         )
+                    except Exception:
+                        pass
 
-                        # Clear chat and voice input elements upon completion of the
-                        # interview (seems slightly faster than relying only on rerun)
-                        text_input_element.empty()
-                        voice_input_element.empty()
-                        st.rerun()
+            # Refresh to show a new voice_input element
+            st.session_state.voice_input_key = random.uniform(0, 1)
+            st.rerun()
 
-                # Otherwise (i.e. if no code in message) arrive here
-
-                # Append message
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": message_interviewer}
-                )
-
-                # Attempt a backup save but continue interview if writing fails
-                try:
-                    save_backup(
-                        backups_directory=config.BACKUPS_DIRECTORY,
-                        admin_alias=config.ADMIN_ALIAS,
-                    )
-                except Exception:
-                    pass
-
-        # Refresh to show a new voice_input element
-        st.session_state.voice_input_key = random.uniform(0, 1)
-        st.rerun()
+except Exception:
+    logging.exception("Unhandled error in interview app")
+    st.error(
+        "Something went wrong. Please refresh the page to continue your interview."
+    )
+    st.stop()

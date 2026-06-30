@@ -16,8 +16,59 @@ local test run does not crash.
 """
 
 import json
+import logging
+import time
+
 import dropbox
+import requests
 import streamlit as st
+
+
+_log = logging.getLogger("dropbox_storage")
+
+
+# Network blips between Azure and Dropbox surface as dropped connections,
+# timeouts, or 5xx responses. These are transient, so we retry them with
+# exponential backoff. AuthError and ApiError are deterministic (bad token,
+# missing file) and are never retried; they fall through to the existing
+# handlers in each function below.
+def _is_transient(exc):
+    if isinstance(
+        exc,
+        (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ChunkedEncodingError,
+        ),
+    ):
+        return True
+    if isinstance(exc, dropbox.exceptions.HttpError):
+        return 500 <= getattr(exc, "status_code", 0) < 600
+    return False
+
+
+def _with_retry(operation, *args, **kwargs):
+    """Run a Dropbox SDK call, retrying transient failures.
+
+    Retries up to 3 times with 1s, 2s, 4s backoff (4 attempts total). Only
+    transient errors (see _is_transient) are retried; anything else is
+    re-raised immediately so each caller's own except clauses still apply.
+    """
+    delays = [1, 2, 4]
+    for attempt in range(len(delays) + 1):
+        try:
+            return operation(*args, **kwargs)
+        except Exception as exc:
+            if not _is_transient(exc) or attempt == len(delays):
+                raise
+            _log.warning(
+                "Dropbox transient error %r; retry %d/%d in %ds",
+                exc,
+                attempt + 1,
+                len(delays),
+                delays[attempt],
+            )
+            time.sleep(delays[attempt])
 
 
 _DROPBOX_CLIENT = None
@@ -95,9 +146,17 @@ def get_dropbox_client():
         return None
 
     try:
-        dbx.users_get_current_account()
+        _with_retry(dbx.users_get_current_account)
     except dropbox.exceptions.AuthError:
         _disable_dropbox()
+        return None
+    except Exception as exc:
+        if not _is_transient(exc):
+            raise
+        # Transient outage during the first validation. The token is valid, so
+        # do not disable Dropbox permanently; leave the status unchecked so the
+        # next rerun retries, and fall back to local storage for now.
+        _log.warning("Dropbox validation failed (transient): %r", exc)
         return None
 
     _DROPBOX_CLIENT = dbx
@@ -124,7 +183,8 @@ def upload_text(content, dropbox_path):
     dbx = get_dropbox_client()
     if dbx:
         try:
-            dbx.files_upload(
+            _with_retry(
+                dbx.files_upload,
                 content.encode("utf-8"),
                 dropbox_path,
                 mode=dropbox.files.WriteMode.overwrite,
@@ -132,6 +192,12 @@ def upload_text(content, dropbox_path):
             return True
         except dropbox.exceptions.AuthError:
             _disable_dropbox()
+        except Exception as exc:
+            if not _is_transient(exc):
+                raise
+            # Retries exhausted. Degrade gracefully: report failure so the
+            # caller falls back to local storage instead of crashing the page.
+            _log.error("Dropbox upload failed for %s: %r", dropbox_path, exc)
     return False
 
 
@@ -149,7 +215,8 @@ def upload_json(data, dropbox_path):
     if dbx:
         content = json.dumps(data)
         try:
-            dbx.files_upload(
+            _with_retry(
+                dbx.files_upload,
                 content.encode("utf-8"),
                 dropbox_path,
                 mode=dropbox.files.WriteMode.overwrite,
@@ -157,6 +224,12 @@ def upload_json(data, dropbox_path):
             return True
         except dropbox.exceptions.AuthError:
             _disable_dropbox()
+        except Exception as exc:
+            if not _is_transient(exc):
+                raise
+            # Retries exhausted. Degrade gracefully: report failure so the
+            # caller falls back to local storage instead of crashing the page.
+            _log.error("Dropbox upload failed for %s: %r", dropbox_path, exc)
     return False
 
 
@@ -176,12 +249,18 @@ def download_text(dropbox_path):
     dbx = get_dropbox_client()
     if dbx:
         try:
-            _, response = dbx.files_download(dropbox_path)
+            _, response = _with_retry(dbx.files_download, dropbox_path)
             return response.content.decode("utf-8")
         except dropbox.exceptions.AuthError:
             _disable_dropbox()
             return None
         except dropbox.exceptions.ApiError:
+            return None
+        except Exception as exc:
+            if not _is_transient(exc):
+                raise
+            # Retries exhausted. Degrade gracefully rather than crash.
+            _log.error("Dropbox download failed for %s: %r", dropbox_path, exc)
             return None
     return None
 
@@ -221,11 +300,20 @@ def file_exists(dropbox_path):
     dbx = get_dropbox_client()
     if dbx:
         try:
-            dbx.files_get_metadata(dropbox_path)
+            _with_retry(dbx.files_get_metadata, dropbox_path)
             return True
         except dropbox.exceptions.AuthError:
             _disable_dropbox()
             return False
         except dropbox.exceptions.ApiError:
+            return False
+        except Exception as exc:
+            if not _is_transient(exc):
+                raise
+            # This is the call site that originally crashed the page: a dropped
+            # connection here bubbled up to Streamlit. Now we log and report
+            # "not found" so is_interview_completed() falls back to its
+            # backup-based check instead of erroring.
+            _log.error("Dropbox file_exists failed for %s: %r", dropbox_path, exc)
             return False
     return False
