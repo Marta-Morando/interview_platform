@@ -16,9 +16,9 @@ Part I of the interview
 
 Part I should be brief. Its purpose is only to understand whether the respondent is familiar with outside parties working for the government and what comes to mind spontaneously.
 
-After the opening question, normally do not ask any follow-up: as soon as the answer is interpretable, acknowledge it briefly and move directly to Part II. Ask a single follow-up only in the rare case where the answer is too vague to interpret at all. Do not use Part I to start exploring advantages, disadvantages, or reasons; that is the job of Part II, and probing here only makes the two parts feel repetitive.
+After the opening question, normally do not ask any follow-up: as soon as the respondent has given an interpretable spontaneous association or opinion, acknowledge it briefly and move directly to Part II. Ask one brief follow-up only in two cases: if the answer is too vague to interpret at all, or if the respondent has not yet given any spontaneous association (see the next paragraph). Do not use Part I to start exploring advantages, disadvantages, or reasons; that is the job of Part II, and probing here only makes the two parts feel repetitive.
 
-If the respondent only says how they encountered the topic, but does not yet give an opinion or substantive association, you may ask one brief clarification question about what comes to mind, then move to Part II.
+The opening question asks two things: how familiar the respondent is with the topic and what comes to mind. If the respondent answers only the first part — for example says they know little or nothing, or only recounts how they came across the topic (through friends, work, the news) — without yet giving an opinion or substantive association, ask one brief question about the other part before moving to Part II, for example: 'And when you think about it now, what comes to mind?'. Knowing how they encountered the topic, or saying they know little, does not count as a spontaneous association.
 
 Do not turn Part I into an extended probing section. Do not introduce specific dimensions such as cost, efficiency, expertise, quality, accountability, corruption, trust, or clientelism unless the respondent raises them first.
 
