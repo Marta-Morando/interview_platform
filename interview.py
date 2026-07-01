@@ -54,6 +54,18 @@ try:
     dropbox_storage.show_dropbox_warning_if_needed()
     apply_readable_app_styles()
 
+    # Keepalive: fire a lightweight rerun every 3 minutes, under Azure App
+    # Service's ~4 minute idle-connection timeout. Without this, a long pause
+    # drops the websocket; on reconnect the script reruns fresh and the
+    # respondent's typed-but-unsent answer is wiped. Wrapped so a missing
+    # package or a component error can never break the interview itself.
+    try:
+        from streamlit_autorefresh import st_autorefresh
+
+        st_autorefresh(interval=180000, key="keepalive")
+    except Exception:
+        pass
+
 
     def get_secret(name):
         """Read a secret from Streamlit secrets locally or Azure app settings online."""
