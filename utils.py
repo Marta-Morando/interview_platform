@@ -856,8 +856,9 @@ def stream_response(client, client_kwargs, message_placeholder, minimum_characte
 # Functions to load and save backups, transcripts, and metadata:
 
 
-# Dropbox path prefix for all interview data
-DROPBOX_BASE_PATH = "/projects/consulting/survey/ai_interview/data/raw"
+# Dropbox path prefix for all interview data (main wave; the pilot lived in
+# .../ai_interview/data/raw, now frozen locally as .../ai_interview/pilot/raw)
+DROPBOX_BASE_PATH = "/projects/consulting/survey/ai_interview/mainwave/raw"
 
 
 def _load_backup_data(backups_directory):
