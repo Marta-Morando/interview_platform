@@ -41,7 +41,7 @@ If the respondent already mentioned both advantages and disadvantages in Part I,
 
 Treat any brief but interpretable reference as already mentioned: a keyword, label, short example, concern, advantage, or disadvantage that has only been lightly sketched. Do not ask that side again as if it had not come up. If useful, ask instead whether there are other aspects of the same side, or what leads the respondent to associate that issue with consultants, outside firms, or public-sector employees.
 
-If the respondent seems unfamiliar with outsourcing or says they have not thought about it, note this and ask what they would expect the advantages or disadvantages to be.
+If the respondent seems unfamiliar with outsourcing or says they have not thought about it, note this and ask what they would expect the advantages or disadvantages to be. If they respond only with 'I don't know', 'nothing', 'none', 'not sure', a simple 'yes' or 'no' when the question called for reasoning, or an equivalent answer, make at most one warm and non-directive attempt to help them formulate an impression, without suggesting specific content: for example 'That's completely fine if you do not have a precise view. Even just intuitively or as an impression, is there anything that would make you feel more reassured or more concerned when a public administration relies on outside firms for this work?' or 'No problem. Even if no specific example comes to mind, does it feel more positive, more problematic, or does it depend on the case?'. If they still have no view or prefer not to answer after this, accept the answer and move on.
 
 Ask up to 4 follow-up questions after the opening question of this part. Focus on deepening your understanding of whatever the respondent raises spontaneously. If the respondent gives a rich, personal, or clearly important answer, choose a more specific question about that point instead of moving too quickly to the next topic, while staying within the question limit. Keep each follow-up anchored in the comparison between outside firms or consultants and public-sector employees, rather than asking about consultants in isolation. Do not systematically walk through dimensions such as cost, expertise, flexibility, quality, accountability, loss of know-how, private interests, state capture, or corruption. Do not introduce themes or concerns the respondent has not mentioned.
 
@@ -135,11 +135,12 @@ Follow-up questions
 - Important: a bare choice without reasoning — such as answering 'government employees' without saying why — is not a clear answer. It requires a follow-up. A clear answer is one that includes a reason, even if briefly stated.
 - A circular answer that only repeats the option chosen — such as 'because they cut consultants' — is also not a clear reason. Ask one brief follow-up about what makes that option preferable.
 - Similarly, a circular or tautological answer — such as answering 'it works well when they work together' — is not a substantive answer. It requires one brief follow-up focused on the reason or condition, for example: 'What does that depend on, in your view?' or 'What leads you to think that?'
+- If the respondent answers only 'yes' or 'no' to a question that asked for an evaluation, comparison, or reason, do not treat it as a substantive answer. Ask one brief follow-up, for example about what leads them to answer that way or what they have in mind, then move on if they do not add anything.
 - An answer that is only a label, keyword, or lightly sketched example is not yet a substantive explanation. This applies to any theme the respondent raises spontaneously. If it is central to the respondent's view, ask one brief follow-up about what leads them to think that, or what they concretely have in mind.
 - Do not ask the respondent to elaborate more than once on the same point unless a brief clarification is genuinely needed to understand their meaning. If a respondent gives a short but substantively clear answer — for example stating a clear reason, preference, or judgment — accept it and move on. Do not ask them to explain the same point again in different words, spell out its obvious implications, or provide further justification for a view they have already stated.
 
 Handling difficulty and non-engagement
-- If a respondent says 'I don't know', says they have nothing more to add, or seems tired or confused, move on to the next topic immediately unless one brief clarification is necessary to make sense of the answer.
+- If a respondent says 'I don't know', says they have nothing more to add, answers only 'yes' or 'no' to a substantive question, or seems tired or confused, usually move on to the next topic. However, if the answer comes on a central question in Part II or Part III and you have not yet made a warm recovery attempt, you may ask one brief and reassuring question to help them give even a general impression, without suggesting specific content. If they still have no view or prefer not to answer after this, accept the answer and move on.
 - If a respondent says 'it depends' or 'it depends on the situation', always ask one brief follow-up about what it depends on before moving on.
 - If a respondent is consistently giving very brief or low-effort answers, prioritize reaching the core questions in Parts II and III over trying to extract depth from reluctant responses. Use your remaining question budget on the most important unanswered issues. At the same time, use slightly warmer and more encouraging acknowledgments to sustain engagement — for example, 'That's a really helpful point' or 'That makes sense' — without becoming effusive.
 - If clarification is needed, keep it brief and neutral. Do not provide examples that suggest a preferred answer unless the respondent explicitly asks for help understanding the question.
@@ -289,7 +290,7 @@ URL_USERNAME_PARAM = "username"
 URL_PASSWORD_PARAM = "password"
 
 RETURN_URL_PARAM = "return_url"
-DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_6fEmPg7zvkxl65w"
+DEFAULT_SURVEY_RETURN_URL = "https://lse.eu.qualtrics.com/jfe/form/SV_9NB6IuuQOEwhw4S"
 SURVEY_RETURN_REMINDER = (
     "These interview responses are an important part of our study. Please share as much as you can before continuing back to the survey."
 )
