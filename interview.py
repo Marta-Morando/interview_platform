@@ -26,6 +26,7 @@ from utils import (
     has_survey_return_target,
     initialize_survey_username,
     is_valid_username,
+    is_exact_low_effort_answer,
     load_backup,
     is_interview_completed,
     render_completion_redirect,
@@ -173,6 +174,11 @@ try:
             st.session_state.times_previous_attempts,
             st.session_state.num_text_and_voice_answers,
         ) = load_backup(backups_directory=config.BACKUPS_DIRECTORY)
+
+    st.session_state.setdefault("low_effort_exact_count", 0)
+    st.session_state.setdefault("low_effort_streak", 0)
+    st.session_state.setdefault("low_effort_nudge_shown", False)
+    st.session_state.setdefault("low_effort_nudge_turn", None)
 
     # Create Boolean to track if transcription of voice input is done
     if "transcription_done" not in st.session_state:
@@ -468,6 +474,42 @@ try:
                 {"role": "user", "content": message_respondent}
             )
 
+            if is_exact_low_effort_answer(message_respondent):
+                st.session_state.low_effort_exact_count += 1
+                st.session_state.low_effort_streak += 1
+            else:
+                st.session_state.low_effort_streak = 0
+
+            show_low_effort_nudge = (
+                st.session_state.low_effort_streak >= 2
+                and not st.session_state.low_effort_nudge_shown
+            )
+            api_kwargs_for_turn = deepcopy(api_kwargs)
+            if show_low_effort_nudge:
+                if get_lang() == "it":
+                    nudge_text = (
+                        "Nessun problema. Per le prossime domande, se puoi, prova a "
+                        "rispondere con una breve frase, anche solo a intuito."
+                    )
+                    instruction = (
+                        "\n\nPer questo turno soltanto, inizia esattamente con: "
+                        f'"{nudge_text}" Nello stesso messaggio fai poi la prossima '
+                        "domanda sostanziale prevista dall'intervista. Non menzionare "
+                        "controlli di qualità, attenzione, esclusione o pagamenti."
+                    )
+                else:
+                    nudge_text = (
+                        "No problem. For the next questions, if you can, please answer "
+                        "with a short sentence, even just based on your first impression."
+                    )
+                    instruction = (
+                        "\n\nFor this turn only, begin exactly with: "
+                        f'"{nudge_text}" In the same message, then ask the next '
+                        "substantive interview question. Do not mention quality checks, "
+                        "attention, exclusion, or payment."
+                    )
+                api_kwargs_for_turn["_system_prompt_suffix"] = instruction
+
             with transcript_container:
                 # Generate and display interviewer response to message
                 with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
@@ -477,9 +519,16 @@ try:
                     # Stream response from chat API
                     message_interviewer = stream_response(
                         client=client,
-                        client_kwargs=api_kwargs,
+                        client_kwargs=api_kwargs_for_turn,
                         message_placeholder=message_placeholder,
                     )
+
+                    if show_low_effort_nudge:
+                        st.session_state.low_effort_nudge_shown = True
+                        st.session_state.low_effort_nudge_turn = sum(
+                            message["role"] == "user"
+                            for message in st.session_state.messages
+                        )
 
                     # Display closing message if code is in the message and end interview
                     for code in config.CLOSING_MESSAGES.keys():

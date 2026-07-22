@@ -338,6 +338,14 @@ def get_system_prompt():
     return _get_config().SYSTEM_PROMPT
 
 
+def is_exact_low_effort_answer(text):
+    """Return True only for the narrow set of non-substantive reply tokens."""
+
+    normalized = " ".join(str(text or "").casefold().split())
+    normalized = re.sub(r"^\W+|\W+$", "", normalized, flags=re.UNICODE)
+    return normalized in {"si", "sì", "no", "boh", "non so", "nulla", "niente"}
+
+
 def get_survey_return_url(*, completion=False):
     """Build the URL to return the respondent to Qualtrics.
 
@@ -682,24 +690,29 @@ def add_messages_to_api_kwargs(api, client_kwargs):
 
     # Copy client kwargs and add messages from session state
     client_kwargs_transformed = deepcopy(client_kwargs)
+    system_prompt_suffix = client_kwargs_transformed.pop("_system_prompt_suffix", "")
+    system_prompt = get_system_prompt() + system_prompt_suffix
     client_kwargs_transformed["messages"] = deepcopy(st.session_state.messages)
 
     # For the OpenAI API, rename "messages" to "input" and add system prompt
     if api == "openai":
         client_kwargs_transformed["input"] = client_kwargs_transformed.pop("messages")
         client_kwargs_transformed["input"].insert(
-            0, {"role": "developer", "content": get_system_prompt()}
+            0, {"role": "developer", "content": system_prompt}
         )
 
     # For the Azure API, add system prompt
     elif api == "azure":
         client_kwargs_transformed["messages"].insert(
-            0, {"role": "system", "content": get_system_prompt()}
+            0, {"role": "system", "content": system_prompt}
         )
 
     # For the Google API, rename "messages" to "contents", add required initial user
     # message, and restructure messages
     elif api == "google":
+        client_kwargs_transformed.setdefault("config", {})[
+            "system_instruction"
+        ] = system_prompt
         client_kwargs_transformed["contents"] = client_kwargs_transformed.pop(
             "messages"
         )
@@ -716,6 +729,7 @@ def add_messages_to_api_kwargs(api, client_kwargs):
 
     # For the Anthropic API, add required initial user message
     elif api == "anthropic":
+        client_kwargs_transformed["system"] = system_prompt
         client_kwargs_transformed["messages"].insert(
             0, {"role": "user", "content": "Hello"}
         )
@@ -941,6 +955,20 @@ def load_backup(backups_directory):
         # The remaining items are messages
         messages = data["messages"]
 
+        quality_flags = data.get("quality_flags", {})
+        st.session_state.low_effort_exact_count = quality_flags.get(
+            "low_effort_exact_count", 0
+        )
+        st.session_state.low_effort_streak = quality_flags.get(
+            "low_effort_streak", 0
+        )
+        st.session_state.low_effort_nudge_shown = quality_flags.get(
+            "low_effort_nudge_shown", False
+        )
+        st.session_state.low_effort_nudge_turn = quality_flags.get(
+            "low_effort_nudge_turn"
+        )
+
         # Check if at least one message from "assistant" is in backup. If yes, return
         # all messages until and including the last assistant message.
         # If not, return empty lists for start of interview.
@@ -1006,6 +1034,20 @@ def save_backup(backups_directory, admin_alias):
 
         # Add number of answers through text and voice inputs
         data["num_text_and_voice_answers"] = st.session_state.num_text_and_voice_answers
+
+        # Add the non-punitive low-effort nudge indicators
+        data["quality_flags"] = {
+            "low_effort_exact_count": st.session_state.get(
+                "low_effort_exact_count", 0
+            ),
+            "low_effort_streak": st.session_state.get("low_effort_streak", 0),
+            "low_effort_nudge_shown": st.session_state.get(
+                "low_effort_nudge_shown", False
+            ),
+            "low_effort_nudge_turn": st.session_state.get(
+                "low_effort_nudge_turn"
+            ),
+        }
 
         # --- Also save a running transcript after every message ---
         transcript_text = f"Respondent ID: {st.session_state.username}\n\n"
@@ -1152,6 +1194,9 @@ Text answers given by respondent: {st.session_state.num_text_and_voice_answers[0
 Voice answers given by respondent: {st.session_state.num_text_and_voice_answers[1]}
 Total respondent messages: {user_messages}
 Total interviewer messages: {assistant_messages}
+Low-effort exact replies: {st.session_state.get("low_effort_exact_count", 0)}
+Low-effort nudge shown: {int(st.session_state.get("low_effort_nudge_shown", False))}
+Low-effort nudge turn: {st.session_state.get("low_effort_nudge_turn") or ""}
 
 ---
 
