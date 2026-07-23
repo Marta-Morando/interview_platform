@@ -27,6 +27,7 @@ from utils import (
     initialize_survey_username,
     is_valid_username,
     is_exact_low_effort_answer,
+    low_effort_turn_instruction,
     load_backup,
     is_interview_completed,
     render_completion_redirect,
@@ -474,7 +475,8 @@ try:
                 {"role": "user", "content": message_respondent}
             )
 
-            if is_exact_low_effort_answer(message_respondent):
+            is_low_effort_exact = is_exact_low_effort_answer(message_respondent)
+            if is_low_effort_exact:
                 st.session_state.low_effort_exact_count += 1
                 st.session_state.low_effort_streak += 1
             else:
@@ -485,30 +487,13 @@ try:
                 and not st.session_state.low_effort_nudge_shown
             )
             api_kwargs_for_turn = deepcopy(api_kwargs)
-            if show_low_effort_nudge:
-                if get_lang() == "it":
-                    nudge_text = (
-                        "Nessun problema. Per le prossime domande, se puoi, prova a "
-                        "rispondere con una breve frase, anche solo a intuito."
+            if is_low_effort_exact:
+                api_kwargs_for_turn["_system_prompt_suffix"] = (
+                    low_effort_turn_instruction(
+                        get_lang(),
+                        show_nudge=show_low_effort_nudge,
                     )
-                    instruction = (
-                        "\n\nPer questo turno soltanto, inizia esattamente con: "
-                        f'"{nudge_text}" Nello stesso messaggio fai poi la prossima '
-                        "domanda sostanziale prevista dall'intervista. Non menzionare "
-                        "controlli di qualità, attenzione, esclusione o pagamenti."
-                    )
-                else:
-                    nudge_text = (
-                        "No problem. For the next questions, if you can, please answer "
-                        "with a short sentence, even just based on your first impression."
-                    )
-                    instruction = (
-                        "\n\nFor this turn only, begin exactly with: "
-                        f'"{nudge_text}" In the same message, then ask the next '
-                        "substantive interview question. Do not mention quality checks, "
-                        "attention, exclusion, or payment."
-                    )
-                api_kwargs_for_turn["_system_prompt_suffix"] = instruction
+                )
 
             with transcript_container:
                 # Generate and display interviewer response to message

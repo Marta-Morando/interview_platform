@@ -343,7 +343,66 @@ def is_exact_low_effort_answer(text):
 
     normalized = " ".join(str(text or "").casefold().split())
     normalized = re.sub(r"^\W+|\W+$", "", normalized, flags=re.UNICODE)
-    return normalized in {"si", "sì", "no", "boh", "non so", "nulla", "niente"}
+    return normalized in {
+        "si",
+        "sì",
+        "no",
+        "bo",
+        "boh",
+        "non so",
+        "nulla",
+        "niente",
+    }
+
+
+def low_effort_turn_instruction(language, *, show_nudge=False):
+    """Build a hidden turn instruction for an exact non-substantive reply."""
+
+    if language == "it":
+        instruction = (
+            "\n\nISTRUZIONE VINCOLANTE PER QUESTO TURNO: l'ultimo messaggio "
+            "della persona è una risposta esatta a basso contenuto e non "
+            "esprime alcuna opinione, accordo o informazione sostanziale. Non "
+            "interpretarlo come una risposta pertinente e non dire che è un "
+            "punto utile, interessante o informativo. Se lo riconosci, usa "
+            "solo una formula neutra come «Va bene» o «Nessun problema». Segui "
+            "poi le regole dell'intervista per una risposta non sostanziale, "
+            "senza suggerire contenuti."
+        )
+        if show_nudge:
+            nudge_text = (
+                "Nessun problema. Per le prossime domande, se puoi, prova a "
+                "rispondere con una breve frase, anche solo a intuito."
+            )
+            instruction += (
+                " Inizia esattamente con: "
+                f'"{nudge_text}" Nello stesso messaggio fai poi la prossima '
+                "domanda sostanziale prevista dall'intervista. Non menzionare "
+                "controlli di qualità, attenzione, esclusione o pagamenti."
+            )
+        return instruction
+
+    instruction = (
+        "\n\nBINDING INSTRUCTION FOR THIS TURN: the respondent's latest "
+        "message is an exact low-content reply and conveys no substantive "
+        "view, agreement, or information. Do not interpret it as a relevant "
+        "answer and do not call it helpful, interesting, or informative. If "
+        "you acknowledge it, use only a neutral phrase such as “Okay” or “No "
+        "problem.” Then follow the interview rules for a non-substantive "
+        "answer without suggesting content."
+    )
+    if show_nudge:
+        nudge_text = (
+            "No problem. For the next questions, if you can, please answer "
+            "with a short sentence, even just based on your first impression."
+        )
+        instruction += (
+            " Begin exactly with: "
+            f'"{nudge_text}" In the same message, then ask the next '
+            "substantive interview question. Do not mention quality checks, "
+            "attention, exclusion, or payment."
+        )
+    return instruction
 
 
 def get_survey_return_url(*, completion=False):
